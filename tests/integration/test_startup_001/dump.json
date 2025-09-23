@@ -2,8 +2,8 @@
     "players": [
         {
             "index": 0,
-            "name": "钱夫人",
-            "fund": 1500,
+            "name": "Q",
+            "fund": 10000,
             "credit": 0,
             "location": 0,
             "alive": true,
@@ -20,8 +20,7 @@
             }
         }
     ],
-    "houses": {
-    },
+    "houses": {},
     "placed_prop": {
         "bomb": [],
         "barrier": []

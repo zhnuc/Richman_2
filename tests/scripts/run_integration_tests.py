@@ -56,12 +56,12 @@ class IntegrationTestRunner:
                 text=True,
                 capture_output=True,
                 timeout=30,
-                cwd=str(self.project_root)
+                cwd=str(test_dir)
             )
             
-            # 保存输出
+            # 保存输出（去除末尾空白字符）
             with open(output_file, 'w', encoding='utf-8') as f:
-                f.write(result.stdout)
+                f.write(result.stdout.rstrip() + '\n')
             
             # 检查是否有dump命令，如果有则保存dump.json
             if "dump" in cmd_input:
@@ -73,9 +73,12 @@ class IntegrationTestRunner:
                         dump_path = line.split(": ")[-1].strip()
                         break
                 
-                if dump_path and os.path.exists(dump_path):
-                    # 将dump文件移动到测试目录
-                    subprocess.run(["mv", dump_path, str(dump_file)], check=True)
+                # 现在程序在test_dir中执行，dump.json应该直接在那里
+                dump_source = test_dir / "dump.json"
+                if dump_source.exists():
+                    # 如果dump.json和目标文件不是同一个文件，才移动
+                    if str(dump_source) != str(dump_file):
+                        subprocess.run(["mv", str(dump_source), str(dump_file)], check=True)
                     print(f"📄 生成dump文件: {dump_file.name}")
             
         except subprocess.TimeoutExpired:

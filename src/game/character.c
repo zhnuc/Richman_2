@@ -8,19 +8,19 @@ Character g_characters[4];
 void init_characters(void) {
     // 初始化4个预设角色
     g_characters[0].id = 1;
-    strcpy(g_characters[0].name, "钱夫人");
+    strcpy(g_characters[0].name, "Q");
     strcpy(g_characters[0].display_name, "钱夫人");
     
     g_characters[1].id = 2;
-    strcpy(g_characters[1].name, "阿土伯");
+    strcpy(g_characters[1].name, "A");
     strcpy(g_characters[1].display_name, "阿土伯");
     
     g_characters[2].id = 3;
-    strcpy(g_characters[2].name, "孙小美");
+    strcpy(g_characters[2].name, "S");
     strcpy(g_characters[2].display_name, "孙小美");
     
     g_characters[3].id = 4;
-    strcpy(g_characters[3].name, "金贝贝");
+    strcpy(g_characters[3].name, "J");
     strcpy(g_characters[3].display_name, "金贝贝");
 }
 

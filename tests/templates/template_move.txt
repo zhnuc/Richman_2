@@ -1,0 +1,85 @@
+# 移动功能测试用例模板
+
+## 测试用例：test_move_001
+**功能**：移动功能测试
+**目标**：验证移动命令是否正常工作
+
+### cmdlist.txt
+```
+1
+step 3
+query
+dump
+quit
+```
+
+### expected_output.txt
+```
+大富翁游戏启动
+欢迎来到大富翁，请按数字键选择你的角色：
+1.钱夫人
+2.阿土伯
+3.孙小美
+4.金贝贝
+请输入选择 (1-4): 您选择了: 钱夫人
+游戏开始！
+> 钱夫人移动了3步，当前位置：3
+> === 游戏状态 ===
+玩家数量: 1
+玩家0: 钱夫人, 资金:1500, 位置:3, 存活:是
+当前玩家: 0
+游戏状态: 未开始
+> 游戏状态已保存到: dump.json
+> 游戏结束
+```
+
+### expected_dump.json
+```json
+{
+    "players": [
+        {
+            "index": 0,
+            "name": "钱夫人",
+            "fund": 1500,
+            "credit": 0,
+            "location": 3,
+            "alive": true,
+            "prop": {
+                "bomb": 0,
+                "barrier": 0,
+                "robot": 0,
+                "total": 0
+            },
+            "buff": {
+                "god": 0,
+                "prison": 0,
+                "hospital": 0
+            }
+        }
+    ],
+    "houses": {
+    },
+    "placed_prop": {
+        "bomb": [],
+        "barrier": []
+    },
+    "game": {
+        "now_player": 0,
+        "next_player": 1,
+        "started": false,
+        "ended": false,
+        "winner": -1
+    }
+}
+```
+
+### description.txt
+```
+移动功能测试用例
+验证step命令的移动功能，包括位置更新和状态保存
+```
+
+### tags.txt
+```
+move, step, position, location
+```

@@ -1,0 +1,91 @@
+# 房产购买测试用例模板
+
+## 测试用例：test_land_001
+**功能**：房产购买测试
+**目标**：验证房产购买功能是否正常工作
+
+### cmdlist.txt
+```
+1
+step 1
+buy
+query
+dump
+quit
+```
+
+### expected_output.txt
+```
+大富翁游戏启动
+欢迎来到大富翁，请按数字键选择你的角色：
+1.钱夫人
+2.阿土伯
+3.孙小美
+4.金贝贝
+请输入选择 (1-4): 您选择了: 钱夫人
+游戏开始！
+> 钱夫人移动了1步，当前位置：1
+> 当前位置是空地，是否购买？(y/n): 购买成功！花费200元
+> === 游戏状态 ===
+玩家数量: 1
+玩家0: 钱夫人, 资金:1300, 位置:1, 存活:是
+当前玩家: 0
+游戏状态: 未开始
+> 游戏状态已保存到: dump.json
+> 游戏结束
+```
+
+### expected_dump.json
+```json
+{
+    "players": [
+        {
+            "index": 0,
+            "name": "钱夫人",
+            "fund": 1300,
+            "credit": 0,
+            "location": 1,
+            "alive": true,
+            "prop": {
+                "bomb": 0,
+                "barrier": 0,
+                "robot": 0,
+                "total": 0
+            },
+            "buff": {
+                "god": 0,
+                "prison": 0,
+                "hospital": 0
+            }
+        }
+    ],
+    "houses": {
+        "1": {
+            "owner": "钱夫人",
+            "level": 0
+        }
+    },
+    "placed_prop": {
+        "bomb": [],
+        "barrier": []
+    },
+    "game": {
+        "now_player": 0,
+        "next_player": 1,
+        "started": false,
+        "ended": false,
+        "winner": -1
+    }
+}
+```
+
+### description.txt
+```
+房产购买测试用例
+验证空地购买功能，包括资金扣除、房产归属、状态更新
+```
+
+### tags.txt
+```
+land, buy, property, money, houses
+```

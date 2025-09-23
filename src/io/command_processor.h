@@ -4,6 +4,7 @@
 // 命令行处理函数声明
 void process_command(const char* command);
 void run_game(void);
-void show_welcome_and_select_character(void);
+int get_initial_fund(void);
+void show_welcome_and_select_character(int initial_fund);
 
 #endif // COMMAND_PROCESSOR_H
