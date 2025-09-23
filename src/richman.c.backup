@@ -1,0 +1,180 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdbool.h>
+
+// 基础数据结构 - 按照JSON格式设计
+typedef struct {
+    int bomb;
+    int barrier;
+    int robot;
+    int total;
+} PlayerProp;
+
+typedef struct {
+    int god;        // 财神附体，没有为 0
+    int prison;     // 蹲监狱，没有为 0
+    int hospital;   // 住院，没有为 0
+} PlayerBuff;
+
+typedef struct {
+    int index;
+    char name[32];
+    int fund;
+    int credit;
+    int location;
+    bool alive;
+    PlayerProp prop;
+    PlayerBuff buff;
+} Player;
+
+typedef struct {
+    char owner[32];
+    int level;      // 等级（0-3）
+} House;
+
+typedef struct {
+    int bomb_positions[20];
+    int bomb_count;
+    int barrier_positions[20];
+    int barrier_count;
+} PlacedProp;
+
+typedef struct {
+    int now_player;
+    int next_player;
+    bool started;
+    bool ended;
+    int winner;
+} GameInfo;
+
+typedef struct {
+    Player players[4];
+    int player_count;
+    House houses[40];  // 假设40个位置的棋盘
+    PlacedProp placed_prop;
+    GameInfo game;
+} GameState;
+
+// 全局游戏状态
+GameState g_game_state;
+
+// 基础函数声明
+Player* create_player(int index, const char* name, int fund);
+void init_game_state(void);
+void print_game_state(void);
+
+// 实现函数
+Player* create_player(int index, const char* name, int fund) {
+    if (index < 0 || index >= 4 || g_game_state.player_count >= 4) {
+        return NULL;
+    }
+    
+    Player* player = &g_game_state.players[g_game_state.player_count];
+    player->index = index;
+    strncpy(player->name, name, sizeof(player->name) - 1);
+    player->name[sizeof(player->name) - 1] = '\0';
+    player->fund = fund;
+    player->credit = 0;
+    player->location = 0;
+    player->alive = true;
+    
+    // 初始化道具
+    player->prop.bomb = 0;
+    player->prop.barrier = 0;
+    player->prop.robot = 0;
+    player->prop.total = 0;
+    
+    // 初始化Buff
+    player->buff.god = 0;
+    player->buff.prison = 0;
+    player->buff.hospital = 0;
+    
+    g_game_state.player_count++;
+    return player;
+}
+
+void init_game_state(void) {
+    g_game_state.player_count = 0;
+    
+    // 初始化房产
+    for (int i = 0; i < 40; i++) {
+        strcpy(g_game_state.houses[i].owner, "");
+        g_game_state.houses[i].level = 0;
+    }
+    
+    // 初始化道具
+    g_game_state.placed_prop.bomb_count = 0;
+    g_game_state.placed_prop.barrier_count = 0;
+    
+    // 初始化游戏信息
+    g_game_state.game.now_player = 0;
+    g_game_state.game.next_player = 1;
+    g_game_state.game.started = false;
+    g_game_state.game.ended = false;
+    g_game_state.game.winner = -1;
+}
+
+void print_game_state(void) {
+    printf("=== 游戏状态 ===\n");
+    printf("玩家数量: %d\n", g_game_state.player_count);
+    
+    for (int i = 0; i < g_game_state.player_count; i++) {
+        Player* p = &g_game_state.players[i];
+        printf("玩家%d: %s, 资金:%d, 位置:%d, 存活:%s\n", 
+               p->index, p->name, p->fund, p->location, 
+               p->alive ? "是" : "否");
+    }
+    
+    printf("当前玩家: %d\n", g_game_state.game.now_player);
+    printf("游戏状态: %s\n", g_game_state.game.started ? "已开始" : "未开始");
+}
+
+void run_game(void) {
+    printf("大富翁游戏启动\n");
+    
+    init_game_state();
+    
+    // 简单的命令行界面
+    char command[100];
+    while (1) {
+        printf("> ");
+        if (fgets(command, sizeof(command), stdin) == NULL) {
+            break;
+        }
+        
+        // 去掉换行符
+        command[strcspn(command, "\n")] = 0;
+        
+        if (strcmp(command, "quit") == 0) {
+            printf("游戏结束\n");
+            break;
+        } else if (strncmp(command, "create_player", 13) == 0) {
+            // 简单的创建玩家命令: create_player 张三 1500
+            char name[32];
+            int fund;
+            if (sscanf(command, "create_player %s %d", name, &fund) == 2) {
+                Player* p = create_player(g_game_state.player_count, name, fund);
+                if (p) {
+                    printf("创建玩家成功: %s\n", p->name);
+                } else {
+                    printf("创建玩家失败\n");
+                }
+            } else {
+                printf("格式错误，请使用: create_player <姓名> <资金>\n");
+            }
+        } else if (strcmp(command, "status") == 0) {
+            print_game_state();
+        } else {
+            printf("未知命令: %s\n", command);
+            printf("可用命令: create_player <姓名> <资金>, status, quit\n");
+        }
+    }
+}
+
+#ifndef TESTING
+int main(void) {
+    run_game();
+    return 0;
+}
+#endif

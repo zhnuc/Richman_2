@@ -1,0 +1,46 @@
+{
+    "players": [
+        {
+            "index": int,          // 从 0 开始（0：Q， 1：A， 2：S，3：J）
+            "name": str,           // 名称（钱夫人，阿土伯，孙小美，金贝贝）
+            "fund": int,           // 资金
+            "credit": int,         // 点数
+            "location": int,       // 当前位置，从起始点开始顺时针，从 0 开始
+            "alive": bool,         // 玩家是否存活
+            "prop": {
+                "bomb": int,       // 玩家拥有炸弹个数
+                "barrier": int,    // 玩家拥有路障个数
+                "robot": int,      // 玩家拥有机器人个数
+                "total": int       // 玩家拥有道具总计个数
+            },
+            "buff":{
+                "god": int,        // 财神附体剩余回合数，没有则为 0
+                "prison": int,     // 蹲监狱剩余回合数，没有则为 0
+                "hospital": int    // 住院剩余回合数，没有则为 0
+            }
+        },
+        ...
+    ],
+    "houses": {                    // 房产属性
+        "1": {                     // 房产位置，数字文本，（一维坐标）
+            "owner": "name",       // 所有者
+            "level": int,          // 等级（0-3）
+        },
+        "3": {
+            "owner":"name",
+            "level":int,
+        },
+        "其他位置房产": {...},
+        ...
+    },
+    "placed_prop":{
+        "bomb": [int, ...],        // 炸弹位置，数组，每个元素表示一个炸弹的位置（一维坐标）
+        "barrier": [int, ...]      // 路障位置，数组，每个元素表示一个路障的位置（一维坐标）
+    },
+    "game": {
+        "now_player": int,         // 当前操作玩家
+        "next_player": int,        // 下一操作玩家
+        "ended": bool,             // 游戏是否结束
+        "winner": int,             // 胜者 ID，未结束为 -1
+    },
+}
