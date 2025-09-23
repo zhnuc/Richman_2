@@ -31,17 +31,18 @@
 ### 标准目录结构
 ```
 tests/integration/test_{功能}_{序号}/
-├── cmdlist.txt           # 命令序列（必需）
-├── expected_output.txt   # 期望控制台输出（必需）
-├── expected_dump.json    # 期望JSON状态（必需）
-├── preset.json          # 初始状态（可选）
-├── description.txt       # 测试描述（推荐）
-└── tags.txt             # 测试标签（推荐）
+├── input.txt            # 命令序列（必需）
+├── expected_result.json # 期望JSON状态（必需）
+├── preset.json         # 初始状态（可选）
+├── output.txt          # 实际控制台输出（自动生成，调试用）
+├── dump.json           # 实际JSON状态（自动生成）
+├── description.txt      # 测试描述（推荐）
+└── tags.txt            # 测试标签（推荐）
 ```
 
 ### 文件内容要求
 
-#### cmdlist.txt - 命令序列
+#### input.txt - 命令序列
 **格式要求**：
 - 第一行：初始资金（如果没有preset.json）
 - 第二行：角色选择（1-4的数字组合）
@@ -70,35 +71,10 @@ quit
 - 参数用空格分隔
 - 每行一个命令
 - 必须包含quit命令
+- 测试只验证JSON状态，不验证控制台输出
+- output.txt文件自动生成，仅供调试使用
 
-#### expected_output.txt - 期望输出
-**格式要求**：
-- 包含完整的控制台输出
-- 从游戏启动到游戏结束
-- 包含所有提示信息和结果
-
-**示例**：
-```
-大富翁游戏启动
-请输入初始资金: 欢迎来到大富翁，请按数字键选择你的角色：
-1.钱夫人
-2.阿土伯
-3.孙小美
-4.金贝贝
-请输入选择 (1-4): 您选择了: 钱夫人
-
-游戏开始！
-> 游戏状态已保存到: dump.json
-> 游戏结束
-```
-
-**注意事项**：
-- 输出必须与实际游戏完全一致
-- 包含所有换行符和空格
-- 提示信息必须准确
-- 状态信息必须正确
-
-#### expected_dump.json - 期望状态
+#### expected_result.json - 期望状态
 **格式要求**：
 - 符合JSON格式规范
 - 包含完整的游戏状态
@@ -149,6 +125,8 @@ quit
 - 数值必须准确
 - 状态必须完整
 - 字段必须齐全
+- 这是测试验证的唯一标准
+- 与dump.json进行精确比对
 
 ## 🎮 具体功能测试用例撰写
 
@@ -158,14 +136,14 @@ quit
 **功能**：单角色选择测试
 **目标**：验证单个角色选择功能
 
-**cmdlist.txt**：
+**input.txt**：
 ```
 10000
 1
 quit
 ```
 
-**expected_output.txt**：
+**expected_result.json**：
 ```
 大富翁游戏启动
 请输入初始资金: 欢迎来到大富翁，请按数字键选择你的角色：
@@ -179,7 +157,7 @@ quit
 > 游戏结束
 ```
 
-**expected_dump.json**：
+**expected_result.json**：
 ```json
 {
     "players": [
@@ -225,7 +203,7 @@ quit
 **功能**：Step命令基础测试
 **目标**：验证Step命令的移动功能
 
-**cmdlist.txt**：
+**input.txt**：
 ```
 10000
 1
@@ -235,7 +213,7 @@ dump
 quit
 ```
 
-**expected_output.txt**：
+**expected_result.json**：
 ```
 大富翁游戏启动
 请输入初始资金: 欢迎来到大富翁，请按数字键选择你的角色：
@@ -256,7 +234,7 @@ quit
 > 游戏结束
 ```
 
-**expected_dump.json**：
+**expected_result.json**：
 ```json
 {
     "players": [
@@ -302,7 +280,7 @@ quit
 **功能**：地段1空地购买测试
 **目标**：验证地段1空地的购买功能
 
-**cmdlist.txt**：
+**input.txt**：
 ```
 10000
 1
@@ -313,7 +291,7 @@ dump
 quit
 ```
 
-**expected_output.txt**：
+**expected_result.json**：
 ```
 大富翁游戏启动
 请输入初始资金: 欢迎来到大富翁，请按数字键选择你的角色：
@@ -335,7 +313,7 @@ quit
 > 游戏结束
 ```
 
-**expected_dump.json**：
+**expected_result.json**：
 ```json
 {
     "players": [
@@ -385,7 +363,7 @@ quit
 **功能**：路障使用测试
 **目标**：验证路障的放置和使用功能
 
-**cmdlist.txt**：
+**input.txt**：
 ```
 10000
 1
@@ -398,7 +376,7 @@ dump
 quit
 ```
 
-**expected_output.txt**：
+**expected_result.json**：
 ```
 大富翁游戏启动
 请输入初始资金: 欢迎来到大富翁，请按数字键选择你的角色：
@@ -424,7 +402,7 @@ quit
 > 游戏结束
 ```
 
-**expected_dump.json**：
+**expected_result.json**：
 ```json
 {
     "players": [
@@ -674,17 +652,17 @@ validator.validate_all_tests()
 - [ ] 准备期望输出和状态
 
 ### 撰写中检查
-- [ ] cmdlist.txt格式正确
+- [ ] input.txt格式正确
 - [ ] 命令序列完整可执行
-- [ ] 期望输出准确完整
-- [ ] JSON状态正确无误
+- [ ] expected_result.json状态正确无误
 - [ ] 测试用例独立可运行
+- [ ] 只关注JSON状态验证
 
 ### 撰写后检查
 - [ ] 运行测试用例验证
-- [ ] 检查输出是否匹配
-- [ ] 验证JSON状态正确
+- [ ] 验证JSON状态正确匹配
 - [ ] 确认测试用例通过
+- [ ] 检查output.txt调试信息（可选）
 - [ ] 更新测试文档
 
 ## 🚀 最佳实践
@@ -701,17 +679,17 @@ validator.validate_all_tests()
 - 确保命令顺序正确
 - 包含必要的验证命令
 
-### 3. 期望输出设计
-- 期望输出要完整准确
-- 包含所有必要的提示信息
-- 状态信息要正确
-- 格式要与实际输出一致
+### 3. JSON状态设计
+- JSON格式要正确规范
+- 数值要准确无误
+- 状态要完整齐全
+- 字段要与实际游戏状态一致
 
-### 4. JSON状态设计
-- JSON格式要正确
-- 数值要准确
-- 状态要完整
-- 字段要齐全
+### 4. 调试和维护
+- 利用output.txt文件进行问题排查
+- 对比dump.json和expected_result.json找出差异
+- 关注游戏逻辑而非输出格式
+- 保持测试用例的简洁性
 
 ### 5. 测试用例维护
 - 定期更新测试用例
@@ -723,15 +701,16 @@ validator.validate_all_tests()
 
 ### 常见问题
 1. **测试用例不通过怎么办？**
-   - 检查期望输出是否准确
-   - 验证JSON状态是否正确
+   - 检查expected_result.json是否准确
+   - 验证dump.json与期望状态的差异
    - 确认命令序列是否完整
+   - 查看output.txt了解程序执行过程
 
-2. **如何生成期望输出？**
+2. **如何生成期望状态？**
    - 运行游戏程序
    - 手动执行命令序列
-   - 记录实际输出
-   - 保存游戏状态
+   - 复制生成的dump.json为expected_result.json
+   - 验证状态的正确性
 
 3. **如何验证JSON状态？**
    - 使用dump命令保存状态

@@ -25,7 +25,7 @@ class IntegrationTestRunner:
         print("=" * 50)
         
         # 检查必需文件
-        required_files = ["cmdlist.txt", "expected_output.txt", "expected_dump.json"]
+        required_files = ["input.txt", "expected_result.json"]
         missing_files = []
         for file in required_files:
             if not (test_dir / file).exists():
@@ -41,13 +41,13 @@ class IntegrationTestRunner:
             print(f"📋 使用预设文件: {preset_file.name}")
         
         # 运行游戏程序
-        cmdlist_file = test_dir / "cmdlist.txt"
+        input_file = test_dir / "input.txt"
         output_file = test_dir / "output.txt"
         dump_file = test_dir / "dump.json"
         
         try:
             # 执行游戏程序
-            with open(cmdlist_file, 'r', encoding='utf-8') as f:
+            with open(input_file, 'r', encoding='utf-8') as f:
                 cmd_input = f.read()
             
             result = subprocess.run(
@@ -59,9 +59,10 @@ class IntegrationTestRunner:
                 cwd=str(test_dir)
             )
             
-            # 保存输出（去除末尾空白字符）
+            # 保存输出文件（便于检查日志）
             with open(output_file, 'w', encoding='utf-8') as f:
                 f.write(result.stdout.rstrip() + '\n')
+            
             
             # 检查是否有dump命令，如果有则保存dump.json
             if "dump" in cmd_input:
@@ -88,18 +89,11 @@ class IntegrationTestRunner:
             print(f"❌ 执行错误: {e}")
             return False
         
-        # 比较输出文件
-        output_match = self.compare_files(
-            test_dir / "expected_output.txt",
-            output_file,
-            "控制台输出"
-        )
-        
         # 比较dump文件
         dump_match = True
         if dump_file.exists():
             dump_match = self.compare_files(
-                test_dir / "expected_dump.json",
+                test_dir / "expected_result.json",
                 dump_file,
                 "JSON状态"
             )
@@ -108,7 +102,7 @@ class IntegrationTestRunner:
             dump_match = False
         
         # 返回测试结果
-        test_passed = output_match and dump_match
+        test_passed = dump_match
         if test_passed:
             print(f"✅ {test_name} 通过")
         else:

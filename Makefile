@@ -47,6 +47,7 @@ clean:
 	@echo "🧹 清理构建文件..."
 	rm -f $(RICHMAN_BIN)
 	rm -f $(TEST_DIR)/integration/*/output.txt
+	rm -f $(TEST_DIR)/integration/*/dump.json
 	@echo "✅ 清理完成"
 
 # 创建集成测试模板

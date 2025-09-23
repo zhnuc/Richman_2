@@ -53,11 +53,20 @@ Richman_2/
 ├── tests/                        # 测试目录
 │   ├── integration/              # 集成测试用例
 │   │   ├── test_startup_001/     # 启动测试用例1（钱夫人）
+│   │   │   ├── input.txt         # 输入命令序列
+│   │   │   ├── expected_result.json # 期望JSON状态
+│   │   │   ├── output.txt        # 实际输出（调试用）
+│   │   │   └── dump.json         # 实际JSON状态
 │   │   ├── test_startup_002/     # 启动测试用例2（多角色）
 │   │   ├── test_startup_003/     # 启动测试用例3（三角色）
 │   │   ├── test_startup_004/     # 启动测试用例4（四角色）
 │   │   ├── test_startup_005/     # 启动测试用例5（无效输入）
 │   │   ├── test_startup_006/     # preset初始化测试1（单玩家）
+│   │   │   ├── input.txt         # 输入命令序列
+│   │   │   ├── preset.json       # 初始游戏状态
+│   │   │   ├── expected_result.json # 期望JSON状态
+│   │   │   ├── output.txt        # 实际输出（调试用）
+│   │   │   └── dump.json         # 实际JSON状态
 │   │   └── test_startup_007/     # preset初始化测试2（多玩家）
 │   └── scripts/                  # 测试脚本
 │       └── run_integration_tests.py # 自动化集成测试
@@ -221,26 +230,13 @@ mkdir tests/integration/test_new_feature
 
 #### 2. 创建测试文件
 ```bash
-# cmdlist.txt - 命令序列
+# input.txt - 命令序列
 echo "10000
 1
 dump
-quit" > tests/integration/test_new_feature/cmdlist.txt
+quit" > tests/integration/test_new_feature/input.txt
 
-# expected_output.txt - 期望输出
-echo "大富翁游戏启动
-请输入初始资金: 欢迎来到大富翁，请按数字键选择你的角色：
-1.钱夫人
-2.阿土伯
-3.孙小美
-4.金贝贝
-请输入选择 (1-4): 您选择了: 钱夫人
-
-游戏开始！
-> 游戏状态已保存到: dump.json
-> 游戏结束" > tests/integration/test_new_feature/expected_output.txt
-
-# expected_dump.json - 期望的JSON状态
+# expected_result.json - 期望的JSON状态
 echo '{
     "players": [
         {
@@ -276,7 +272,7 @@ echo '{
         "ended": false,
         "winner": -1
     }
-}' > tests/integration/test_new_feature/expected_dump.json
+}' > tests/integration/test_new_feature/expected_result.json
 ```
 
 #### 3. 运行测试
@@ -406,18 +402,24 @@ git merge feature/new-feature          # 合并功能分支
 make -n richman
 ```
 
-### Q: 测试失败 "控制台输出不匹配"
-**A**: 检查expected_output.txt是否与实际输出一致
+### Q: 测试失败 "JSON状态不匹配"
+**A**: 检查expected_result.json是否与实际游戏状态一致
 ```bash
-# 查看实际输出
-cat tests/integration/test1/output.txt
+# 查看实际输出（调试用）
+cat tests/integration/test_startup_001/output.txt
+
+# 查看实际JSON状态
+cat tests/integration/test_startup_001/dump.json
+
+# 查看期望JSON状态
+cat tests/integration/test_startup_001/expected_result.json
 ```
 
 ### Q: JSON格式错误
 **A**: 使用JSON验证器检查格式
 ```bash
 # 验证JSON文件
-python3 -m json.tool tests/integration/test1/dump.json
+python3 -m json.tool tests/integration/test_startup_001/dump.json
 ```
 
 ### Q: 角色选择无效
@@ -428,13 +430,13 @@ echo -e "10000\n1" | ./rich
 ```
 
 ### Q: dump命令不工作
-**A**: 确保cmdlist.txt中只有`dump`，没有额外参数
+**A**: 确保input.txt中只有`dump`，没有额外参数
 ```bash
-# 正确的cmdlist.txt格式
+# 正确的input.txt格式
 echo "10000
 1
 dump
-quit" > cmdlist.txt
+quit" > input.txt
 ```
 
 ## 📚 扩展阅读
