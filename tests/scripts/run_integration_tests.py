@@ -15,7 +15,7 @@ class IntegrationTestRunner:
     def __init__(self, project_root):
         self.project_root = Path(project_root)
         self.integration_dir = self.project_root / "tests" / "integration"
-        self.game_binary = self.project_root / "richman"
+        self.game_binary = self.project_root / "rich"
         self.results = []
         
     def run_single_test(self, test_dir):

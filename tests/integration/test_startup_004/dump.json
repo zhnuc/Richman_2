@@ -77,7 +77,8 @@
             }
         }
     ],
-    "houses": {},
+    "houses": {
+    },
     "placed_prop": {
         "bomb": [],
         "barrier": []

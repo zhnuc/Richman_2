@@ -63,7 +63,7 @@ void save_game_dump(const char* filename) {
         }
         fprintf(file, "\n    },\n");
     } else {
-        fprintf(file, "    \"houses\": {},\n");
+        fprintf(file, "    \"houses\": {\n    },\n");
     }
     
     fprintf(file, "    \"placed_prop\": {\n");
