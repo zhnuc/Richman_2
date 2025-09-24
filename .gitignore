@@ -1,0 +1,29 @@
+# 编译产物
+*.o
+*.so
+*.a
+*.out
+rich
+
+
+# IDE和编辑器文件
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# 临时文件
+*.tmp
+*.temp
+*.bak
+*.backup
+
+# 日志文件
+*.log
+
+# 测试输出
+tests/integration/output.txt
+tests/integration/dump.json
+.rich
