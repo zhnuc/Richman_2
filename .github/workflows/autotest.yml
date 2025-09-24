@@ -24,9 +24,23 @@ jobs:
     - name: Clean and rebuild
       run: make clean && make
       
-    - name: Build and Run tests
-      run: make test
+    - name: Run tests
+      id: test-step
+      run: |
+        echo "🧪 运行敏捷测试..."
+        make test
+        echo "✅ 所有测试通过！"
       continue-on-error: false
+
+    - name: Test failure notification
+      if: failure() && steps.test-step.outcome == 'failure'
+      run: |
+        echo "❌ 测试失败！"
+        echo "请检查测试结果并修复问题后重新提交。"
+        echo "可以使用以下命令本地调试："
+        echo "  make test        # 运行敏捷测试"
+        echo "  make test_status # 查看测试状态"
+        exit 1
 
     - name: Upload test results
       if: always()
