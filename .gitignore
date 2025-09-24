@@ -24,6 +24,10 @@ rich
 *.log
 
 # 测试输出
-tests/integration/output.txt
-tests/integration/dump.json
+tests/integration/*/output.txt
+tests/integration/*/dump.json
+tests/integration/**/output.txt
+tests/integration/**/dump.json
+test_output/
+coverage.info
 .rich
