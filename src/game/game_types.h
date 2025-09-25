@@ -13,10 +13,12 @@ typedef struct {
     int id;           // 角色ID (1-4)
     char name[MAX_NAME_LENGTH];    // 角色名称
     char display_name[MAX_NAME_LENGTH]; // 显示名称
+    const char* color_code; // 颜色代码
 } Character;
 
 // 道具结构
 typedef struct {
+// ... existing code ...
     int bomb;
 // ... existing code ...
     int barrier;
@@ -35,6 +37,7 @@ typedef struct {
 typedef struct {
     int index;
     char name[MAX_NAME_LENGTH];
+    const char* color; // 用于存储ANSI颜色代码
     int fund;
     int credit;
     int location;
@@ -45,8 +48,10 @@ typedef struct {
 
 // 房屋结构
 typedef struct {
-    int owner_id; // 玩家索引, -1 表示无主
+    int id;
+    int price;
     int level;
+    int owner_id; // -1 for no owner
 } House;
 
 // 放置的道具结构

@@ -1,5 +1,6 @@
 #include "player.h"
 #include "character.h"
+#include "../io/colors.h" // 包含颜色定义
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -25,6 +26,15 @@ Player* create_player_by_character(int character_id, int fund) {
     player->credit = 0;
     player->location = 0;
     player->alive = true;
+    
+    // 根据角色ID分配颜色
+    switch (character_id) {
+        case 1: player->color = COLOR_RED; break;    // 钱夫人
+        case 2: player->color = COLOR_GREEN; break;  // 阿土伯
+        case 3: player->color = COLOR_BLUE; break;   // 孙小美
+        case 4: player->color = COLOR_YELLOW; break; // 金贝贝
+        default: player->color = COLOR_RESET; break;
+    }
     
     // 初始化道具
     player->prop.bomb = 0;

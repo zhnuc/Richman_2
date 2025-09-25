@@ -7,11 +7,26 @@ GameState g_game_state;
 
 void init_game_state(void) {
     g_game_state.player_count = 0;
-    
+    g_game_state.game.started = false;
+    g_game_state.game.ended = false;
+    g_game_state.game.now_player_id = 0;
+
     // 初始化房产
     for (int i = 0; i < MAP_SIZE; i++) {
-        g_game_state.houses[i].owner_id = -1;
+        g_game_state.houses[i].id = i;
         g_game_state.houses[i].level = 0;
+        g_game_state.houses[i].owner_id = -1; // 无人拥有
+        
+        // 根据位置设置价格
+        if ((i >= 1 && i <= 13) || (i >= 15 && i <= 27)) { // 地段1
+            g_game_state.houses[i].price = 200;
+        } else if ((i >= 29 && i <= 34)) { // 地段2
+            g_game_state.houses[i].price = 500;
+        } else if ((i >= 36 && i <= 48) || (i >= 50 && i <= 62)) { // 地段3
+            g_game_state.houses[i].price = 300;
+        } else {
+            g_game_state.houses[i].price = 0; // 特殊位置不可购买
+        }
     }
     
     // 初始化道具

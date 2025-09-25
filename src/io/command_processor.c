@@ -2,7 +2,11 @@
 #include "../game/game_state.h"
 #include "../game/player.h"
 #include "../game/character.h"
+#include "../game/map.h"
+#include "../game/land.h"
+#include "../io/colors.h"
 #include "json_serializer.h"
+#include "utils.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -12,11 +16,11 @@
 
 // 函数声明
 void handle_roll_command();
-// ... existing code ...
 void handle_step_command(const char* command);
 void handle_query_command();
 void handle_help_command();
 void handle_quit_command();
+void handle_sell_command(int location);
 
 
 void process_command(const char* command) {
@@ -34,6 +38,13 @@ void process_command(const char* command) {
         handle_query_command();
     } else if (strcmp(lower_command, "help") == 0) {
         handle_help_command();
+    } else if (strncmp(lower_command, "sell ", 5) == 0) {
+        int location;
+        if (sscanf(command, "sell %d", &location) == 1) {
+            handle_sell_command(location);
+        } else {
+            printf("格式错误，请使用: sell <位置>\n");
+        }
     } else if (strcmp(lower_command, "quit") == 0) {
         handle_quit_command();
     } else if (strncmp(lower_command, "create_player", 13) == 0) {
@@ -91,6 +102,9 @@ void handle_roll_command() {
     current_player->location = (current_player->location + steps) % MAP_SIZE;
     printf("%s 前进 %d 步，到达位置 %d\n", current_player->name, steps, current_player->location);
 
+    // 触发到达事件
+    on_player_land(current_player);
+
     // 切换到下一个玩家
     g_game_state.game.now_player_id = (g_game_state.game.now_player_id + 1) % g_game_state.player_count;
 }
@@ -102,6 +116,9 @@ void handle_step_command(const char* command) {
         Player* current_player = &g_game_state.players[g_game_state.game.now_player_id];
         current_player->location = (current_player->location + steps) % MAP_SIZE;
         printf("%s 前进 %d 步，到达位置 %d\n", current_player->name, steps, current_player->location);
+
+        // 触发到达事件
+        on_player_land(current_player);
 
         // 切换到下一个玩家
         g_game_state.game.now_player_id = (g_game_state.game.now_player_id + 1) % g_game_state.player_count;
@@ -121,16 +138,39 @@ void handle_query_command() {
     printf("    - 炸弹: %d\n", p->prop.bomb);
     printf("    - 路障: %d\n", p->prop.barrier);
     printf("    - 机器娃娃: %d\n", p->prop.robot);
-    printf("  房产: (待实现)\n");
+    printf("  房产:\n");
+    bool has_house = false;
+    for (int i = 0; i < MAP_SIZE; i++) {
+        if (g_game_state.houses[i].owner_id == p->index) {
+            printf("    - 位置 %d (等级 %d)\n", i, g_game_state.houses[i].level);
+            has_house = true;
+        }
+    }
+    if (!has_house) {
+        printf("    (无)\n");
+    }
 }
 
 void handle_help_command() {
-    printf("命令列表:\n");
-    printf("  roll          - 掷骰子，走1-6步\n");
-    printf("  step n        - 遥控骰子，走n步\n");
-    printf("  query         - 查询当前玩家资产\n");
-    printf("  help          - 显示此帮助信息\n");
-    printf("  quit          - 退出游戏\n");
+    printf("命令帮助:\n");
+    printf("roll\n");
+    printf("  掷骰子命令，行走1～6步，步数由随机算法产生。\n");
+    printf("sell n\n");
+    printf("  出售房产，n为房产在地图上的绝对位置，出售价格为投资总成本的2倍。\n");
+    printf("block n\n");
+    printf("  放置路障，n为前后相对距离（±10步），玩家经过将被拦截。\n");
+    printf("bomb n\n");
+    printf("  放置炸弹，n为前后相对距离（±10步），玩家经过将被炸伤，住院3天。\n");
+    printf("robot\n");
+    printf("  清扫前方10步内的障碍（路障、炸弹）。\n");
+    printf("query\n");
+    printf("  显示自家资产信息。\n");
+    printf("help\n");
+    printf("  查看命令帮助。\n");
+    printf("quit\n");
+    printf("  强制退出游戏。\n");
+    printf("step n\n");
+    printf("  遥控骰子，指定行走步数。\n");
 }
 
 void handle_quit_command() {
@@ -238,15 +278,22 @@ void run_game(void) {
     
     char command[100];
     while (!g_game_state.game.ended) {
+        printf(CLEAR_SCREEN); // 清屏
+        display_map(); // 在每个回合开始时显示地图
         Player* current_player = &g_game_state.players[g_game_state.game.now_player_id];
-        printf("%s> ", current_player->name);
+        printf("%s%c%s> ", current_player->color, current_player->name[0], COLOR_RESET);
         
         if (fgets(command, sizeof(command), stdin) == NULL) {
             break;
         }
         
+        // Trim trailing newline
         command[strcspn(command, "\n")] = 0;
         
         process_command(command);
+
+        if (!g_game_state.game.ended) {
+            wait_for_enter();
+        }
     }
 }
