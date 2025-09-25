@@ -37,7 +37,7 @@ class AgileTestManager:
     
     def get_test_status(self, test_name):
         """获取测试状态"""
-        return self.test_statuses.get(test_name, 'active')
+        return self.test_statuses.get(test_name, 'pending')
     
     def should_run_test(self, test_name):
         """判断是否应该运行测试"""
@@ -270,14 +270,225 @@ class AgileTestManager:
             print(f"❌ 比较JSON时出错: {e}")
             return False
 
+    def batch_update_status(self, pattern, new_status):
+        """批量更新测试状态"""
+        print(f"🔄 批量更新测试状态: {pattern} -> {new_status}")
+        
+        # 获取所有测试目录
+        test_dirs = sorted([d for d in self.integration_dir.iterdir() 
+                           if d.is_dir() and d.name.startswith('test_')])
+        
+        updated_tests = []
+        
+        # 匹配测试名称
+        for test_dir in test_dirs:
+            test_name = test_dir.name
+            if self._match_pattern(test_name, pattern):
+                self.test_statuses[test_name] = new_status
+                updated_tests.append(test_name)
+        
+        if updated_tests:
+            # 保存到配置文件
+            self._save_test_statuses()
+            print(f"✅ 已更新 {len(updated_tests)} 个测试用例:")
+            for test in updated_tests:
+                print(f"   • {test}: {new_status}")
+        else:
+            print(f"❌ 没有找到匹配模式 '{pattern}' 的测试用例")
+    
+    def _match_pattern(self, test_name, pattern):
+        """匹配测试名称模式"""
+        import re
+        
+        # 支持正则表达式（包含特殊字符如[]）
+        if any(char in pattern for char in ['[', ']', '^', '$', '(', ')', '+']):
+            try:
+                return re.match(f"^{pattern}$", test_name) is not None
+            except re.error:
+                # 如果正则表达式无效，回退到通配符匹配
+                pass
+        
+        # 支持通配符 * 和 ?
+        if '*' in pattern or '?' in pattern:
+            # 转换通配符为正则表达式
+            regex_pattern = pattern.replace('*', '.*').replace('?', '.')
+            return re.match(f"^{regex_pattern}$", test_name) is not None
+        
+        # 支持前缀匹配
+        if pattern.endswith('*'):
+            return test_name.startswith(pattern[:-1])
+        
+        # 精确匹配
+        return test_name == pattern
+    
+    def _save_test_statuses(self):
+        """保存测试状态到配置文件"""
+        lines = []
+        
+        # 保留文件头部注释
+        if self.status_config.exists():
+            with open(self.status_config, 'r', encoding='utf-8') as f:
+                for line in f:
+                    stripped = line.strip()
+                    if stripped.startswith('#') or not stripped:
+                        lines.append(line)
+                    elif ':' in stripped:
+                        break  # 遇到第一个配置行就停止保留
+        
+        # 添加测试状态配置
+        for test_name, status in sorted(self.test_statuses.items()):
+            lines.append(f"{test_name}: {status}\n")
+        
+        # 写入文件
+        with open(self.status_config, 'w', encoding='utf-8') as f:
+            f.writelines(lines)
+    
+    def find_new_tests(self):
+        """发现新的测试用例（未在配置文件中的）"""
+        # 获取所有测试目录
+        test_dirs = sorted([d for d in self.integration_dir.iterdir() 
+                           if d.is_dir() and d.name.startswith('test_')])
+        
+        new_tests = []
+        for test_dir in test_dirs:
+            test_name = test_dir.name
+            if test_name not in self.test_statuses:
+                new_tests.append(test_name)
+        
+        return new_tests
+    
+    def auto_add_new_tests(self, default_status='pending'):
+        """自动添加新发现的测试用例到配置文件"""
+        new_tests = self.find_new_tests()
+        
+        if not new_tests:
+            print("✅ 没有发现新的测试用例")
+            return
+        
+        print(f"🆕 发现 {len(new_tests)} 个新测试用例:")
+        for test in new_tests:
+            print(f"   • {test}")
+        
+        # 添加到配置中
+        for test in new_tests:
+            self.test_statuses[test] = default_status
+        
+        # 保存配置文件
+        self._save_test_statuses()
+        print(f"✅ 已将 {len(new_tests)} 个新测试用例添加到配置文件，状态: {default_status}")
+
+    def list_tests(self):
+        """列出所有测试及其状态"""
+        print("📋 测试用例状态列表")
+        print("=" * 60)
+        
+        # 获取所有测试目录
+        test_dirs = sorted([d for d in self.integration_dir.iterdir() 
+                           if d.is_dir() and d.name.startswith('test_')])
+        
+        if not test_dirs:
+            print("❌ 没有找到测试用例")
+            return
+        
+        # 检查是否有新测试用例
+        new_tests = self.find_new_tests()
+        if new_tests:
+            print(f"⚠️  发现 {len(new_tests)} 个未配置的测试用例:")
+            for test in new_tests:
+                print(f"   🆕 {test} (默认: pending)")
+            print("   💡 使用 --auto-add 自动添加这些测试用例到配置文件")
+            print()
+        
+        # 按状态分组
+        status_groups = {
+            'active': [],
+            'wip': [],
+            'pending': [],
+            'disabled': []
+        }
+        
+        for test_dir in test_dirs:
+            test_name = test_dir.name
+            status = self.get_test_status(test_name)
+            if status in status_groups:
+                status_groups[status].append(test_name)
+            else:
+                status_groups.setdefault('other', []).append(f"{test_name} ({status})")
+        
+        # 显示分组结果
+        status_emoji = {
+            'active': '🟢',
+            'wip': '🟡', 
+            'pending': '🔵',
+            'disabled': '⚫'
+        }
+        
+        for status, tests in status_groups.items():
+            if tests:
+                emoji = status_emoji.get(status, '⚪')
+                status_cn = {
+                    'active': '活跃测试',
+                    'wip': '开发中测试',
+                    'pending': '待实现测试',
+                    'disabled': '禁用测试'
+                }.get(status, f'{status.upper()}测试')
+                
+                print(f"\n{emoji} {status_cn} ({len(tests)}个):")
+                for test in sorted(tests):
+                    print(f"   • {test}")
+
 def main():
-    if len(sys.argv) != 2:
-        print("用法: python run_agile_tests.py <项目root路径>")
-        sys.exit(1)
+    import argparse
     
-    project_root = sys.argv[1]
-    test_manager = AgileTestManager(project_root)
+    parser = argparse.ArgumentParser(description='敏捷测试管理器')
+    parser.add_argument('project_root', help='项目根目录路径')
+    parser.add_argument('--list', '-l', action='store_true', help='列出所有测试及其状态')
+    parser.add_argument('--batch-update', '-b', nargs=2, metavar=('PATTERN', 'STATUS'),
+                       help='批量更新测试状态 (支持通配符 *, ?, 正则表达式)')
+    parser.add_argument('--auto-add', '-a', nargs='?', const='pending', metavar='STATUS',
+                       help='自动添加新发现的测试用例 (默认状态: pending)')
+    parser.add_argument('--find-new', '-n', action='store_true', help='只查找新测试用例，不添加')
+    parser.add_argument('--verbose', '-v', action='store_true', help='详细输出')
     
+    args = parser.parse_args()
+    
+    test_manager = AgileTestManager(args.project_root)
+    
+    if args.find_new:
+        new_tests = test_manager.find_new_tests()
+        if new_tests:
+            print(f"🆕 发现 {len(new_tests)} 个新测试用例:")
+            for test in new_tests:
+                print(f"   • {test}")
+        else:
+            print("✅ 没有发现新的测试用例")
+        sys.exit(0)
+    
+    if args.auto_add:
+        valid_statuses = ['active', 'wip', 'pending', 'disabled']
+        if args.auto_add not in valid_statuses:
+            print(f"❌ 无效状态: {args.auto_add}")
+            print(f"   有效状态: {', '.join(valid_statuses)}")
+            sys.exit(1)
+        test_manager.auto_add_new_tests(args.auto_add)
+        sys.exit(0)
+    
+    if args.list:
+        test_manager.list_tests()
+        sys.exit(0)
+    
+    if args.batch_update:
+        pattern, status = args.batch_update
+        valid_statuses = ['active', 'wip', 'pending', 'disabled']
+        if status not in valid_statuses:
+            print(f"❌ 无效状态: {status}")
+            print(f"   有效状态: {', '.join(valid_statuses)}")
+            sys.exit(1)
+        
+        test_manager.batch_update_status(pattern, status)
+        sys.exit(0)
+    
+    # 默认运行测试
     success = test_manager.run_tests()
     sys.exit(0 if success else 1)
 
