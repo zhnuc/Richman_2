@@ -8,7 +8,7 @@
 extern GameState g_game_state;
 
 Player* create_player_by_character(int character_id, int fund) {
-    if (!is_valid_character_id(character_id) || g_game_state.player_count >= 4) {
+    if (!is_valid_character_id(character_id) || g_game_state.player_count >= MAX_PLAYERS) {
         return NULL;
     }
     
@@ -42,7 +42,7 @@ Player* create_player_by_character(int character_id, int fund) {
 }
 
 Player* create_player(int index, const char* name, int fund) {
-    if (index < 0 || index >= 4 || g_game_state.player_count >= 4) {
+    if (index < 0 || index >= MAX_PLAYERS || g_game_state.player_count >= MAX_PLAYERS) {
         return NULL;
     }
     

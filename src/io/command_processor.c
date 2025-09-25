@@ -7,12 +7,36 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
+#include <time.h>
+#include <ctype.h>
+
+// 函数声明
+void handle_roll_command();
+// ... existing code ...
+void handle_step_command(const char* command);
+void handle_query_command();
+void handle_help_command();
+void handle_quit_command();
+
 
 void process_command(const char* command) {
-    if (strcmp(command, "quit") == 0) {
-        printf("游戏结束\n");
-        return;
-    } else if (strncmp(command, "create_player", 13) == 0) {
+    char lower_command[100];
+    for (int i = 0; command[i]; i++) {
+        lower_command[i] = tolower(command[i]);
+    }
+    lower_command[strlen(command)] = '\0';
+
+    if (strcmp(lower_command, "roll") == 0) {
+        handle_roll_command();
+    } else if (strncmp(lower_command, "step", 4) == 0) {
+        handle_step_command(lower_command);
+    } else if (strcmp(lower_command, "query") == 0) {
+        handle_query_command();
+    } else if (strcmp(lower_command, "help") == 0) {
+        handle_help_command();
+    } else if (strcmp(lower_command, "quit") == 0) {
+        handle_quit_command();
+    } else if (strncmp(lower_command, "create_player", 13) == 0) {
         // 简单的创建玩家命令: create_player 张三 1500
         char name[32];
         int fund;
@@ -26,13 +50,13 @@ void process_command(const char* command) {
         } else {
             printf("格式错误，请使用: create_player <姓名> <资金>\n");
         }
-    } else if (strcmp(command, "status") == 0) {
+    } else if (strcmp(lower_command, "status") == 0) {
         print_game_state();
-    } else if (strcmp(command, "dump") == 0) {
+    } else if (strcmp(lower_command, "dump") == 0) {
         // dump命令: 默认保存为dump.json
         save_game_dump("dump.json");
         printf("游戏状态已保存到: dump.json\n");
-    } else if (strncmp(command, "dump ", 5) == 0) {
+    } else if (strncmp(lower_command, "dump ", 5) == 0) {
         // dump命令: dump filename.json (带文件名)
         char filename[256];
         if (sscanf(command, "dump %s", filename) == 1) {
@@ -41,7 +65,7 @@ void process_command(const char* command) {
         } else {
             printf("格式错误，请使用: dump 或 dump <文件名>\n");
         }
-    } else if (strncmp(command, "load", 4) == 0) {
+    } else if (strncmp(lower_command, "load", 4) == 0) {
         // load命令: load filename.json
         char filename[256];
         if (sscanf(command, "load %s", filename) == 1) {
@@ -55,138 +79,174 @@ void process_command(const char* command) {
         }
     } else {
         printf("未知命令: %s\n", command);
-        printf("可用命令: create_player <姓名> <资金>, status, dump, dump <文件名>, load <文件名>, quit\n");
+        handle_help_command();
     }
 }
 
+void handle_roll_command() {
+    int steps = rand() % 6 + 1;
+    printf("玩家 %s 掷骰子，点数为 %d\n", g_game_state.players[g_game_state.game.now_player_id].name, steps);
+    
+    Player* current_player = &g_game_state.players[g_game_state.game.now_player_id];
+    current_player->location = (current_player->location + steps) % MAP_SIZE;
+    printf("%s 前进 %d 步，到达位置 %d\n", current_player->name, steps, current_player->location);
+
+    // 切换到下一个玩家
+    g_game_state.game.now_player_id = (g_game_state.game.now_player_id + 1) % g_game_state.player_count;
+}
+
+void handle_step_command(const char* command) {
+    int steps;
+    if (sscanf(command, "step %d", &steps) == 1) {
+        printf("遥控骰子，指定步数为 %d\n", steps);
+        Player* current_player = &g_game_state.players[g_game_state.game.now_player_id];
+        current_player->location = (current_player->location + steps) % MAP_SIZE;
+        printf("%s 前进 %d 步，到达位置 %d\n", current_player->name, steps, current_player->location);
+
+        // 切换到下一个玩家
+        g_game_state.game.now_player_id = (g_game_state.game.now_player_id + 1) % g_game_state.player_count;
+    } else {
+        printf("无效的 step 命令格式, e.g., step 5\n");
+    }
+}
+
+void handle_query_command() {
+    Player* p = &g_game_state.players[g_game_state.game.now_player_id];
+    printf("资产查询:\n");
+    printf("  玩家: %s\n", p->name);
+    printf("  资金: %d 元\n", p->fund);
+    printf("  点数: %d 点\n", p->credit);
+    printf("  位置: %d\n", p->location);
+    printf("  道具:\n");
+    printf("    - 炸弹: %d\n", p->prop.bomb);
+    printf("    - 路障: %d\n", p->prop.barrier);
+    printf("    - 机器娃娃: %d\n", p->prop.robot);
+    printf("  房产: (待实现)\n");
+}
+
+void handle_help_command() {
+    printf("命令列表:\n");
+    printf("  roll          - 掷骰子，走1-6步\n");
+    printf("  step n        - 遥控骰子，走n步\n");
+    printf("  query         - 查询当前玩家资产\n");
+    printf("  help          - 显示此帮助信息\n");
+    printf("  quit          - 退出游戏\n");
+}
+
+void handle_quit_command() {
+    printf("您确定要退出游戏吗? (y/n): ");
+    char confirm[10];
+    fgets(confirm, sizeof(confirm), stdin);
+    if (confirm[0] == 'y' || confirm[0] == 'Y') {
+        g_game_state.game.ended = true;
+        printf("游戏结束。\n");
+    }
+}
+
+
 int get_initial_fund(void) {
     char input[20];
-    printf("请输入初始资金: ");
-    if (fgets(input, sizeof(input), stdin) == NULL) {
-        return 0;
+    int fund = 10000; // 默认资金
+    printf("请设置玩家初始资金（范围：1000～50000，默认10000），直接回车使用默认资金: ");
+    if (fgets(input, sizeof(input), stdin) != NULL && input[0] != '\n') {
+        int temp_fund = atoi(input);
+        if (temp_fund >= 1000 && temp_fund <= 50000) {
+            fund = temp_fund;
+        } else {
+            printf("无效的资金数额，将使用默认资金 10000。\n");
+        }
     }
-    
-    // 去掉换行符
-    input[strcspn(input, "\n")] = 0;
-    
-    int fund = atoi(input);
-    if (fund > 0) {
-        printf("初始资金设置为: %d\n", fund);
-        return fund;
-    } else {
-        printf("无效的初始资金\n");
-        return 0;
-    }
+    printf("初始资金设置为: %d\n", fund);
+    return fund;
 }
 
 void show_welcome_and_select_character(int initial_fund) {
     init_characters();
     
-    while (g_game_state.player_count == 0) {
+    while (g_game_state.player_count < 2 || g_game_state.player_count > 4) {
         show_character_selection();
         
         char input[10];
-        printf("请输入选择 (1-4): ");
+        printf("请选择2～4位不重复玩家，输入编号即可（1、钱夫人；2、阿土伯；3、孙小美；4、金贝贝）: ");
         if (fgets(input, sizeof(input), stdin) == NULL) {
             return;
         }
         
-        // 去掉换行符
         input[strcspn(input, "\n")] = 0;
         
-        // 支持多角色选择，如"12"、"123"、"1234"
-        // 首先验证输入是否只包含1-4的数字，且无重复
         bool valid_input = true;
-        bool used[5] = {false}; // 检查重复
+        bool used[5] = {false};
+        int len = strlen(input);
+        if (len < 2 || len > 4) {
+            printf("请选择 2-4 位玩家。\n");
+            continue;
+        }
         
-        for (int i = 0; input[i] != '\0'; i++) {
+        for (int i = 0; i < len; i++) {
             if (input[i] < '1' || input[i] > '4') {
                 valid_input = false;
                 break;
             }
             int digit = input[i] - '0';
             if (used[digit]) {
-                valid_input = false; // 重复数字
+                printf("角色选择重复。\n");
+                valid_input = false; 
                 break;
             }
             used[digit] = true;
         }
         
         if (!valid_input) {
-            printf("无效选择，请输入1-4之间的数字\n");
+            printf("无效选择，请输入1-4之间的不重复数字。\n");
+            g_game_state.player_count = 0; // 重置玩家计数
             continue;
         }
         
-        int player_count = 0;
-        bool selected[5] = {false}; // 标记已选择的角色，避免重复
-        
-        for (int i = 0; input[i] != '\0'; i++) {
+        for (int i = 0; i < len; i++) {
             int choice = input[i] - '0';
-            if (!selected[choice]) { // 避免重复选择
-                selected[choice] = true;
-                    Player* player = create_player_by_character(choice, initial_fund);
-                if (player) {
-                    player_count++;
-                    if (player_count == 1) {
-                        printf("您选择了: %s", g_characters[choice-1].display_name);
-                    } else {
-                        printf(", %s", g_characters[choice-1].display_name);
-                    }
-                }
+            Player* player = create_player_by_character(choice, initial_fund);
+            if (player) {
+                 printf("玩家 %s (%s) 加入游戏。\n", player->name, get_character_by_id(choice)->display_name);
             }
         }
         
-        if (player_count > 0) {
+        if (g_game_state.player_count > 0) {
             printf("\n游戏开始！\n");
+            g_game_state.game.started = true;
             break;
-        } else {
-            printf("无效选择，请输入1-4之间的数字\n");
         }
     }
 }
 
 void run_game(void) {
     printf("大富翁游戏启动\n");
+    srand(time(NULL)); // 初始化随机数种子
     
     init_game_state();
     
-    // 检查是否有preset文件
     if (load_game_preset("preset.json") == 0) {
         printf("使用预设配置\n");
     } else {
-        // 设置初始资金
         int initial_fund = get_initial_fund();
-        if (initial_fund <= 0) {
-            printf("无效的初始资金，游戏结束\n");
-            return;
-        }
-        
-        // 显示欢迎界面并选择角色
         show_welcome_and_select_character(initial_fund);
         
-        // 如果没有任何玩家，直接退出
         if (g_game_state.player_count == 0) {
             printf("没有选择任何角色，游戏结束\n");
             return;
         }
     }
     
-    // 简单的命令行界面
     char command[100];
-    while (1) {
-        printf("> ");
+    while (!g_game_state.game.ended) {
+        Player* current_player = &g_game_state.players[g_game_state.game.now_player_id];
+        printf("%s> ", current_player->name);
+        
         if (fgets(command, sizeof(command), stdin) == NULL) {
             break;
         }
         
-        // 去掉换行符
         command[strcspn(command, "\n")] = 0;
         
         process_command(command);
-        
-        // 如果是quit命令，退出循环
-        if (strcmp(command, "quit") == 0) {
-            break;
-        }
     }
 }
