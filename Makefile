@@ -110,18 +110,62 @@ run: $(RICHMAN_BIN)
 debug: CFLAGS += -DDEBUG
 debug: $(RICHMAN_BIN)
 
+# 批量测试管理 - 列出所有测试及状态
+list_tests:
+	@echo "📋 列出所有测试用例及其状态..."
+	@python3 $(TEST_DIR)/scripts/run_agile_tests.py $(PWD) --list
+
+# 批量更新测试状态
+batch_update:
+	@if [ -z "$(PATTERN)" ] || [ -z "$(STATUS)" ]; then \
+		echo "用法: make batch_update PATTERN=pattern STATUS=status"; \
+		echo "示例: make batch_update PATTERN=test_help STATUS=active"; \
+		echo "状态选项: active, wip, pending, disabled"; \
+		exit 1; \
+	fi
+	@echo "🔄 批量更新测试状态: $(PATTERN) -> $(STATUS)"
+	@python3 $(TEST_DIR)/scripts/run_agile_tests.py $(PWD) --batch-update $(PATTERN) $(STATUS)
+
+# 自动添加新测试用例
+auto_add_tests:
+	@echo "🔍 自动发现并添加新测试用例..."
+	@python3 $(TEST_DIR)/scripts/run_agile_tests.py $(PWD) --auto-add $(or $(STATUS),pending)
+
+# 查找新测试用例（不添加）
+find_new_tests:
+	@echo "🔍 查找未配置的新测试用例..."
+	@python3 $(TEST_DIR)/scripts/run_agile_tests.py $(PWD) --find-new
+
 # 显示帮助
 help:
 	@echo "大富翁游戏 Makefile 使用说明"
 	@echo "=============================="
+	@echo "📦 编译和运行:"
 	@echo "make              - 编译游戏主程序"
-	@echo "make test         - 运行单元测试"
-	@echo "make integration_test - 运行集成测试"
-	@echo "make test_all     - 运行所有测试"
 	@echo "make run          - 启动游戏"
-	@echo "make create_test  - 创建新的集成测试模板"
-	@echo "make clean        - 清理构建文件"
 	@echo "make debug        - 调试模式编译"
-	@echo "make help         - 显示此帮助信息"
+	@echo "make clean        - 清理构建文件"
+	@echo ""
+	@echo "🧪 测试管理:"
+	@echo "make test         - 运行敏捷测试（active+wip状态）"
+	@echo "make integration_test - 运行传统集成测试（所有测试）"
+	@echo "make test_all     - 运行所有测试"
+	@echo "make create_test  - 创建新的集成测试模板"
+	@echo ""
+	@echo "📋 测试状态管理:"
+	@echo "make test_status  - 查看测试状态配置"
+	@echo "make list_tests   - 列出所有测试用例及状态"
+	@echo "make mark_test TEST=name STATUS=status - 标记单个测试状态"
+	@echo ""
+	@echo "🔄 批量测试管理:"
+	@echo "make batch_update PATTERN=pattern STATUS=status - 批量更新测试状态"
+	@echo "make auto_add_tests [STATUS=status] - 自动添加新测试用例"
+	@echo "make find_new_tests - 查找新测试用例（不添加）"
+	@echo ""
+	@echo "💡 示例:"
+	@echo "make batch_update PATTERN=test_startup* STATUS=active"
+	@echo "make auto_add_tests STATUS=wip"
+	@echo "make mark_test TEST=test_help_00{1,2,5,6} STATUS=pending"
 
-.PHONY: all test integration_test test_all clean create_test run debug help
+.PHONY: all test integration_test test_all clean create_test run debug help \
+        list_tests batch_update auto_add_tests find_new_tests
