@@ -13,11 +13,17 @@
 #define HOSPITAL_DAYS 3         // 炸弹爆炸后住院天数
 #define HOSPITAL_LOCATION 14    // 医院位置
 
+// 机器娃娃系统常量
+#define ROBOT_CLEAR_RANGE 10    // 机器娃娃清除范围（前方10步）
+
 // 路障命令处理函数
 bool handle_block_command(Player* player, int relative_distance);
 
 // 炸弹命令处理函数
 bool handle_bomb_command(Player* player, int relative_distance);
+
+// 机器娃娃命令处理函数
+bool handle_robot_command(Player* player);
 
 // 路障放置相关函数
 bool place_block(int player_index, int target_location);
@@ -45,6 +51,11 @@ void display_all_blocks(void);
 
 // 炸弹查询函数
 void display_all_bombs(void);
+
+// 机器娃娃清除功能函数
+int clear_props_in_range(Player* player, int start_location, int range);
+int clear_single_prop(int location);
+bool has_any_prop_at_location(int location);
 
 // 位置检查辅助函数
 bool is_special_building(int location);

@@ -305,3 +305,85 @@ void display_all_bombs(void) {
     printf("\n");
 }
 
+// ========== 机器娃娃系统实现 ==========
+
+// 检查位置是否有任何道具（路障或炸弹）
+bool has_any_prop_at_location(int location) {
+    if (location < 0 || location >= MAP_SIZE) return false;
+    return has_block_at_location(location) || has_bomb_at_location(location);
+}
+
+// 清除单个位置的道具，返回实际清除的道具数量
+int clear_single_prop(int location) {
+    if (location < 0 || location >= MAP_SIZE) return 0;
+    
+    // 检查并清除路障
+    if (has_block_at_location(location)) {
+        g_game_state.placed_prop.barrier[location] = 0;
+        printf("清除了位置 %d 的路障。\n", location);
+        return 1;
+    }
+    
+    // 检查并清除炸弹
+    if (has_bomb_at_location(location)) {
+        g_game_state.placed_prop.bomb[location] = 0;
+        printf("清除了位置 %d 的炸弹。\n", location);
+        return 1;
+    }
+    
+    // 该位置没有道具
+    return 0;
+}
+
+// 清除指定范围内的所有道具
+int clear_props_in_range(Player* player, int start_location, int range) {
+    (void)player; // 避免未使用参数警告
+    int cleared_count = 0;
+    
+    printf("机器娃娃开始清扫前方 %d 步内的道具...\n", range);
+    
+    // 清除前方range步内的所有道具
+    for (int i = 1; i <= range; i++) {
+        int target_location = (start_location + i) % MAP_SIZE;
+        
+        if (has_any_prop_at_location(target_location)) {
+            clear_single_prop(target_location);
+            cleared_count++;  // 每个位置最多只有1个道具
+        }
+    }
+    
+    if (cleared_count == 0) {
+        printf("前方 %d 步内没有发现任何道具。\n", range);
+    } else {
+        printf("机器娃娃清扫完成，共清除了 %d 个道具。\n", cleared_count);
+    }
+    
+    return cleared_count;
+}
+
+// 处理robot命令
+bool handle_robot_command(Player* player) {
+    // 检查玩家是否有机器娃娃道具
+    if (player->prop.robot <= 0) {
+        printf("您没有机器娃娃道具。\n");
+        return false;
+    }
+    
+    printf("玩家 %s 使用机器娃娃清扫前方道具。\n", player->name);
+    
+    // 清除前方10步内的道具
+    int cleared_count = clear_props_in_range(player, player->location, ROBOT_CLEAR_RANGE);
+    
+    // 消耗机器娃娃道具（一次性使用）
+    player->prop.robot--;
+    player->prop.total--;
+    printf("使用了一个机器娃娃道具。剩余机器娃娃：%d\n", player->prop.robot);
+    
+    // 即使没有清除任何道具，机器娃娃也会被消耗
+    if (cleared_count == 0) {
+        printf("虽然没有清除任何道具，但机器娃娃已被使用。\n");
+    }
+    
+    return true;
+}
+

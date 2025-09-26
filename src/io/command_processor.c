@@ -62,6 +62,9 @@ void process_command(const char* command) {
         } else {
             printf("格式错误，请使用: bomb <相对距离>\n");
         }
+    } else if (strcmp(lower_command, "robot") == 0) {
+        Player* current_player = &g_game_state.players[g_game_state.game.now_player_id];
+        handle_robot_command(current_player);
     } else if (strcmp(lower_command, "quit") == 0) {
         handle_quit_command();
     } else if (strncmp(lower_command, "create_player", 13) == 0) {
