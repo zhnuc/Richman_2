@@ -15,6 +15,7 @@ int calculate_block_position(int current_pos, int relative_distance) {
 
 // 验证路障放置位置是否有效
 bool is_valid_block_position(int current_pos, int relative_distance) {
+    (void)current_pos; // 避免未使用参数警告
     // 检查距离范围 (-10 到 +10)
     if (abs(relative_distance) > BLOCK_RANGE) {
         return false;
@@ -61,6 +62,7 @@ bool has_bomb_at_location(int location) {
 
 // 放置路障
 bool place_block(int player_index, int target_location) {
+    (void)player_index; // 避免未使用参数警告
     // 检查位置有效性
     if (target_location < 0 || target_location >= MAP_SIZE) {
         printf("无效的放置位置。\n");

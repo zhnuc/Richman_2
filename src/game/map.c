@@ -86,6 +86,7 @@ void display_map() {
                 // Otherwise, we need to find the last moved player if they are on this spot.
                 Player* player_to_show = NULL;
                 bool last_moved_player_on_spot = false;
+                (void)last_moved_player_on_spot; // 避免未使用变量警告
                  for (int k = 0; k < g_game_state.player_count; k++) {
                     Player* p = &g_game_state.players[k];
                      if (p->alive) {
