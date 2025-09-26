@@ -248,6 +248,10 @@ void trigger_bomb_explosion(Player* player, int location) {
     printf("玩家 %s 踩中了位置 %d 的炸弹！\n", player->name, location);
     printf("炸弹爆炸！%s 被炸伤，需要住院治疗。\n", player->name);
     
+    // 将玩家送到医院
+    player->location = HOSPITAL_LOCATION;
+    printf("%s 被送到医院（位置 %d）。\n", player->name, HOSPITAL_LOCATION);
+    
     // 设置住院状态
     player->buff.hospital = HOSPITAL_DAYS;
     printf("%s 将住院 %d 天。\n", player->name, HOSPITAL_DAYS);

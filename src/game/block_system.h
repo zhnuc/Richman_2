@@ -11,6 +11,7 @@
 #define BOMB_RANGE 10           // 炸弹放置最大距离
 #define BOMB_SYMBOL '@'         // 炸弹在地图上的显示符号
 #define HOSPITAL_DAYS 3         // 炸弹爆炸后住院天数
+#define HOSPITAL_LOCATION 14    // 医院位置
 
 // 路障命令处理函数
 bool handle_block_command(Player* player, int relative_distance);

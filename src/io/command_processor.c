@@ -147,8 +147,7 @@ void handle_roll_command() {
         // 检查炸弹爆炸
         if (check_bomb_explosion(next_location)) {
             // 踩中炸弹，玩家移动到炸弹位置并触发爆炸
-            current_player->location = next_location;
-            printf("%s 前进 %d 步，到达位置 %d\n", current_player->name, i, current_player->location);
+            printf("%s 前进 %d 步，到达位置 %d\n", current_player->name, i, next_location);
             trigger_bomb_explosion(current_player, next_location);
             
             // 即使被炸也要切换到下一个玩家
@@ -204,8 +203,7 @@ void handle_step_command(const char* command) {
             // 检查炸弹爆炸
             if (check_bomb_explosion(next_location)) {
                 // 踩中炸弹，玩家移动到炸弹位置并触发爆炸
-                current_player->location = next_location;
-                printf("%s 前进 %d 步，到达位置 %d\n", current_player->name, i, current_player->location);
+                printf("%s 前进 %d 步，到达位置 %d\n", current_player->name, i, next_location);
                 trigger_bomb_explosion(current_player, next_location);
                 
                 // 即使被炸也要切换到下一个玩家
