@@ -258,13 +258,8 @@ void handle_help_command() {
 }
 
 void handle_quit_command() {
-    printf("您确定要退出游戏吗? (y/n): ");
-    char confirm[10];
-    fgets(confirm, sizeof(confirm), stdin);
-    if (confirm[0] == 'y' || confirm[0] == 'Y') {
         g_game_state.game.ended = true;
         printf("游戏结束。\n");
-    }
 }
 
 
@@ -370,6 +365,16 @@ void run_game(void) {
             printf("玩家 %s 正在住院治疗，剩余 %d 天，本轮自动跳过。\n", 
                    current_player->name, current_player->buff.hospital);
             current_player->buff.hospital--;
+            g_game_state.game.now_player_id = (g_game_state.game.now_player_id + 1) % g_game_state.player_count;
+            wait_for_enter();
+            continue; // 直接进入下一轮
+        }
+        
+        // 检查当前玩家是否在监狱，如果是则自动跳过
+        if (current_player->buff.prison > 0) {
+            printf("玩家 %s 正在监狱中，剩余 %d 天，本轮自动跳过。\n", 
+                   current_player->name, current_player->buff.prison);
+            current_player->buff.prison--;
             g_game_state.game.now_player_id = (g_game_state.game.now_player_id + 1) % g_game_state.player_count;
             wait_for_enter();
             continue; // 直接进入下一轮

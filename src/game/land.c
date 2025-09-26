@@ -1,6 +1,7 @@
 #include "land.h"
 #include "game_state.h"
 #include "prop_shop.h"
+#include "gift_house.h"
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
@@ -108,6 +109,12 @@ void pay_toll(Player* player, int location) {
     Player* owner = &g_game_state.players[land->owner_id];
     int toll = (land->price * (land->level + 1)) / 2;
 
+    // 检查财神附身
+    if (player->buff.god > 0) {
+        printf("财神附身，免除本次过路费！\n");
+        return;
+    }
+
     printf("您到达了玩家 %s 的地盘(等级 %d)，需支付过路费 %d 元。\n", owner->name, land->level, toll);
 
     if (player->fund < toll) {
@@ -153,13 +160,14 @@ void on_player_land(Player* player) {
                 printf("您到达了医院。\n");
                 break;
             case 49:  // P - 监狱 
-                printf("您到达了监狱。\n");
+                printf("您到达了监狱，被关押2天。\n");
+                player->buff.prison = 2;
                 break;
             case 35:  // G - 礼品屋
-                printf("您到达了礼品屋。\n");
+                enter_gift_house(player);
                 break;
             case 63:  // M - 魔法屋
-                printf("您到达了魔法屋。\n");
+                printf("您到达了魔法屋，暂时无效果\n");
                 break;
             default:
                 // 检查是否是矿地 ($) - 位置64-69
