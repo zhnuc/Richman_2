@@ -346,7 +346,6 @@ void run_game(void) {
     
     if (load_game_preset("preset.json") == 0) {
         printf("使用预设配置\n");
-        game_started = true;
     } else {
         int initial_fund = get_initial_fund();
         show_welcome_and_select_character(initial_fund);

@@ -1,5 +1,6 @@
 10000
 1234
 map
+
 dump
 quit
