@@ -85,7 +85,6 @@ void save_game_dump(const char* filename) {
     fprintf(file, "    \"game\": {\n");
     fprintf(file, "        \"now_player\": %d,\n", g_game_state.game.now_player_id);
     fprintf(file, "        \"next_player\": %d,\n", g_game_state.game.next_player_id);
-    fprintf(file, "        \"started\": %s,\n", g_game_state.game.started ? "true" : "false");
     fprintf(file, "        \"ended\": %s,\n", g_game_state.game.ended ? "true" : "false");
     fprintf(file, "        \"winner\": %d\n", g_game_state.game.winner_id);
     fprintf(file, "    }\n");
@@ -131,6 +130,10 @@ void parse_player_prop(const char* player_obj, const char* player_end, Prop* pro
     prop->barrier = extract_int_value(prop_obj_start, "barrier", prop_obj_end);
     prop->robot = extract_int_value(prop_obj_start, "robot", prop_obj_end);
     prop->total = extract_int_value(prop_obj_start, "total", prop_obj_end);
+    // 本回合购买标记在JSON中不保存，加载时重置为0
+    prop->barrier_bought_this_turn = 0;
+    prop->robot_bought_this_turn = 0;
+    prop->bomb_bought_this_turn = 0;
 }
 
 // 辅助函数：解析player的buff对象
@@ -210,7 +213,6 @@ void parse_and_load_game_info(const char* content) {
     
     g_game_state.game.now_player_id = extract_int_value(obj_start, "now_player", obj_end);
     g_game_state.game.next_player_id = extract_int_value(obj_start, "next_player", obj_end);
-    g_game_state.game.started = extract_bool_value(obj_start, "started", obj_end);
     g_game_state.game.ended = extract_bool_value(obj_start, "ended", obj_end);
     g_game_state.game.winner_id = extract_int_value(obj_start, "winner", obj_end);
 }

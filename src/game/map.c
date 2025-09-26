@@ -1,6 +1,7 @@
 #include "map.h"
 #include "game_state.h"
 #include "character.h"
+#include "block_system.h"
 #include "../io/colors.h"
 #include <stdio.h>
 #include <string.h>
@@ -123,7 +124,10 @@ void display_map() {
                 else if (j == 0 && i > 0 && i < 7) loc = 69 - (i-1);
                 else if (j == 28 && i > 0 && i < 7) loc = 28 + i;
 
-                if (loc != -1 && g_game_state.houses[loc].owner_id != -1) {
+                // 检查是否有路障
+                if (loc != -1 && has_block_at_location(loc)) {
+                    printf("%c", BLOCK_SYMBOL);  // 显示路障符号 #
+                } else if (loc != -1 && g_game_state.houses[loc].owner_id != -1) {
                     Player* owner = &g_game_state.players[g_game_state.houses[loc].owner_id];
                     int level = g_game_state.houses[loc].level;
                     char symbol = (level > 0 && level <= 3) ? level + '0' : map[i][j];

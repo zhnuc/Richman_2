@@ -18,12 +18,10 @@ typedef struct {
 
 // 道具结构
 typedef struct {
-// ... existing code ...
-    int bomb;
-// ... existing code ...
-    int barrier;
-    int robot;
-    int total;
+    int bomb;       // 玩家拥有炸弹个数
+    int barrier;    // 玩家拥有路障个数
+    int robot;      // 玩家拥有机器人个数
+    int total;      // 玩家拥有道具总计个数
 } Prop;
 
 // 状态效果结构 (buff)
@@ -62,11 +60,10 @@ typedef struct {
 
 // 游戏核心状态结构
 typedef struct {
-    int now_player_id; // 当前玩家索引
-    int next_player_id; // 下一个玩家索引
-    bool started;
-    bool ended;
-    int winner_id; // -1 表示无获胜者
+    int now_player_id; // 当前操作玩家
+    int next_player_id; // 下一操作玩家
+    bool ended;        // 游戏是否结束
+    int winner_id;     // 胜者 ID，未结束为 -1
 } Game;
 
 // 顶层游戏状态结构

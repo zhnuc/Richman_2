@@ -7,7 +7,6 @@ GameState g_game_state;
 
 void init_game_state(void) {
     g_game_state.player_count = 0;
-    g_game_state.game.started = false;
     g_game_state.game.ended = false;
     g_game_state.game.now_player_id = 0;
 
@@ -36,7 +35,6 @@ void init_game_state(void) {
     // 初始化游戏信息
     g_game_state.game.now_player_id = 0;
     g_game_state.game.next_player_id = 1;
-    g_game_state.game.started = false;
     g_game_state.game.ended = false;
     g_game_state.game.winner_id = -1;
 }
@@ -53,7 +51,7 @@ void print_game_state(void) {
     }
     
     printf("当前玩家: %d\n", g_game_state.game.now_player_id);
-    printf("游戏状态: %s\n", g_game_state.game.started ? "已开始" : "未开始");
+    printf("游戏结束: %s\n", g_game_state.game.ended ? "是" : "否");
 }
 
 GameState* get_game_state(void) {

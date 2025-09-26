@@ -4,6 +4,7 @@
 #include "../game/character.h"
 #include "../game/map.h"
 #include "../game/land.h"
+#include "../game/block_system.h"
 #include "../io/colors.h"
 #include "json_serializer.h"
 #include "utils.h"
@@ -44,6 +45,14 @@ void process_command(const char* command) {
             handle_sell_command(location);
         } else {
             printf("格式错误，请使用: sell <位置>\n");
+        }
+    } else if (strncmp(lower_command, "block ", 6) == 0) {
+        int relative_distance;
+        if (sscanf(command, "block %d", &relative_distance) == 1) {
+            Player* current_player = &g_game_state.players[g_game_state.game.now_player_id];
+            handle_block_command(current_player, relative_distance);
+        } else {
+            printf("格式错误，请使用: block <相对距离>\n");
         }
     } else if (strcmp(lower_command, "quit") == 0) {
         handle_quit_command();
@@ -99,6 +108,25 @@ void handle_roll_command() {
     printf("玩家 %s 掷骰子，点数为 %d\n", g_game_state.players[g_game_state.game.now_player_id].name, steps);
     
     Player* current_player = &g_game_state.players[g_game_state.game.now_player_id];
+    int original_location = current_player->location;
+    
+    // 检查移动路径上是否有路障
+    for (int i = 1; i <= steps; i++) {
+        int next_location = (original_location + i) % MAP_SIZE;
+        if (check_block_interception(next_location)) {
+            // 被路障拦截，停留在路障前一位置
+            int blocked_location = (original_location + i - 1) % MAP_SIZE;
+            current_player->location = blocked_location;
+            printf("%s 前进 %d 步，到达位置 %d\n", current_player->name, i-1, current_player->location);
+            trigger_block_interception(current_player, next_location);
+            
+            // 即使被拦截也要切换到下一个玩家
+            g_game_state.game.now_player_id = (g_game_state.game.now_player_id + 1) % g_game_state.player_count;
+            return;
+        }
+    }
+    
+    // 没有路障拦截，正常移动
     current_player->location = (current_player->location + steps) % MAP_SIZE;
     printf("%s 前进 %d 步，到达位置 %d\n", current_player->name, steps, current_player->location);
 
@@ -114,6 +142,25 @@ void handle_step_command(const char* command) {
     if (sscanf(command, "step %d", &steps) == 1) {
         printf("遥控骰子，指定步数为 %d\n", steps);
         Player* current_player = &g_game_state.players[g_game_state.game.now_player_id];
+        int original_location = current_player->location;
+        
+        // 检查移动路径上是否有路障
+        for (int i = 1; i <= steps; i++) {
+            int next_location = (original_location + i) % MAP_SIZE;
+            if (check_block_interception(next_location)) {
+                // 被路障拦截，停留在路障前一位置
+                int blocked_location = (original_location + i - 1) % MAP_SIZE;
+                current_player->location = blocked_location;
+                printf("%s 前进 %d 步，到达位置 %d\n", current_player->name, i-1, current_player->location);
+                trigger_block_interception(current_player, next_location);
+                
+                // 即使被拦截也要切换到下一个玩家
+                g_game_state.game.now_player_id = (g_game_state.game.now_player_id + 1) % g_game_state.player_count;
+                return;
+            }
+        }
+        
+        // 没有路障拦截，正常移动
         current_player->location = (current_player->location + steps) % MAP_SIZE;
         printf("%s 前进 %d 步，到达位置 %d\n", current_player->name, steps, current_player->location);
 
@@ -252,7 +299,6 @@ void show_welcome_and_select_character(int initial_fund) {
         
         if (g_game_state.player_count > 0) {
             printf("\n游戏开始！\n");
-            g_game_state.game.started = true;
             break;
         }
     }
