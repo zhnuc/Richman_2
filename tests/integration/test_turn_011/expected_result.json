@@ -3,9 +3,9 @@
         {
             "index": 0,
             "name": "Q",
-            "fund": 20000,
-            "credit": 200,
-            "location": 0,
+            "fund": 10000,
+            "credit": 0,
+            "location": 4,
             "alive": true,
             "prop": {
                 "bomb": 0,
@@ -22,8 +22,8 @@
         {
             "index": 1,
             "name": "A",
-            "fund": 20000,
-            "credit": 200,
+            "fund": 10000,
+            "credit": 0,
             "location": 0,
             "alive": true,
             "prop": {
@@ -41,8 +41,8 @@
         {
             "index": 2,
             "name": "S",
-            "fund": 20000,
-            "credit": 200,
+            "fund": 10000,
+            "credit": 0,
             "location": 0,
             "alive": true,
             "prop": {
@@ -58,15 +58,14 @@
             }
         }
     ],
-    "houses": {
-    },
+    "houses": {},
     "placed_prop": {
         "bomb": [],
         "barrier": []
     },
     "game": {
-        "now_player": 0,
-        "next_player": 1,
+        "now_player": 1,
+        "next_player": 2,
         "started": true,
         "ended": false,
         "winner": -1
