@@ -331,6 +331,7 @@ void show_welcome_and_select_character(int initial_fund) {
         
         if (g_game_state.player_count > 0) {
             printf("\n游戏开始！\n");
+            g_game_state.game.started = true;
             break;
         }
     }
@@ -341,9 +342,11 @@ void run_game(void) {
     srand(time(NULL)); // 初始化随机数种子
     
     init_game_state();
+    bool game_started = false;
     
     if (load_game_preset("preset.json") == 0) {
         printf("使用预设配置\n");
+        game_started = true;
     } else {
         int initial_fund = get_initial_fund();
         show_welcome_and_select_character(initial_fund);
@@ -352,13 +355,52 @@ void run_game(void) {
             printf("没有选择任何角色，游戏结束\n");
             return;
         }
+        game_started = true;
     }
     
     char command[100];
     while (!g_game_state.game.ended) {
+        // 检查胜利条件
+        if (game_started) {
+            int alive_count = 0;
+            int winner_id = -1;
+            for (int i = 0; i < g_game_state.player_count; i++) {
+                if (g_game_state.players[i].alive) {
+                    alive_count++;
+                    winner_id = i;
+                }
+            }
+
+            if (alive_count <= 1) {
+                printf(CLEAR_SCREEN);
+                display_map();
+                if (winner_id != -1) {
+                    printf("游戏结束！胜利者是 %s！\n", g_game_state.players[winner_id].name);
+                } else {
+                    printf("所有玩家都已破产，游戏结束！\n");
+                }
+                g_game_state.game.ended = true;
+                wait_for_enter();
+                continue;
+            }
+        }
+
         printf(CLEAR_SCREEN); // 清屏
         display_map(); // 在每个回合开始时显示地图
         Player* current_player = &g_game_state.players[g_game_state.game.now_player_id];
+
+        // 检查财神附身状态
+        if (current_player->buff.god > 0) {
+            printf("玩家 %s 有财神附身，免过路费，剩余 %d 回合。\n",
+                   current_player->name, current_player->buff.god);
+            current_player->buff.god--;
+        }
+
+        // 检查当前玩家是否已破产，如果是则自动跳过
+        if (!current_player->alive) {
+            g_game_state.game.now_player_id = (g_game_state.game.now_player_id + 1) % g_game_state.player_count;
+            continue; // 直接进入下一位玩家
+        }
         
         // 检查当前玩家是否在住院，如果是则自动跳过
         if (current_player->buff.hospital > 0) {
@@ -379,6 +421,7 @@ void run_game(void) {
             wait_for_enter();
             continue; // 直接进入下一轮
         }
+        
         
         printf("%s%c%s> ", current_player->color, current_player->name[0], COLOR_RESET);
         

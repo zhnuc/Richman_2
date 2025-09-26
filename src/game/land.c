@@ -109,6 +109,12 @@ void pay_toll(Player* player, int location) {
     Player* owner = &g_game_state.players[land->owner_id];
     int toll = (land->price * (land->level + 1)) / 2;
 
+    // 检查房主是否在医院或监狱
+    if (owner->buff.hospital > 0 || owner->buff.prison > 0) {
+        printf("房主 %s 正在医院或监狱中，免除本次过路费！\n", owner->name);
+        return;
+    }
+
     // 检查财神附身
     if (player->buff.god > 0) {
         printf("财神附身，免除本次过路费！\n");
@@ -122,7 +128,21 @@ void pay_toll(Player* player, int location) {
         owner->fund += player->fund;
         player->fund = 0;
         player->alive = false;
-        // TODO: Reset ownership of all bankrupt player's properties
+        
+        // 清空破产玩家的道具
+        player->prop.bomb = 0;
+        player->prop.barrier = 0;
+        player->prop.robot = 0;
+
+        // 将破产玩家的房产变为空地
+        for (int i = 0; i < MAP_SIZE; i++) {
+            if (g_game_state.houses[i].owner_id == player->index) {
+                g_game_state.houses[i].owner_id = -1;
+                g_game_state.houses[i].level = 0;
+            }
+        }
+        printf("玩家 %s 的所有房产和道具已被清空。\n", player->name);
+
     } else {
         player->fund -= toll;
         owner->fund += toll;

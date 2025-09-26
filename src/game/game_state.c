@@ -7,6 +7,7 @@ GameState g_game_state;
 
 void init_game_state(void) {
     g_game_state.player_count = 0;
+    g_game_state.game.started = false;
     g_game_state.game.ended = false;
     g_game_state.game.now_player_id = 0;
 

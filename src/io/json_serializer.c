@@ -85,6 +85,7 @@ void save_game_dump(const char* filename) {
     fprintf(file, "    \"game\": {\n");
     fprintf(file, "        \"now_player\": %d,\n", g_game_state.game.now_player_id);
     fprintf(file, "        \"next_player\": %d,\n", g_game_state.game.next_player_id);
+    fprintf(file, "        \"started\": %s,\n", g_game_state.game.started ? "true" : "false");
     fprintf(file, "        \"ended\": %s,\n", g_game_state.game.ended ? "true" : "false");
     fprintf(file, "        \"winner\": %d\n", g_game_state.game.winner_id);
     fprintf(file, "    }\n");
