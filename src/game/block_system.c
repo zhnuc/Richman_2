@@ -115,7 +115,7 @@ bool check_block_interception(int location) {
 // 触发路障拦截效果
 void trigger_block_interception(Player* player, int location) {
     printf("玩家 %s 被位置 %d 的路障拦截！\n", player->name, location);
-    printf("您无法通过此位置，停留在当前位置。\n");
+    printf("您被拦截在路障位置，无法继续前进。\n");
     
     // 路障一次性使用，拦截后移除
     remove_block(location);

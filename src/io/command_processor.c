@@ -117,14 +117,6 @@ void process_command(const char* command) {
 void handle_roll_command() {
     Player* current_player = &g_game_state.players[g_game_state.game.now_player_id];
     
-    // 检查玩家是否在住院
-    if (current_player->buff.hospital > 0) {
-        printf("玩家 %s 正在住院治疗，剩余 %d 天，本轮跳过。\n", current_player->name, current_player->buff.hospital);
-        current_player->buff.hospital--;
-        g_game_state.game.now_player_id = (g_game_state.game.now_player_id + 1) % g_game_state.player_count;
-        return;
-    }
-    
     int steps = rand() % 6 + 1;
     printf("玩家 %s 掷骰子，点数为 %d\n", current_player->name, steps);
     
@@ -136,10 +128,9 @@ void handle_roll_command() {
         
         // 检查路障拦截
         if (check_block_interception(next_location)) {
-            // 被路障拦截，停留在路障前一位置
-            int blocked_location = (original_location + i - 1) % MAP_SIZE;
-            current_player->location = blocked_location;
-            printf("%s 前进 %d 步，到达位置 %d\n", current_player->name, i-1, current_player->location);
+            // 被路障拦截，停留在路障所在位置
+            current_player->location = next_location;
+            printf("%s 前进 %d 步，到达位置 %d\n", current_player->name, i, current_player->location);
             trigger_block_interception(current_player, next_location);
             
             // 即使被拦截也要切换到下一个玩家
@@ -149,8 +140,8 @@ void handle_roll_command() {
         
         // 检查炸弹爆炸
         if (check_bomb_explosion(next_location)) {
-            // 踩中炸弹，玩家移动到炸弹位置并触发爆炸
-            printf("%s 前进 %d 步，到达位置 %d\n", current_player->name, i, next_location);
+            // 踩中炸弹，触发爆炸效果
+            printf("%s 前进 %d 步，踩中位置 %d 的炸弹\n", current_player->name, i, next_location);
             trigger_bomb_explosion(current_player, next_location);
             
             // 即使被炸也要切换到下一个玩家
@@ -175,14 +166,6 @@ void handle_step_command(const char* command) {
     if (sscanf(command, "step %d", &steps) == 1) {
         Player* current_player = &g_game_state.players[g_game_state.game.now_player_id];
         
-        // 检查玩家是否在住院
-        if (current_player->buff.hospital > 0) {
-            printf("玩家 %s 正在住院治疗，剩余 %d 天，本轮跳过。\n", current_player->name, current_player->buff.hospital);
-            current_player->buff.hospital--;
-            g_game_state.game.now_player_id = (g_game_state.game.now_player_id + 1) % g_game_state.player_count;
-            return;
-        }
-        
         printf("遥控骰子，指定步数为 %d\n", steps);
         int original_location = current_player->location;
         
@@ -192,10 +175,9 @@ void handle_step_command(const char* command) {
             
             // 检查路障拦截
             if (check_block_interception(next_location)) {
-                // 被路障拦截，停留在路障前一位置
-                int blocked_location = (original_location + i - 1) % MAP_SIZE;
-                current_player->location = blocked_location;
-                printf("%s 前进 %d 步，到达位置 %d\n", current_player->name, i-1, current_player->location);
+                // 被路障拦截，停留在路障所在位置
+                current_player->location = next_location;
+                printf("%s 前进 %d 步，到达位置 %d\n", current_player->name, i, current_player->location);
                 trigger_block_interception(current_player, next_location);
                 
                 // 即使被拦截也要切换到下一个玩家
@@ -205,8 +187,8 @@ void handle_step_command(const char* command) {
             
             // 检查炸弹爆炸
             if (check_bomb_explosion(next_location)) {
-                // 踩中炸弹，玩家移动到炸弹位置并触发爆炸
-                printf("%s 前进 %d 步，到达位置 %d\n", current_player->name, i, next_location);
+                // 踩中炸弹，触发爆炸效果
+                printf("%s 前进 %d 步，踩中位置 %d 的炸弹\n", current_player->name, i, next_location);
                 trigger_bomb_explosion(current_player, next_location);
                 
                 // 即使被炸也要切换到下一个玩家
@@ -382,6 +364,17 @@ void run_game(void) {
         printf(CLEAR_SCREEN); // 清屏
         display_map(); // 在每个回合开始时显示地图
         Player* current_player = &g_game_state.players[g_game_state.game.now_player_id];
+        
+        // 检查当前玩家是否在住院，如果是则自动跳过
+        if (current_player->buff.hospital > 0) {
+            printf("玩家 %s 正在住院治疗，剩余 %d 天，本轮自动跳过。\n", 
+                   current_player->name, current_player->buff.hospital);
+            current_player->buff.hospital--;
+            g_game_state.game.now_player_id = (g_game_state.game.now_player_id + 1) % g_game_state.player_count;
+            wait_for_enter();
+            continue; // 直接进入下一轮
+        }
+        
         printf("%s%c%s> ", current_player->color, current_player->name[0], COLOR_RESET);
         
         if (fgets(command, sizeof(command), stdin) == NULL) {
