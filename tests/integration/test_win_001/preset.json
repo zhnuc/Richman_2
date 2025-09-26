@@ -2,10 +2,10 @@
     "players": [
         {
             "index": 0,
-            "name": "Q", 
-            "fund": 10000,
+            "name": "Q",
+            "fund": 200,
             "credit": 0,
-            "location": 49,
+            "location": 0,
             "alive": true,
             "prop": {
                 "bomb": 0,
@@ -39,14 +39,19 @@
             }
         }
     ],
-    "houses": {},
+    "houses": {
+        "5": {
+            "owner": "A",
+            "level": 2
+        }
+    },
     "placed_prop": {
         "bomb": [],
         "barrier": []
     },
     "game": {
-        "now_player": 1,
-        "next_player": 0,
+        "now_player": 0,
+        "next_player": 1,
         "started": true,
         "ended": false,
         "winner": -1
