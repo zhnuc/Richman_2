@@ -1,5 +1,0 @@
-10000
-1
-step 3
-dump
-quit
