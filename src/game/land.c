@@ -33,15 +33,32 @@ void buy_land(Player* player, int location) {
     }
 
     char input[10];
-    printf("您到达一块空地(价格: %d)，是否购买? (y/n): ", land->price);
-    fgets(input, sizeof(input), stdin);
-
-    if (tolower(input[0]) == 'y') {
-        player->fund -= land->price;
-        land->owner_id = player->index;
-        printf("恭喜！您成功购买了此地。剩余资金: %d\n", player->fund);
-    } else {
-        printf("您放弃了购买此地。\n");
+    int valid_input = 0;
+    
+    while (!valid_input) {
+        printf("您到达一块空地(价格: %d)，是否购买? (y/n): ", land->price);
+        if (fgets(input, sizeof(input), stdin) == NULL) {
+            // 输入流结束，自动选择不购买
+            printf("您放弃了购买此地。\n");
+            return;
+        }
+        
+        // 移除换行符
+        input[strcspn(input, "\n")] = 0;
+        
+        // 检查输入是否是 y 或 n
+        if (strcmp(input, "y") == 0) {
+            player->fund -= land->price;
+            land->owner_id = player->index;
+            printf("恭喜！您成功购买了此地。剩余资金: %d\n", player->fund);
+            valid_input = 1;
+        } else if (strcmp(input, "n") == 0) {
+            printf("您放弃了购买此地。\n");
+            valid_input = 1;
+        } else {
+            // 输入不是 y 或 n，提示错误并循环
+            printf("错误指令！请输入 y 或 n。\n");
+        }
     }
 }
 
@@ -90,18 +107,11 @@ void handle_sell_command(int location) {
     int total_investment = land->price * (1 + land->level);
     int sell_price = total_investment * 2;
 
-    char input[10];
-    printf("您确定要以 %d 元的价格出售位于 %d 的房产吗? (y/n): ", sell_price, location);
-    fgets(input, sizeof(input), stdin);
-
-    if (tolower(input[0]) == 'y') {
-        player->fund += sell_price;
-        land->owner_id = -1;
-        land->level = 0;
-        printf("出售成功！您获得了 %d 元，当前总资金: %d\n", sell_price, player->fund);
-    } else {
-        printf("您取消了出售。\n");
-    }
+    // 直接执行出售操作，不需要确认
+    player->fund += sell_price;
+    land->owner_id = -1;
+    land->level = 0;
+    printf("出售成功！您获得了 %d 元，当前总资金: %d\n", sell_price, player->fund);
 }
 
 void pay_toll(Player* player, int location) {
@@ -125,8 +135,8 @@ void pay_toll(Player* player, int location) {
 
     if (player->fund < toll) {
         printf("您的资金不足以支付过路费，您已破产！\n");
-        owner->fund += player->fund;
-        player->fund = 0;
+        owner->fund += toll;
+        player->fund = -1;
         player->alive = false;
         
         // 清空破产玩家的道具
@@ -142,6 +152,25 @@ void pay_toll(Player* player, int location) {
             }
         }
         printf("玩家 %s 的所有房产和道具已被清空。\n", player->name);
+        
+        // 检查游戏是否结束
+        int alive_count = 0;
+        int winner_id = -1;
+        for (int i = 0; i < g_game_state.player_count; i++) {
+            if (g_game_state.players[i].alive) {
+                alive_count++;
+                winner_id = i;
+            }
+        }
+        
+        if (alive_count <= 1) {
+            g_game_state.game.ended = true;
+            if (winner_id != -1) {
+                g_game_state.game.winner_id = winner_id;
+                g_game_state.game.now_player_id = winner_id;
+                g_game_state.game.next_player_id = winner_id;
+            }
+        }
 
     } else {
         player->fund -= toll;
@@ -192,8 +221,8 @@ void on_player_land(Player* player) {
             default:
                 // 检查是否是矿地 ($) - 位置64-69
                 if (location >= 64 && location <= 69) {
-                    // 矿地点数：从上到下依次为 20、80、100、40、80、60
-                    int credits[] = {20, 80, 100, 40, 80, 60};
+                    // 矿地点数：从上到下依次为 60、80、100、40、80、20
+                    int credits[] = {60, 80, 100, 40, 80, 20};
                     int index = location - 64;
                     if (index >= 0 && index < 6) {
                         player->credit += credits[index];
