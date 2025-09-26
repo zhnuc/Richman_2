@@ -358,6 +358,12 @@ void run_game(void) {
     }
     
     char command[100];
+    char last_command_output[1024] = {0}; // 用于存储上一条命令的输出
+
+    // 初始显示
+    printf(CLEAR_SCREEN);
+    display_map();
+
     while (!g_game_state.game.ended) {
         // 检查胜利条件
         if (game_started) {
@@ -379,13 +385,11 @@ void run_game(void) {
                     printf("所有玩家都已破产，游戏结束！\n");
                 }
                 g_game_state.game.ended = true;
-                wait_for_enter();
+                //wait_for_enter();
                 continue;
             }
         }
 
-        printf(CLEAR_SCREEN); // 清屏
-        display_map(); // 在每个回合开始时显示地图
         Player* current_player = &g_game_state.players[g_game_state.game.now_player_id];
 
         // 检查财神附身状态
@@ -407,7 +411,7 @@ void run_game(void) {
                    current_player->name, current_player->buff.hospital);
             current_player->buff.hospital--;
             g_game_state.game.now_player_id = (g_game_state.game.now_player_id + 1) % g_game_state.player_count;
-            wait_for_enter();
+            //wait_for_enter();
             continue; // 直接进入下一轮
         }
         
@@ -417,7 +421,7 @@ void run_game(void) {
                    current_player->name, current_player->buff.prison);
             current_player->buff.prison--;
             g_game_state.game.now_player_id = (g_game_state.game.now_player_id + 1) % g_game_state.player_count;
-            wait_for_enter();
+            //wait_for_enter();
             continue; // 直接进入下一轮
         }
         
@@ -431,10 +435,14 @@ void run_game(void) {
         // Trim trailing newline
         command[strcspn(command, "\n")] = 0;
         
+        // 在处理命令前清屏并重绘
+        printf(CLEAR_SCREEN);
+        display_map();
+
         process_command(command);
 
         if (!g_game_state.game.ended) {
-            wait_for_enter();
+            //wait_for_enter();
         }
     }
 }
