@@ -22,6 +22,7 @@ void handle_query_command();
 void handle_help_command();
 void handle_quit_command();
 void handle_sell_command(int location);
+void switch_to_next_player();
 
 
 void process_command(const char* command) {
@@ -134,7 +135,7 @@ void handle_roll_command() {
             trigger_block_interception(current_player, next_location);
             
             // 即使被拦截也要切换到下一个玩家
-            g_game_state.game.now_player_id = (g_game_state.game.now_player_id + 1) % g_game_state.player_count;
+            switch_to_next_player();
             return;
         }
         
@@ -145,7 +146,7 @@ void handle_roll_command() {
             trigger_bomb_explosion(current_player, next_location);
             
             // 即使被炸也要切换到下一个玩家
-            g_game_state.game.now_player_id = (g_game_state.game.now_player_id + 1) % g_game_state.player_count;
+            switch_to_next_player();
             return;
         }
     }
@@ -158,7 +159,7 @@ void handle_roll_command() {
     on_player_land(current_player);
 
     // 切换到下一个玩家
-    g_game_state.game.now_player_id = (g_game_state.game.now_player_id + 1) % g_game_state.player_count;
+    switch_to_next_player();
 }
 
 void handle_step_command(const char* command) {
@@ -181,7 +182,7 @@ void handle_step_command(const char* command) {
                 trigger_block_interception(current_player, next_location);
                 
                 // 即使被拦截也要切换到下一个玩家
-                g_game_state.game.now_player_id = (g_game_state.game.now_player_id + 1) % g_game_state.player_count;
+                switch_to_next_player();
                 return;
             }
             
@@ -192,20 +193,23 @@ void handle_step_command(const char* command) {
                 trigger_bomb_explosion(current_player, next_location);
                 
                 // 即使被炸也要切换到下一个玩家
-                g_game_state.game.now_player_id = (g_game_state.game.now_player_id + 1) % g_game_state.player_count;
+                switch_to_next_player();
                 return;
             }
         }
         
         // 没有路障拦截，正常移动
-        current_player->location = (current_player->location + steps) % MAP_SIZE;
-        printf("%s 前进 %d 步，到达位置 %d\n", current_player->name, steps, current_player->location);
-
-        // 触发到达事件
-        on_player_land(current_player);
+        if (steps > 0) {
+            current_player->location = (current_player->location + steps) % MAP_SIZE;
+            printf("%s 前进 %d 步，到达位置 %d\n", current_player->name, steps, current_player->location);
+            // 触发到达事件
+            on_player_land(current_player);
+        } else {
+            printf("%s 前进 %d 步，到达位置 %d\n", current_player->name, steps, current_player->location);
+        }
 
         // 切换到下一个玩家
-        g_game_state.game.now_player_id = (g_game_state.game.now_player_id + 1) % g_game_state.player_count;
+        switch_to_next_player();
     } else {
         printf("无效的 step 命令格式, e.g., step 5\n");
     }
@@ -401,7 +405,7 @@ void run_game(void) {
 
         // 检查当前玩家是否已破产，如果是则自动跳过
         if (!current_player->alive) {
-            g_game_state.game.now_player_id = (g_game_state.game.now_player_id + 1) % g_game_state.player_count;
+            switch_to_next_player();
             continue; // 直接进入下一位玩家
         }
         
@@ -410,7 +414,7 @@ void run_game(void) {
             printf("玩家 %s 正在住院治疗，剩余 %d 天，本轮自动跳过。\n", 
                    current_player->name, current_player->buff.hospital);
             current_player->buff.hospital--;
-            g_game_state.game.now_player_id = (g_game_state.game.now_player_id + 1) % g_game_state.player_count;
+            switch_to_next_player();
             //wait_for_enter();
             continue; // 直接进入下一轮
         }
@@ -420,7 +424,7 @@ void run_game(void) {
             printf("玩家 %s 正在监狱中，剩余 %d 天，本轮自动跳过。\n", 
                    current_player->name, current_player->buff.prison);
             current_player->buff.prison--;
-            g_game_state.game.now_player_id = (g_game_state.game.now_player_id + 1) % g_game_state.player_count;
+            switch_to_next_player();
             //wait_for_enter();
             continue; // 直接进入下一轮
         }
@@ -445,4 +449,9 @@ void run_game(void) {
             //wait_for_enter();
         }
     }
+}
+
+void switch_to_next_player() {
+    g_game_state.game.now_player_id = (g_game_state.game.now_player_id + 1) % g_game_state.player_count;
+    g_game_state.game.next_player_id = (g_game_state.game.now_player_id + 1) % g_game_state.player_count;
 }
