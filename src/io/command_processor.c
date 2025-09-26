@@ -54,6 +54,14 @@ void process_command(const char* command) {
         } else {
             printf("格式错误，请使用: block <相对距离>\n");
         }
+    } else if (strncmp(lower_command, "bomb ", 5) == 0) {
+        int relative_distance;
+        if (sscanf(command, "bomb %d", &relative_distance) == 1) {
+            Player* current_player = &g_game_state.players[g_game_state.game.now_player_id];
+            handle_bomb_command(current_player, relative_distance);
+        } else {
+            printf("格式错误，请使用: bomb <相对距离>\n");
+        }
     } else if (strcmp(lower_command, "quit") == 0) {
         handle_quit_command();
     } else if (strncmp(lower_command, "create_player", 13) == 0) {
@@ -104,15 +112,26 @@ void process_command(const char* command) {
 }
 
 void handle_roll_command() {
-    int steps = rand() % 6 + 1;
-    printf("玩家 %s 掷骰子，点数为 %d\n", g_game_state.players[g_game_state.game.now_player_id].name, steps);
-    
     Player* current_player = &g_game_state.players[g_game_state.game.now_player_id];
+    
+    // 检查玩家是否在住院
+    if (current_player->buff.hospital > 0) {
+        printf("玩家 %s 正在住院治疗，剩余 %d 天，本轮跳过。\n", current_player->name, current_player->buff.hospital);
+        current_player->buff.hospital--;
+        g_game_state.game.now_player_id = (g_game_state.game.now_player_id + 1) % g_game_state.player_count;
+        return;
+    }
+    
+    int steps = rand() % 6 + 1;
+    printf("玩家 %s 掷骰子，点数为 %d\n", current_player->name, steps);
+    
     int original_location = current_player->location;
     
-    // 检查移动路径上是否有路障
+    // 检查移动路径上是否有路障或炸弹
     for (int i = 1; i <= steps; i++) {
         int next_location = (original_location + i) % MAP_SIZE;
+        
+        // 检查路障拦截
         if (check_block_interception(next_location)) {
             // 被路障拦截，停留在路障前一位置
             int blocked_location = (original_location + i - 1) % MAP_SIZE;
@@ -121,6 +140,18 @@ void handle_roll_command() {
             trigger_block_interception(current_player, next_location);
             
             // 即使被拦截也要切换到下一个玩家
+            g_game_state.game.now_player_id = (g_game_state.game.now_player_id + 1) % g_game_state.player_count;
+            return;
+        }
+        
+        // 检查炸弹爆炸
+        if (check_bomb_explosion(next_location)) {
+            // 踩中炸弹，玩家移动到炸弹位置并触发爆炸
+            current_player->location = next_location;
+            printf("%s 前进 %d 步，到达位置 %d\n", current_player->name, i, current_player->location);
+            trigger_bomb_explosion(current_player, next_location);
+            
+            // 即使被炸也要切换到下一个玩家
             g_game_state.game.now_player_id = (g_game_state.game.now_player_id + 1) % g_game_state.player_count;
             return;
         }
@@ -140,13 +171,24 @@ void handle_roll_command() {
 void handle_step_command(const char* command) {
     int steps;
     if (sscanf(command, "step %d", &steps) == 1) {
-        printf("遥控骰子，指定步数为 %d\n", steps);
         Player* current_player = &g_game_state.players[g_game_state.game.now_player_id];
+        
+        // 检查玩家是否在住院
+        if (current_player->buff.hospital > 0) {
+            printf("玩家 %s 正在住院治疗，剩余 %d 天，本轮跳过。\n", current_player->name, current_player->buff.hospital);
+            current_player->buff.hospital--;
+            g_game_state.game.now_player_id = (g_game_state.game.now_player_id + 1) % g_game_state.player_count;
+            return;
+        }
+        
+        printf("遥控骰子，指定步数为 %d\n", steps);
         int original_location = current_player->location;
         
-        // 检查移动路径上是否有路障
+        // 检查移动路径上是否有路障或炸弹
         for (int i = 1; i <= steps; i++) {
             int next_location = (original_location + i) % MAP_SIZE;
+            
+            // 检查路障拦截
             if (check_block_interception(next_location)) {
                 // 被路障拦截，停留在路障前一位置
                 int blocked_location = (original_location + i - 1) % MAP_SIZE;
@@ -155,6 +197,18 @@ void handle_step_command(const char* command) {
                 trigger_block_interception(current_player, next_location);
                 
                 // 即使被拦截也要切换到下一个玩家
+                g_game_state.game.now_player_id = (g_game_state.game.now_player_id + 1) % g_game_state.player_count;
+                return;
+            }
+            
+            // 检查炸弹爆炸
+            if (check_bomb_explosion(next_location)) {
+                // 踩中炸弹，玩家移动到炸弹位置并触发爆炸
+                current_player->location = next_location;
+                printf("%s 前进 %d 步，到达位置 %d\n", current_player->name, i, current_player->location);
+                trigger_bomb_explosion(current_player, next_location);
+                
+                // 即使被炸也要切换到下一个玩家
                 g_game_state.game.now_player_id = (g_game_state.game.now_player_id + 1) % g_game_state.player_count;
                 return;
             }

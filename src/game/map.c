@@ -126,7 +126,9 @@ void display_map() {
                 else if (j == 28 && i > 0 && i < 7) loc = 28 + i;
 
                 // 检查是否有路障
-                if (loc != -1 && has_block_at_location(loc)) {
+                if (loc != -1 && has_bomb_at_location(loc)) {
+                    printf("%c", BOMB_SYMBOL);   // 显示炸弹符号 @
+                } else if (loc != -1 && has_block_at_location(loc)) {
                     printf("%c", BLOCK_SYMBOL);  // 显示路障符号 #
                 } else if (loc != -1 && g_game_state.houses[loc].owner_id != -1) {
                     Player* owner = &g_game_state.players[g_game_state.houses[loc].owner_id];
