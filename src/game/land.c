@@ -1,5 +1,6 @@
 #include "land.h"
 #include "game_state.h"
+#include "prop_shop.h"
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
@@ -126,6 +127,13 @@ void on_player_land(Player* player) {
     int location = player->location;
     House* land = &g_game_state.houses[location];
 
+    // 检查是否是道具屋 (位置28 - T)
+    if (location == PROP_SHOP_LOCATION) {
+        printf("您到达了道具屋。\n");
+        enter_prop_shop(player);
+        return;
+    }
+
     if (land->owner_id == player->index) {
         // Owned by self
         upgrade_land(player, location);
@@ -136,7 +144,40 @@ void on_player_land(Player* player) {
         // Unowned land
         buy_land(player, location);
     } else {
-        // Special location
-        printf("您到达了特殊地点。\n");
+        // 其他特殊地点
+        switch (location) {
+            case 0:   // S - 起点
+                printf("您到达了起点。\n");
+                break;
+            case 14:  // H - 医院
+                printf("您到达了医院。\n");
+                break;
+            case 49:  // P - 监狱 
+                printf("您到达了监狱。\n");
+                break;
+            case 35:  // G - 礼品屋
+                printf("您到达了礼品屋。\n");
+                break;
+            case 63:  // M - 魔法屋
+                printf("您到达了魔法屋。\n");
+                break;
+            default:
+                // 检查是否是矿地 ($) - 位置64-69
+                if (location >= 64 && location <= 69) {
+                    // 矿地点数：从上到下依次为 20、80、100、40、80、60
+                    int credits[] = {20, 80, 100, 40, 80, 60};
+                    int index = location - 64;
+                    if (index >= 0 && index < 6) {
+                        player->credit += credits[index];
+                        printf("您到达了矿地，获得了 %d 点数！当前点数：%d\n", 
+                               credits[index], player->credit);
+                    } else {
+                        printf("您到达了特殊地点。\n");
+                    }
+                } else {
+                    printf("您到达了特殊地点。\n");
+                }
+                break;
+        }
     }
 }
