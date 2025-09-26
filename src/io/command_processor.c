@@ -134,8 +134,10 @@ void handle_roll_command() {
             printf("%s 前进 %d 步，到达位置 %d\n", current_player->name, i, current_player->location);
             trigger_block_interception(current_player, next_location);
             
-            // 即使被拦截也要切换到下一个玩家
-            switch_to_next_player();
+            // 即使被拦截也要切换到下一个玩家（游戏未结束时）
+            if (!g_game_state.game.ended) {
+                switch_to_next_player();
+            }
             return;
         }
         
@@ -145,8 +147,10 @@ void handle_roll_command() {
             printf("%s 前进 %d 步，踩中位置 %d 的炸弹\n", current_player->name, i, next_location);
             trigger_bomb_explosion(current_player, next_location);
             
-            // 即使被炸也要切换到下一个玩家
-            switch_to_next_player();
+            // 即使被炸也要切换到下一个玩家（游戏未结束时）
+            if (!g_game_state.game.ended) {
+                switch_to_next_player();
+            }
             return;
         }
     }
@@ -158,8 +162,10 @@ void handle_roll_command() {
     // 触发到达事件
     on_player_land(current_player);
 
-    // 切换到下一个玩家
-    switch_to_next_player();
+    // 切换到下一个玩家（游戏未结束时）
+    if (!g_game_state.game.ended) {
+        switch_to_next_player();
+    }
 }
 
 void handle_step_command(const char* command) {
@@ -181,8 +187,10 @@ void handle_step_command(const char* command) {
                 printf("%s 前进 %d 步，到达位置 %d\n", current_player->name, i, current_player->location);
                 trigger_block_interception(current_player, next_location);
                 
-                // 即使被拦截也要切换到下一个玩家
-                switch_to_next_player();
+                // 即使被拦截也要切换到下一个玩家（游戏未结束时）
+                if (!g_game_state.game.ended) {
+                    switch_to_next_player();
+                }
                 return;
             }
             
@@ -192,8 +200,10 @@ void handle_step_command(const char* command) {
                 printf("%s 前进 %d 步，踩中位置 %d 的炸弹\n", current_player->name, i, next_location);
                 trigger_bomb_explosion(current_player, next_location);
                 
-                // 即使被炸也要切换到下一个玩家
-                switch_to_next_player();
+                // 即使被炸也要切换到下一个玩家（游戏未结束时）
+                if (!g_game_state.game.ended) {
+                    switch_to_next_player();
+                }
                 return;
             }
         }
@@ -208,8 +218,10 @@ void handle_step_command(const char* command) {
             printf("%s 前进 %d 步，到达位置 %d\n", current_player->name, steps, current_player->location);
         }
 
-        // 切换到下一个玩家
-        switch_to_next_player();
+        // 切换到下一个玩家（游戏未结束时）
+        if (!g_game_state.game.ended) {
+            switch_to_next_player();
+        }
     } else {
         printf("无效的 step 命令格式, e.g., step 5\n");
     }
@@ -368,7 +380,7 @@ void run_game(void) {
     printf(CLEAR_SCREEN);
     display_map();
 
-    while (!g_game_state.game.ended) {
+    while (true) {
         // 检查胜利条件
         if (game_started) {
             int alive_count = 0;
@@ -381,16 +393,19 @@ void run_game(void) {
             }
 
             if (alive_count <= 1) {
-                printf(CLEAR_SCREEN);
-                display_map();
-                if (winner_id != -1) {
-                    printf("游戏结束！胜利者是 %s！\n", g_game_state.players[winner_id].name);
-                } else {
-                    printf("所有玩家都已破产，游戏结束！\n");
+                if (!g_game_state.game.ended) {
+                    printf(CLEAR_SCREEN);
+                    display_map();
+                    if (winner_id != -1) {
+                        printf("游戏结束！胜利者是 %s！\n", g_game_state.players[winner_id].name);
+                    } else {
+                        printf("所有玩家都已破产，游戏结束！\n");
+                    }
+                    g_game_state.game.ended = true;
+                    g_game_state.game.winner_id = winner_id;
+                    //wait_for_enter();
                 }
-                g_game_state.game.ended = true;
-                //wait_for_enter();
-                continue;
+                // 游戏结束后仍然允许处理命令（如dump）
             }
         }
 
@@ -403,8 +418,8 @@ void run_game(void) {
             current_player->buff.god--;
         }
 
-        // 检查当前玩家是否已破产，如果是则自动跳过
-        if (!current_player->alive) {
+        // 检查当前玩家是否已破产，如果是则自动跳过（游戏未结束时）
+        if (!current_player->alive && !g_game_state.game.ended) {
             switch_to_next_player();
             continue; // 直接进入下一位玩家
         }
@@ -414,7 +429,9 @@ void run_game(void) {
             printf("玩家 %s 正在住院治疗，剩余 %d 天，本轮自动跳过。\n", 
                    current_player->name, current_player->buff.hospital);
             current_player->buff.hospital--;
-            switch_to_next_player();
+            if (!g_game_state.game.ended) {
+                switch_to_next_player();
+            }
             //wait_for_enter();
             continue; // 直接进入下一轮
         }
@@ -424,7 +441,9 @@ void run_game(void) {
             printf("玩家 %s 正在监狱中，剩余 %d 天，本轮自动跳过。\n", 
                    current_player->name, current_player->buff.prison);
             current_player->buff.prison--;
-            switch_to_next_player();
+            if (!g_game_state.game.ended) {
+                switch_to_next_player();
+            }
             //wait_for_enter();
             continue; // 直接进入下一轮
         }
@@ -447,6 +466,11 @@ void run_game(void) {
 
         if (!g_game_state.game.ended) {
             //wait_for_enter();
+        }
+        
+        // 如果读取到EOF，则退出
+        if (feof(stdin)) {
+            break;
         }
     }
 }

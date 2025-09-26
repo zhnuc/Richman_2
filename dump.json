@@ -2,10 +2,10 @@
     "players": [
         {
             "index": 0,
-            "name": "Q", 
-            "fund": 10000,
+            "name": "Q",
+            "fund": 9800,
             "credit": 0,
-            "location": 52,
+            "location": 6,
             "alive": true,
             "prop": {
                 "bomb": 0,
@@ -39,7 +39,12 @@
             }
         }
     ],
-    "houses": {},
+    "houses": {
+        "6": {
+            "owner": "Q",
+            "level": 0
+        }
+    },
     "placed_prop": {
         "bomb": [],
         "barrier": []
