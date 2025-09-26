@@ -4,8 +4,8 @@
             "index": 0,
             "name": "Q",
             "fund": 10000,
-            "credit": 0,
-            "location": 14,
+            "credit": 60,
+            "location": 64,
             "alive": true,
             "prop": {
                 "bomb": 0,
@@ -16,7 +16,7 @@
             "buff": {
                 "god": 0,
                 "prison": 0,
-                "hospital": 3
+                "hospital": 0
             }
         },
         {
