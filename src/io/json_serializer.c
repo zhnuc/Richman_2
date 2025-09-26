@@ -219,10 +219,10 @@ void parse_and_load_players(const char* content) {
     int i = 0;
     while (current < arr_end && i < MAX_PLAYERS) {
         char* player_start = strchr(current, '{');
-        if (!player_start) break;
+        if (!player_start || player_start >= arr_end) break;
 
         char* player_end = find_matching_brace(player_start);
-        if (!player_end) break;
+        if (!player_end || player_end >= arr_end) break;
 
         Player* p = &g_game_state.players[i];
         p->index = extract_int_value(player_start, "index", player_end);
