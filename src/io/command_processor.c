@@ -382,15 +382,17 @@ void show_welcome_and_select_character(int initial_fund) {
     }
 }
 
-void run_game(void) {
+void run_game_with_preset(const char* preset_file) {
     printf("大富翁游戏启动\n");
     srand(time(NULL)); // 初始化随机数种子
     
     init_game_state();
     bool game_started = false;
     
-    if (load_game_preset("preset.json") == 0) {
-        printf("使用预设配置\n");
+    const char* file_to_load = preset_file ? preset_file : "preset.json";
+    if (load_game_preset(file_to_load) == 0) {
+        printf("使用预设配置: %s\n", file_to_load);
+        game_started = true; // 使用预设配置时，游戏已经开始
     } else {
         int initial_fund = get_initial_fund();
         show_welcome_and_select_character(initial_fund);
@@ -409,11 +411,7 @@ void run_game(void) {
     display_map();
 
     while (true) {
-        // 在每个回合开始时检查是否需要更新财神状态
-        // 只有在当前玩家是第一个玩家时，才更新财神状态，代表新一轮的开始
-        if (g_game_state.game.now_player_id == 0) {
-            update_god_status();
-        }
+        // 财神状态更新应该移到合适的地方，而不是在每个游戏循环中都调用
 
         // 检查胜利条件
         if (game_started) {
@@ -550,4 +548,8 @@ void switch_to_next_player() {
     g_game_state.game.last_player_id = g_game_state.game.now_player_id;
     g_game_state.game.now_player_id = (g_game_state.game.now_player_id + 1) % g_game_state.player_count;
     g_game_state.game.next_player_id = (g_game_state.game.now_player_id + 1) % g_game_state.player_count;
+}
+
+void run_game(void) {
+    run_game_with_preset(NULL);
 }

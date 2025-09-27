@@ -212,14 +212,39 @@ void parse_player_buff(const char* player_obj, const char* player_end, Buff* buf
 
 // 解析god对象
 void parse_and_load_god(const char* content) {
-    char* god_start = strstr(content, "\"god\":");
-    if (!god_start) return;
+    // 查找顶级的 god 对象，而不是 buff 中的 god 字段
+    // 我们需要查找 "god": { 的模式，而不仅仅是 "god":
+    const char* search_pos = content;
+    const char* god_start = NULL;
+    
+    // 循环查找所有的 "god": 直到找到后面跟着 { 的那个
+    while ((search_pos = strstr(search_pos, "\"god\":")) != NULL) {
+        const char* check_pos = search_pos + strlen("\"god\":");
+        // 跳过空白字符
+        while (*check_pos == ' ' || *check_pos == '\t' || *check_pos == '\n' || *check_pos == '\r') {
+            check_pos++;
+        }
+        // 检查是否是对象开始
+        if (*check_pos == '{') {
+            god_start = search_pos;
+            break;
+        }
+        search_pos++; // 继续查找下一个
+    }
+    
+    if (!god_start) {
+        return;
+    }
 
     char* obj_start = strchr(god_start, '{');
-    if (!obj_start) return;
+    if (!obj_start) {
+        return;
+    }
 
     char* obj_end = find_matching_brace(obj_start);
-    if (!obj_end) return;
+    if (!obj_end) {
+        return;
+    }
 
     g_game_state.god.spawn_cooldown = extract_int_value(obj_start, "spawn_cooldown", obj_end);
     g_game_state.god.location = extract_int_value(obj_start, "location", obj_end);
