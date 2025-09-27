@@ -134,8 +134,10 @@ void pay_toll(Player* player, int location) {
     printf("您到达了玩家 %s 的地盘(等级 %d)，需支付过路费 %d 元。\n", owner->name, land->level, toll);
 
     if (player->fund < toll) {
-        printf("您的资金不足以支付过路费，您已破产！\n");
-        owner->fund += player->fund; // 房主获得玩家所有剩余资金
+        printf("您的资金不足以支付过路费 %d 元，您已破产！\n", toll);
+        printf("您的所有资产（包括剩余资金 %d 元）已被系统没收。\n", player->fund);
+
+        
         player->fund = 0; // 玩家资金归零
         player->alive = false;
         
