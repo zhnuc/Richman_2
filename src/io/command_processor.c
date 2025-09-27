@@ -152,6 +152,11 @@ void handle_roll_command() {
         }
     }
     
+    // 如果是被路障拦截，在移动和触发地点事件前，先触发路障效果
+    if (stopped_by_block) {
+        trigger_block_interception(current_player, final_location);
+    }
+
     // 移动到最终位置
     current_player->location = final_location;
     snprintf(message_buffer, sizeof(message_buffer), "%s 前进 %d 步，到达位置 %d\n", current_player->name, final_steps, current_player->location);
@@ -159,11 +164,6 @@ void handle_roll_command() {
 
     // 触发到达事件
     on_player_land(current_player);
-
-    // 如果是被路障拦截，在触发完地点事件后再触发路障效果
-    if (stopped_by_block) {
-        trigger_block_interception(current_player, final_location);
-    }
 
     // 切换到下一个玩家（游戏未结束时）
     if (!g_game_state.game.ended) {
@@ -204,6 +204,11 @@ void handle_step_command(const char* command) {
             }
         }
         
+        // 如果是被路障拦截，在移动和触发地点事件前，先触发路障效果
+        if (stopped_by_block) {
+            trigger_block_interception(current_player, final_location);
+        }
+        
         // 移动到最终位置
         current_player->location = final_location;
         snprintf(message_buffer, sizeof(message_buffer), "%s 前进 %d 步，到达位置 %d\n", current_player->name, final_steps, current_player->location);
@@ -211,11 +216,6 @@ void handle_step_command(const char* command) {
         
         // 触发到达事件
         on_player_land(current_player);
-
-        // 如果是被路障拦截，在触发完地点事件后再触发路障效果
-        if (stopped_by_block) {
-            trigger_block_interception(current_player, final_location);
-        }
         
         // 切换到下一个玩家（游戏未结束时）
         if (!g_game_state.game.ended) {
