@@ -135,8 +135,8 @@ void pay_toll(Player* player, int location) {
 
     if (player->fund < toll) {
         printf("您的资金不足以支付过路费，您已破产！\n");
-        owner->fund += toll;
-        player->fund = -1;
+        owner->fund += player->fund; // 房主获得玩家所有剩余资金
+        player->fund = 0; // 玩家资金归零
         player->alive = false;
         
         // 清空破产玩家的道具
@@ -221,8 +221,8 @@ void on_player_land(Player* player) {
             default:
                 // 检查是否是矿地 ($) - 位置64-69
                 if (location >= 64 && location <= 69) {
-                    // 矿地点数：从上到下依次为 60、80、100、40、80、20
-                    int credits[] = {60, 80, 100, 40, 80, 20};
+                    // 矿地点数：从上到下依次为 20、80、100、40、80、60
+                    int credits[] = {60, 80, 40, 100, 80, 20};
                     int index = location - 64;
                     if (index >= 0 && index < 6) {
                         player->credit += credits[index];

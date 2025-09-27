@@ -5,7 +5,7 @@
             "name": "Q",
             "fund": 10000,
             "credit": 0,
-            "location": 0,
+            "location": 35,
             "alive": true,
             "prop": {
                 "bomb": 0,
@@ -14,7 +14,7 @@
                 "total": 0
             },
             "buff": {
-                "god": 0,
+                "god": 5,
                 "prison": 0,
                 "hospital": 0
             }
@@ -39,16 +39,15 @@
             }
         }
     ],
-    "houses": {
-    },
+    "houses": {},
     "placed_prop": {
         "bomb": [],
         "barrier": []
     },
     "game": {
-        "now_player": 0,
-        "next_player": 1,
-        "started": false,
+        "now_player": 1,
+        "next_player": 0,
+        "started": true,
         "ended": false,
         "winner": -1
     }

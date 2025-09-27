@@ -122,6 +122,9 @@ void handle_roll_command() {
     printf("玩家 %s 掷骰子，点数为 %d\n", current_player->name, steps);
     
     int original_location = current_player->location;
+    int final_location = (original_location + steps) % MAP_SIZE;
+    int final_steps = steps;
+    bool stopped_by_block = false;
     
     // 检查移动路径上是否有路障或炸弹
     for (int i = 1; i <= steps; i++) {
@@ -129,16 +132,10 @@ void handle_roll_command() {
         
         // 检查路障拦截
         if (check_block_interception(next_location)) {
-            // 被路障拦截，停留在路障所在位置
-            current_player->location = next_location;
-            printf("%s 前进 %d 步，到达位置 %d\n", current_player->name, i, current_player->location);
-            trigger_block_interception(current_player, next_location);
-            
-            // 即使被拦截也要切换到下一个玩家（游戏未结束时）
-            if (!g_game_state.game.ended) {
-                switch_to_next_player();
-            }
-            return;
+            final_location = next_location;
+            final_steps = i;
+            stopped_by_block = true;
+            break; // 找到第一个路障就停下
         }
         
         // 检查炸弹爆炸
@@ -155,12 +152,17 @@ void handle_roll_command() {
         }
     }
     
-    // 没有路障拦截，正常移动
-    current_player->location = (current_player->location + steps) % MAP_SIZE;
-    printf("%s 前进 %d 步，到达位置 %d\n", current_player->name, steps, current_player->location);
+    // 移动到最终位置
+    current_player->location = final_location;
+    printf("%s 前进 %d 步，到达位置 %d\n", current_player->name, final_steps, current_player->location);
 
     // 触发到达事件
     on_player_land(current_player);
+
+    // 如果是被路障拦截，在触发完地点事件后再触发路障效果
+    if (stopped_by_block) {
+        trigger_block_interception(current_player, final_location);
+    }
 
     // 切换到下一个玩家（游戏未结束时）
     if (!g_game_state.game.ended) {
@@ -175,6 +177,9 @@ void handle_step_command(const char* command) {
         
         printf("遥控骰子，指定步数为 %d\n", steps);
         int original_location = current_player->location;
+        int final_location = (original_location + steps) % MAP_SIZE;
+        int final_steps = steps;
+        bool stopped_by_block = false;
         
         // 检查移动路径上是否有路障或炸弹
         for (int i = 1; i <= steps; i++) {
@@ -182,16 +187,10 @@ void handle_step_command(const char* command) {
             
             // 检查路障拦截
             if (check_block_interception(next_location)) {
-                // 被路障拦截，停留在路障所在位置
-                current_player->location = next_location;
-                printf("%s 前进 %d 步，到达位置 %d\n", current_player->name, i, current_player->location);
-                trigger_block_interception(current_player, next_location);
-                
-                // 即使被拦截也要切换到下一个玩家（游戏未结束时）
-                if (!g_game_state.game.ended) {
-                    switch_to_next_player();
-                }
-                return;
+                final_location = next_location;
+                final_steps = i;
+                stopped_by_block = true;
+                break; // 找到第一个路障就停下
             }
             
             // 检查炸弹爆炸
@@ -208,14 +207,16 @@ void handle_step_command(const char* command) {
             }
         }
         
-        // 没有路障拦截，正常移动
-        if (steps > 0) {
-            current_player->location = (current_player->location + steps) % MAP_SIZE;
-            printf("%s 前进 %d 步，到达位置 %d\n", current_player->name, steps, current_player->location);
-            // 触发到达事件
-            on_player_land(current_player);
-        } else {
-            printf("%s 前进 %d 步，到达位置 %d\n", current_player->name, steps, current_player->location);
+        // 移动到最终位置
+        current_player->location = final_location;
+        printf("%s 前进 %d 步，到达位置 %d\n", current_player->name, final_steps, current_player->location);
+
+        // 触发到达事件
+        on_player_land(current_player);
+
+        // 如果是被路障拦截，在触发完地点事件后再触发路障效果
+        if (stopped_by_block) {
+            trigger_block_interception(current_player, final_location);
         }
 
         // 切换到下一个玩家（游戏未结束时）
