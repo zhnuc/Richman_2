@@ -19,7 +19,7 @@ void display_map() {
     // Static map elements
     map[0][0] = 'S';
     for (int i = 1; i <= 13; i++) map[0][i] = '0';
-    map[0][14] = 'H';
+    map[0][14] = 'P';
     for (int i = 15; i <= 27; i++) map[0][i] = '0';
     map[0][28] = 'T';
 
@@ -29,9 +29,20 @@ void display_map() {
     for (int i = 27; i >= 15; i--) map[7][i] = '0';
     map[7][14] = 'P';
     for (int i = 13; i >= 1; i--) map[7][i] = '0';
-    map[7][0] = 'M';
+    map[7][0] = 'P';
 
     for (int i = 1; i <= 6; i++) map[i][0] = '$';
+
+
+    
+    // Place God
+    if (g_game_state.god.location != -1) {
+        int loc = g_game_state.god.location;
+        if (loc >= 0 && loc <= 28) { map[0][loc] = 'F'; }
+        else if (loc >= 29 && loc <= 35) { map[loc - 28][28] = 'F'; }
+        else if (loc >= 36 && loc <= 63) { map[7][28 - (loc - 35)] = 'F'; }
+        else if (loc >= 64 && loc <= 69) { map[7 - (loc - 63)][0] = 'F'; }
+    }
 
     // Place players
     for (int i = 0; i < g_game_state.player_count; i++) {
@@ -148,3 +159,19 @@ void display_map() {
         }
     }
 }
+
+char get_map_symbol(int location) {
+    if (location == 0) return 'S';
+    if (location >= 1 && location <= 13) return '0';
+    if (location == 14) return 'P';
+    if (location >= 15 && location <= 27) return '0';
+    if (location == 28) return 'T';
+    if (location >= 29 && location <= 35) return '0';
+    if (location == 36) return 'G';
+    if (location >= 37 && location <= 48) return '0';
+    if (location == 49) return 'P';
+    if (location >= 50 && location <= 62) return '0';
+    if (location == 63) return 'P';
+    if (location >= 64 && location <= 69) return '$';
+    return ' '; //
+} //Invalid location

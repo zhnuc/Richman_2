@@ -5,6 +5,7 @@
 #include "../game/map.h"
 #include "../game/land.h"
 #include "../game/block_system.h"
+#include "../game/god_system.h"
 #include "../io/colors.h"
 #include "json_serializer.h"
 #include "utils.h"
@@ -118,7 +119,7 @@ void handle_roll_command() {
     int final_steps = steps;
     bool stopped_by_block = false;
     
-    // 检查移动路径上是否有路障
+    // 检查移动路径上是否有路障或财神
     for (int i = 1; i <= steps; i++) {
         int next_location = (original_location + i) % MAP_SIZE;
         
@@ -128,6 +129,12 @@ void handle_roll_command() {
             final_steps = i;
             stopped_by_block = true;
             break; // 找到第一个路障就停下
+        }
+
+        // 检查是否遇到财神
+        if (check_god_encounter(next_location)) {
+            // 遇到财神不停下，直接触发效果
+            trigger_god_encounter(current_player, next_location);
         }
     }
     
@@ -160,7 +167,7 @@ void handle_step_command(const char* command) {
         int final_steps = steps;
         bool stopped_by_block = false;
         
-        // 检查移动路径上是否有路障
+        // 检查移动路径上是否有路障或财神
         for (int i = 1; i <= steps; i++) {
             int next_location = (original_location + i) % MAP_SIZE;
             
@@ -171,12 +178,18 @@ void handle_step_command(const char* command) {
                 stopped_by_block = true;
                 break; // 找到第一个路障就停下
             }
+
+            // 检查是否遇到财神
+            if (check_god_encounter(next_location)) {
+                // 遇到财神不停下，直接触发效果
+                trigger_god_encounter(current_player, next_location);
+            }
         }
         
         // 移动到最终位置
         current_player->location = final_location;
         printf("%s 前进 %d 步，到达位置 %d\n", current_player->name, final_steps, current_player->location);
-
+        
         // 触发到达事件
         on_player_land(current_player);
 
@@ -184,7 +197,7 @@ void handle_step_command(const char* command) {
         if (stopped_by_block) {
             trigger_block_interception(current_player, final_location);
         }
-
+        
         // 切换到下一个玩家（游戏未结束时）
         if (!g_game_state.game.ended) {
             switch_to_next_player();
@@ -204,6 +217,12 @@ void handle_query_command() {
     printf("  道具:\n");
     printf("    - 路障: %d\n", p->prop.barrier);
     printf("    - 机器娃娃: %d\n", p->prop.robot);
+    printf("  状态:\n");
+    if (p->buff.god > 0) {
+        printf("    - 财神附身: 剩余 %d 回合\n", p->buff.god);
+    } else {
+        printf("    - (无特殊状态)\n");
+    }
     printf("  房产:\n");
     bool has_house = false;
     for (int i = 0; i < MAP_SIZE; i++) {
@@ -214,6 +233,14 @@ void handle_query_command() {
     }
     if (!has_house) {
         printf("    (无)\n");
+    }
+
+    // 显示地图财神状态
+    printf("  地图财神状态:\n");
+    if (g_game_state.god.location != -1) {
+        printf("    - 位置: %d (剩余 %d 回合消失)\n", g_game_state.god.location, g_game_state.god.duration);
+    } else {
+        printf("    - (未出现，预计 %d 回合后出现)\n", g_game_state.god.spawn_cooldown);
     }
 }
 
@@ -344,6 +371,12 @@ void run_game(void) {
     display_map();
 
     while (true) {
+        // 在每个回合开始时检查是否需要更新财神状态
+        // 只有在当前玩家是第一个玩家时，才更新财神状态，代表新一轮的开始
+        if (g_game_state.game.now_player_id == 0) {
+            update_god_status();
+        }
+
         // 检查胜利条件
         if (game_started) {
             int alive_count = 0;

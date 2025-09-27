@@ -52,6 +52,13 @@ typedef struct {
     int owner_id; // -1 for no owner
 } House;
 
+// 地图上随机生成的财神道具
+typedef struct {
+    int spawn_cooldown; // 出现冷却时间，从 10 开始递减
+    int location;       // 位置，未出现为 -1
+    int duration;       // 存续时间，从 5 开始递减
+} God;
+
 // 放置的道具结构
 typedef struct {
     int bomb[MAP_SIZE];    // 炸弹位置列表, 1表示有
@@ -73,6 +80,7 @@ typedef struct {
     int player_count;
     House houses[MAP_SIZE];
     PlacedProp placed_prop;
+    God god;            // 地图上随机生成的财神道具
     Game game;
 } GameState;
 
