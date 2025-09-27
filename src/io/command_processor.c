@@ -303,7 +303,9 @@ void handle_help_command() {
 
 void handle_quit_command() {
     g_game_state.game.ended = true;
-    strncpy(g_last_action_message, "游戏结束。\n", sizeof(g_last_action_message) - 1);
+    strncpy(g_last_action_message, "游戏已退出。\n", sizeof(g_last_action_message) - 1);
+    printf("%s", g_last_action_message); // 确保退出前能看到消息
+    exit(0); // 强制退出程序
 }
 
 
