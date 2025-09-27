@@ -2,6 +2,7 @@
 #include "game_state.h"
 #include "prop_shop.h"
 #include "gift_house.h"
+#include "../io/command_processor.h" // 包含 g_last_action_message
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
@@ -12,34 +13,41 @@ void pay_toll(Player* player, int location);
 
 void buy_land(Player* player, int location) {
     House* land = &g_game_state.houses[location];
+    char message_buffer[256];
 
     if (land->price == 0) {
-        printf("此地为特殊地点，不可购买。\n");
+        snprintf(message_buffer, sizeof(message_buffer), "此地为特殊地点，不可购买。\n");
+        strncat(g_last_action_message, message_buffer, sizeof(g_last_action_message) - strlen(g_last_action_message) - 1);
         return;
     }
 
     if (land->owner_id != -1) {
         if (land->owner_id == player->index) {
-            printf("您已经是这块地的主人了。\n");
+            snprintf(message_buffer, sizeof(message_buffer), "您已经是这块地的主人了。\n");
         } else {
-            printf("此地已被其他玩家购买。\n");
+            snprintf(message_buffer, sizeof(message_buffer), "此地已被其他玩家购买。\n");
         }
+        strncat(g_last_action_message, message_buffer, sizeof(g_last_action_message) - strlen(g_last_action_message) - 1);
         return;
     }
 
     if (player->fund < land->price) {
-        printf("资金不足，无法购买此地。需要 %d，您只有 %d。\n", land->price, player->fund);
+        snprintf(message_buffer, sizeof(message_buffer), "资金不足，无法购买此地。需要 %d，您只有 %d。\n", land->price, player->fund);
+        strncat(g_last_action_message, message_buffer, sizeof(g_last_action_message) - strlen(g_last_action_message) - 1);
         return;
     }
 
     char input[10];
     int valid_input = 0;
     
+    // 交互式提示需要立即显示，所以这里保留printf
+    printf("您到达一块空地(价格: %d)，是否购买? (y/n): ", land->price);
+
     while (!valid_input) {
-        printf("您到达一块空地(价格: %d)，是否购买? (y/n): ", land->price);
         if (fgets(input, sizeof(input), stdin) == NULL) {
             // 输入流结束，自动选择不购买
-            printf("您放弃了购买此地。\n");
+            snprintf(message_buffer, sizeof(message_buffer), "您放弃了购买此地。\n");
+            strncat(g_last_action_message, message_buffer, sizeof(g_last_action_message) - strlen(g_last_action_message) - 1);
             return;
         }
         
@@ -50,14 +58,16 @@ void buy_land(Player* player, int location) {
         if (strcmp(input, "y") == 0) {
             player->fund -= land->price;
             land->owner_id = player->index;
-            printf("恭喜！您成功购买了此地。剩余资金: %d\n", player->fund);
+            snprintf(message_buffer, sizeof(message_buffer), "恭喜！您成功购买了此地。剩余资金: %d\n", player->fund);
+            strncat(g_last_action_message, message_buffer, sizeof(g_last_action_message) - strlen(g_last_action_message) - 1);
             valid_input = 1;
         } else if (strcmp(input, "n") == 0) {
-            printf("您放弃了购买此地。\n");
+            snprintf(message_buffer, sizeof(message_buffer), "您放弃了购买此地。\n");
+            strncat(g_last_action_message, message_buffer, sizeof(g_last_action_message) - strlen(g_last_action_message) - 1);
             valid_input = 1;
         } else {
             // 输入不是 y 或 n，提示错误并循环
-            printf("错误指令！请输入 y 或 n。\n");
+            printf("错误指令！请输入 y 或 n: "); // 交互式提示
         }
     }
 }
@@ -65,42 +75,51 @@ void buy_land(Player* player, int location) {
 void upgrade_land(Player* player, int location) {
     House* land = &g_game_state.houses[location];
     int upgrade_cost = land->price;
+    char message_buffer[256];
 
     if (land->level >= 3) {
-        printf("您的房产已是最高级(摩天楼)，无法再升级。\n");
+        snprintf(message_buffer, sizeof(message_buffer), "您的房产已是最高级(摩天楼)，无法再升级。\n");
+        strncat(g_last_action_message, message_buffer, sizeof(g_last_action_message) - strlen(g_last_action_message) - 1);
         return;
     }
 
     if (player->fund < upgrade_cost) {
-        printf("资金不足，无法升级。需要 %d，您只有 %d。\n", upgrade_cost, player->fund);
+        snprintf(message_buffer, sizeof(message_buffer), "资金不足，无法升级。需要 %d，您只有 %d。\n", upgrade_cost, player->fund);
+        strncat(g_last_action_message, message_buffer, sizeof(g_last_action_message) - strlen(g_last_action_message) - 1);
         return;
     }
 
     char input[10];
+    // 交互式提示
     printf("您的房产当前为 %d 级，可升级至 %d 级(费用: %d)，是否升级? (y/n): ", land->level, land->level + 1, upgrade_cost);
     fgets(input, sizeof(input), stdin);
 
     if (tolower(input[0]) == 'y') {
         player->fund -= upgrade_cost;
         land->level++;
-        printf("恭喜！升级成功。当前等级: %d，剩余资金: %d\n", land->level, player->fund);
+        snprintf(message_buffer, sizeof(message_buffer), "恭喜！升级成功。当前等级: %d，剩余资金: %d\n", land->level, player->fund);
+        strncat(g_last_action_message, message_buffer, sizeof(g_last_action_message) - strlen(g_last_action_message) - 1);
     } else {
-        printf("您放弃了升级。\n");
+        snprintf(message_buffer, sizeof(message_buffer), "您放弃了升级。\n");
+        strncat(g_last_action_message, message_buffer, sizeof(g_last_action_message) - strlen(g_last_action_message) - 1);
     }
 }
 
 void handle_sell_command(int location) {
     Player* player = &g_game_state.players[g_game_state.game.now_player_id];
+    char message_buffer[256];
 
     if (location < 0 || location >= MAP_SIZE) {
-        printf("出售失败：无效的位置。\n");
+        snprintf(message_buffer, sizeof(message_buffer), "出售失败：无效的位置。\n");
+        strncat(g_last_action_message, message_buffer, sizeof(g_last_action_message) - strlen(g_last_action_message) - 1);
         return;
     }
 
     House* land = &g_game_state.houses[location];
 
     if (land->owner_id != player->index) {
-        printf("出售失败：这不是您的房产。\n");
+        snprintf(message_buffer, sizeof(message_buffer), "出售失败：这不是您的房产。\n");
+        strncat(g_last_action_message, message_buffer, sizeof(g_last_action_message) - strlen(g_last_action_message) - 1);
         return;
     }
 
@@ -111,32 +130,29 @@ void handle_sell_command(int location) {
     player->fund += sell_price;
     land->owner_id = -1;
     land->level = 0;
-    printf("出售成功！您获得了 %d 元，当前总资金: %d\n", sell_price, player->fund);
+    snprintf(message_buffer, sizeof(message_buffer), "出售成功！您获得了 %d 元，当前总资金: %d\n", sell_price, player->fund);
+    strncat(g_last_action_message, message_buffer, sizeof(g_last_action_message) - strlen(g_last_action_message) - 1);
 }
 
 void pay_toll(Player* player, int location) {
     House* land = &g_game_state.houses[location];
     Player* owner = &g_game_state.players[land->owner_id];
     int toll = (land->price * (land->level + 1)) / 2;
-
-    // 检查房主是否在医院或监狱
-    // if (owner->buff.hospital > 0 || owner->buff.prison > 0) {
-    //     printf("房主 %s 正在医院或监狱中，免除本次过路费！\n", owner->name);
-    //     return;
-    // }
+    char message_buffer[512];
 
     // 检查财神附身
     if (player->buff.god > 0) {
-        printf("财神附身，免除本次过路费！\n");
+        snprintf(message_buffer, sizeof(message_buffer), "财神附身，免除本次过路费！\n");
+        strncat(g_last_action_message, message_buffer, sizeof(g_last_action_message) - strlen(g_last_action_message) - 1);
         return;
     }
 
-    printf("您到达了玩家 %s 的地盘(等级 %d)，需支付过路费 %d 元。\n", owner->name, land->level, toll);
+    snprintf(message_buffer, sizeof(message_buffer), "您到达了玩家 %s 的地盘(等级 %d)，需支付过路费 %d 元。\n", owner->name, land->level, toll);
+    strncat(g_last_action_message, message_buffer, sizeof(g_last_action_message) - strlen(g_last_action_message) - 1);
 
     if (player->fund < toll) {
-        printf("您的资金不足以支付过路费 %d 元，您已破产！\n", toll);
-        printf("您的所有资产（包括剩余资金 %d 元）已被系统没收。\n", player->fund);
-
+        snprintf(message_buffer, sizeof(message_buffer), "您的资金不足以支付过路费 %d 元，您已破产！\n您的所有资产（包括剩余资金 %d 元）已被系统没收。\n", toll, player->fund);
+        strncat(g_last_action_message, message_buffer, sizeof(g_last_action_message) - strlen(g_last_action_message) - 1);
         
         player->fund = 0; // 玩家资金归零
         player->alive = false;
@@ -153,7 +169,8 @@ void pay_toll(Player* player, int location) {
                 g_game_state.houses[i].level = 0;
             }
         }
-        printf("玩家 %s 的所有房产和道具已被清空。\n", player->name);
+        snprintf(message_buffer, sizeof(message_buffer), "玩家 %s 的所有房产和道具已被清空。\n", player->name);
+        strncat(g_last_action_message, message_buffer, sizeof(g_last_action_message) - strlen(g_last_action_message) - 1);
         
         // 检查游戏是否结束
         int alive_count = 0;
@@ -177,17 +194,20 @@ void pay_toll(Player* player, int location) {
     } else {
         player->fund -= toll;
         owner->fund += toll;
-        printf("支付成功。您的剩余资金: %d\n", player->fund);
+        snprintf(message_buffer, sizeof(message_buffer), "支付成功。您的剩余资金: %d\n", player->fund);
+        strncat(g_last_action_message, message_buffer, sizeof(g_last_action_message) - strlen(g_last_action_message) - 1);
     }
 }
 
 void on_player_land(Player* player) {
     int location = player->location;
     House* land = &g_game_state.houses[location];
+    char message_buffer[256];
 
     // 检查是否是道具屋 (位置28 - T)
     if (location == PROP_SHOP_LOCATION) {
-        printf("您到达了道具屋。\n");
+        snprintf(message_buffer, sizeof(message_buffer), "您到达了道具屋。\n");
+        strncat(g_last_action_message, message_buffer, sizeof(g_last_action_message) - strlen(g_last_action_message) - 1);
         enter_prop_shop(player);
         return;
     }
@@ -205,12 +225,14 @@ void on_player_land(Player* player) {
         // 其他特殊地点
         switch (location) {
             case 0:   // S - 起点
-                printf("您到达了起点。\n");
+                snprintf(message_buffer, sizeof(message_buffer), "您到达了起点。\n");
+                strncat(g_last_action_message, message_buffer, sizeof(g_last_action_message) - strlen(g_last_action_message) - 1);
                 break;
             case 14:  // H - 医院 -> 公园
             case 49:  // P - 监狱 -> 公园
             case 63:  // M - 魔法屋 -> 公园
-                printf("您到达了公园。\n");
+                snprintf(message_buffer, sizeof(message_buffer), "您到达了公园。\n");
+                strncat(g_last_action_message, message_buffer, sizeof(g_last_action_message) - strlen(g_last_action_message) - 1);
                 break;
             case 35:  // G - 礼品屋
                 enter_gift_house(player);
@@ -223,13 +245,16 @@ void on_player_land(Player* player) {
                     int index = location - 64;
                     if (index >= 0 && index < 6) {
                         player->credit += credits[index];
-                        printf("您到达了矿地，获得了 %d 点数！当前点数：%d\n", 
+                        snprintf(message_buffer, sizeof(message_buffer), "您到达了矿地，获得了 %d 点数！当前点数：%d\n", 
                                credits[index], player->credit);
+                        strncat(g_last_action_message, message_buffer, sizeof(g_last_action_message) - strlen(g_last_action_message) - 1);
                     } else {
-                        printf("您到达了特殊地点。\n");
+                        snprintf(message_buffer, sizeof(message_buffer), "您到达了特殊地点。\n");
+                        strncat(g_last_action_message, message_buffer, sizeof(g_last_action_message) - strlen(g_last_action_message) - 1);
                     }
                 } else {
-                    printf("您到达了特殊地点。\n");
+                    snprintf(message_buffer, sizeof(message_buffer), "您到达了特殊地点。\n");
+                    strncat(g_last_action_message, message_buffer, sizeof(g_last_action_message) - strlen(g_last_action_message) - 1);
                 }
                 break;
         }

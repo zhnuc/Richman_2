@@ -1,5 +1,6 @@
 #include "prop_shop.h"
 #include "game_state.h"
+#include "../io/command_processor.h" // 包含 g_last_action_message
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -66,23 +67,28 @@ void show_prop_shop_menu(void) {
 
 // 购买道具核心逻辑
 bool buy_prop(Player* player, int prop_id) {
+    char message_buffer[256];
+
     // 验证道具ID
     if (prop_id < 1 || prop_id > prop_count) {
-        printf("无效的道具编号。\n");
+        snprintf(message_buffer, sizeof(message_buffer), "无效的道具编号。\n");
+        strncat(g_last_action_message, message_buffer, sizeof(g_last_action_message) - strlen(g_last_action_message) - 1);
         return false;
     }
     
     // 检查道具空间
     if (!has_prop_space(player)) {
-        printf("您的道具已达到上限（%d个），无法购买更多道具。\n", MAX_PROPS);
+        snprintf(message_buffer, sizeof(message_buffer), "您的道具已达到上限（%d个），无法购买更多道具。\n", MAX_PROPS);
+        strncat(g_last_action_message, message_buffer, sizeof(g_last_action_message) - strlen(g_last_action_message) - 1);
         return false;
     }
     
     // 检查点数是否足够
     if (!can_afford_prop(player, prop_id)) {
         int price = get_prop_price(prop_id);
-        printf("点数不足，无法购买%s。需要%d点数，您只有%d点数。\n", 
+        snprintf(message_buffer, sizeof(message_buffer), "点数不足，无法购买%s。需要%d点数，您只有%d点数。\n", 
                get_prop_name(prop_id), price, player->credit);
+        strncat(g_last_action_message, message_buffer, sizeof(g_last_action_message) - strlen(g_last_action_message) - 1);
         return false;
     }
     
@@ -102,24 +108,28 @@ bool buy_prop(Player* player, int prop_id) {
     
     player->prop.total++;
     
-    printf("购买成功！您获得了%s。剩余点数：%d\n", 
+    snprintf(message_buffer, sizeof(message_buffer), "购买成功！您获得了%s。剩余点数：%d\n", 
            get_prop_name(prop_id), player->credit);
+    strncat(g_last_action_message, message_buffer, sizeof(g_last_action_message) - strlen(g_last_action_message) - 1);
     
     return true;
 }
 
 // 进入道具屋主逻辑
 void enter_prop_shop(Player* player) {
+    char message_buffer[256];
     // 首先检查玩家是否有点数购买最便宜的道具
     int min_price = PROP_ROBOT_PRICE; // 机器娃娃是最便宜的(30点)
     if (player->credit < min_price) {
-        printf("您的点数不足以购买任何道具，自动退出道具屋。\n");
+        snprintf(message_buffer, sizeof(message_buffer), "您的点数不足以购买任何道具，自动退出道具屋。\n");
+        strncat(g_last_action_message, message_buffer, sizeof(g_last_action_message) - strlen(g_last_action_message) - 1);
         return;
     }
     
     char input[10];
     
     while (true) {
+        // 交互式内容保留 printf
         show_prop_shop_menu();
         
         if (fgets(input, sizeof(input), stdin) == NULL) {
@@ -131,20 +141,23 @@ void enter_prop_shop(Player* player) {
         
         // 检查是否退出 (F或f)
         if (tolower(input[0]) == 'f') {
-            printf("您退出了道具屋。\n");
+            snprintf(message_buffer, sizeof(message_buffer), "您退出了道具屋。\n");
+            strncat(g_last_action_message, message_buffer, sizeof(g_last_action_message) - strlen(g_last_action_message) - 1);
             break;
         }
         
         // 尝试解析道具编号
         int prop_id = atoi(input);
         if (prop_id == 0 && input[0] != '0') {
+            // 交互式错误提示
             printf("无效输入，请输入道具编号或F退出。\n");
             continue;
         }
         
         // 尝试购买道具
         if (buy_prop(player, prop_id)) {
-            // 购买成功后检查是否还能继续购买
+            // 购买成功后，消息已在 buy_prop 中处理
+            // 检查是否还能继续购买
             bool can_buy_any = false;
             for (int i = 1; i <= prop_count; i++) {
                 if (can_afford_prop(player, i) && has_prop_space(player)) {
@@ -156,10 +169,11 @@ void enter_prop_shop(Player* player) {
             // 如果不能再购买任何道具，自动退出
             if (!can_buy_any) {
                 if (!has_prop_space(player)) {
-                    printf("您的道具已满，自动退出道具屋。\n");
+                    snprintf(message_buffer, sizeof(message_buffer), "您的道具已满，自动退出道具屋。\n");
                 } else {
-                    printf("您的点数不足以购买任何道具，自动退出道具屋。\n");
+                    snprintf(message_buffer, sizeof(message_buffer), "您的点数不足以购买任何道具，自动退出道具屋。\n");
                 }
+                strncat(g_last_action_message, message_buffer, sizeof(g_last_action_message) - strlen(g_last_action_message) - 1);
                 break;
             }
         }

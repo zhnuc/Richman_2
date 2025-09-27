@@ -1,8 +1,10 @@
 #include "god_system.h"
 #include "game_state.h"
 #include "map.h"
+#include "../io/command_processor.h" // 包含 g_last_action_message
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
 extern GameState g_game_state;
 
@@ -27,10 +29,12 @@ static bool is_valid_god_spawn_location(int location) {
 }
 
 void update_god_status() {
+    char message_buffer[256];
     if (g_game_state.god.location != -1) { // 财神已出现
         g_game_state.god.duration--;
         if (g_game_state.god.duration <= 0) {
-            printf("财神在位置 %d 停留时间结束，消失了。\n", g_game_state.god.location);
+            snprintf(message_buffer, sizeof(message_buffer), "财神在位置 %d 停留时间结束，消失了。\n", g_game_state.god.location);
+            strncat(g_last_action_message, message_buffer, sizeof(g_last_action_message) - strlen(g_last_action_message) - 1);
             g_game_state.god.location = -1;
             g_game_state.god.spawn_cooldown = rand() % 11; // 重置冷却
         }
@@ -44,7 +48,8 @@ void update_god_status() {
                 if (is_valid_god_spawn_location(new_location)) {
                     g_game_state.god.location = new_location;
                     g_game_state.god.duration = 5;
-                    printf("财神出现在地图位置 %d！\n", new_location);
+                    snprintf(message_buffer, sizeof(message_buffer), "财神出现在地图位置 %d！\n", new_location);
+                    strncat(g_last_action_message, message_buffer, sizeof(g_last_action_message) - strlen(g_last_action_message) - 1);
                     break;
                 }
             }
@@ -59,7 +64,9 @@ bool check_god_encounter(int location) {
 
 // 触发财神效果
 void trigger_god_encounter(Player* player, int location) {
-    printf("玩家 %s 在位置 %d 遇到了财神！获得财神附身效果。\n", player->name, location);
+    char message_buffer[256];
+    snprintf(message_buffer, sizeof(message_buffer), "玩家 %s 在位置 %d 遇到了财神！获得财神附身效果。\n", player->name, location);
+    strncat(g_last_action_message, message_buffer, sizeof(g_last_action_message) - strlen(g_last_action_message) - 1);
     player->buff.god = 5; // 获得5回合财神附身
     g_game_state.god.location = -1; // 财神被领取后消失
     g_game_state.god.spawn_cooldown = rand() % 11; // 重置冷却
