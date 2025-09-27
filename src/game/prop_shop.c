@@ -67,28 +67,23 @@ void show_prop_shop_menu(void) {
 
 // 购买道具核心逻辑
 bool buy_prop(Player* player, int prop_id) {
-    char message_buffer[256];
-
     // 验证道具ID
     if (prop_id < 1 || prop_id > prop_count) {
-        snprintf(message_buffer, sizeof(message_buffer), "无效的道具编号。\n");
-        strncat(g_last_action_message, message_buffer, sizeof(g_last_action_message) - strlen(g_last_action_message) - 1);
+        printf("无效的道具编号。\n");
         return false;
     }
     
     // 检查道具空间
     if (!has_prop_space(player)) {
-        snprintf(message_buffer, sizeof(message_buffer), "您的道具已达到上限（%d个），无法购买更多道具。\n", MAX_PROPS);
-        strncat(g_last_action_message, message_buffer, sizeof(g_last_action_message) - strlen(g_last_action_message) - 1);
+        printf("您的道具已达到上限（%d个），无法购买更多道具。\n", MAX_PROPS);
         return false;
     }
     
     // 检查点数是否足够
     if (!can_afford_prop(player, prop_id)) {
         int price = get_prop_price(prop_id);
-        snprintf(message_buffer, sizeof(message_buffer), "点数不足，无法购买%s。需要%d点数，您只有%d点数。\n", 
+        printf("点数不足，无法购买%s。需要%d点数，您只有%d点数。\n", 
                get_prop_name(prop_id), price, player->credit);
-        strncat(g_last_action_message, message_buffer, sizeof(g_last_action_message) - strlen(g_last_action_message) - 1);
         return false;
     }
     
@@ -108,21 +103,20 @@ bool buy_prop(Player* player, int prop_id) {
     
     player->prop.total++;
     
-    snprintf(message_buffer, sizeof(message_buffer), "购买成功！您获得了%s。剩余点数：%d\n", 
+    printf("购买成功！您获得了%s。剩余点数：%d\n", 
            get_prop_name(prop_id), player->credit);
-    strncat(g_last_action_message, message_buffer, sizeof(g_last_action_message) - strlen(g_last_action_message) - 1);
     
     return true;
 }
 
 // 进入道具屋主逻辑
 void enter_prop_shop(Player* player) {
-    char message_buffer[256];
     // 首先检查玩家是否有点数购买最便宜的道具
     int min_price = PROP_ROBOT_PRICE; // 机器娃娃是最便宜的(30点)
     if (player->credit < min_price) {
-        snprintf(message_buffer, sizeof(message_buffer), "您的点数不足以购买任何道具，自动退出道具屋。\n");
-        strncat(g_last_action_message, message_buffer, sizeof(g_last_action_message) - strlen(g_last_action_message) - 1);
+        printf("您的点数不足以购买任何道具，自动退出道具屋。\n");
+        // 将消息也写入全局缓冲区，以便在返回主循环后显示
+        snprintf(g_last_action_message, sizeof(g_last_action_message), "您的点数不足以购买任何道具，自动退出道具屋。\n");
         return;
     }
     
@@ -141,8 +135,8 @@ void enter_prop_shop(Player* player) {
         
         // 检查是否退出 (F或f)
         if (tolower(input[0]) == 'f') {
-            snprintf(message_buffer, sizeof(message_buffer), "您退出了道具屋。\n");
-            strncat(g_last_action_message, message_buffer, sizeof(g_last_action_message) - strlen(g_last_action_message) - 1);
+            printf("您退出了道具屋。\n");
+            snprintf(g_last_action_message, sizeof(g_last_action_message), "您退出了道具屋。\n");
             break;
         }
         
@@ -156,7 +150,7 @@ void enter_prop_shop(Player* player) {
         
         // 尝试购买道具
         if (buy_prop(player, prop_id)) {
-            // 购买成功后，消息已在 buy_prop 中处理
+            // 购买成功后，消息已在 buy_prop 中通过 printf 直接显示
             // 检查是否还能继续购买
             bool can_buy_any = false;
             for (int i = 1; i <= prop_count; i++) {
@@ -168,11 +162,15 @@ void enter_prop_shop(Player* player) {
             
             // 如果不能再购买任何道具，自动退出
             if (!can_buy_any) {
+                char message_buffer[256];
                 if (!has_prop_space(player)) {
+                    printf("您的道具已满，自动退出道具屋。\n");
                     snprintf(message_buffer, sizeof(message_buffer), "您的道具已满，自动退出道具屋。\n");
                 } else {
+                    printf("您的点数不足以购买任何道具，自动退出道具屋。\n");
                     snprintf(message_buffer, sizeof(message_buffer), "您的点数不足以购买任何道具，自动退出道具屋。\n");
                 }
+                // 将最终退出消息写入全局缓冲区
                 strncat(g_last_action_message, message_buffer, sizeof(g_last_action_message) - strlen(g_last_action_message) - 1);
                 break;
             }

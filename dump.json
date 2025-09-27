@@ -3,9 +3,9 @@
         {
             "index": 0,
             "name": "A",
-            "fund": 22022,
+            "fund": 10000,
             "credit": 0,
-            "location": 14,
+            "location": 0,
             "alive": true,
             "prop": {
                 "bomb": 0,
@@ -22,9 +22,9 @@
         {
             "index": 1,
             "name": "S",
-            "fund": 22022,
+            "fund": 10000,
             "credit": 0,
-            "location": 1,
+            "location": 0,
             "alive": true,
             "prop": {
                 "bomb": 0,
@@ -41,9 +41,9 @@
         {
             "index": 2,
             "name": "J",
-            "fund": 22022,
+            "fund": 10000,
             "credit": 0,
-            "location": 6,
+            "location": 0,
             "alive": true,
             "prop": {
                 "bomb": 0,
@@ -59,28 +59,22 @@
         }
     ],
     "houses": {
-        "1": {
-            "owner": "S",
-            "level": 0
-        },
-        "3": {
-            "owner": "A",
-            "level": 0
-        },
-        "6": {
-            "owner": "J",
-            "level": 0
-        }
+
+    },
+    "god": {
+        "spawn_cooldown": 9,
+        "location": -1,
+        "duration": 0
     },
     "placed_prop": {
         "bomb": [],
         "barrier": []
     },
     "game": {
-        "now_player": 1,
-        "next_player": 2,
+        "now_player": 0,
+        "next_player": 1,
         "started": true,
-        "ended": true,
+        "ended": false,
         "winner": -1
     }
 }

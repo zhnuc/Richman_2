@@ -63,6 +63,12 @@ void save_game_dump(const char* filename) {
     }
     fprintf(file, "\n    },\n");
 
+    fprintf(file, "    \"god\": {\n");
+    fprintf(file, "        \"spawn_cooldown\": %d,\n", g_game_state.god.spawn_cooldown);
+    fprintf(file, "        \"location\": %d,\n", g_game_state.god.location);
+    fprintf(file, "        \"duration\": %d\n", g_game_state.god.duration);
+    fprintf(file, "    },\n");
+
     fprintf(file, "    \"placed_prop\": {\n");
     fprintf(file, "        \"bomb\": [");
     bool first_bomb = true;
@@ -202,6 +208,22 @@ void parse_player_buff(const char* player_obj, const char* player_end, Buff* buf
     buff->god = extract_int_value(buff_obj_start, "god", buff_obj_end);
     buff->prison = extract_int_value(buff_obj_start, "prison", buff_obj_end);
     buff->hospital = extract_int_value(buff_obj_start, "hospital", buff_obj_end);
+}
+
+// 解析god对象
+void parse_and_load_god(const char* content) {
+    char* god_start = strstr(content, "\"god\":");
+    if (!god_start) return;
+
+    char* obj_start = strchr(god_start, '{');
+    if (!obj_start) return;
+
+    char* obj_end = find_matching_brace(obj_start);
+    if (!obj_end) return;
+
+    g_game_state.god.spawn_cooldown = extract_int_value(obj_start, "spawn_cooldown", obj_end);
+    g_game_state.god.location = extract_int_value(obj_start, "location", obj_end);
+    g_game_state.god.duration = extract_int_value(obj_start, "duration", obj_end);
 }
 
 // 解析players数组
@@ -387,6 +409,7 @@ int load_game_preset(const char* filename) {
 
     parse_and_load_players(content);
     parse_and_load_houses(content);
+    parse_and_load_god(content);
     parse_and_load_placed_prop(content);
     parse_and_load_game_info(content);
 
