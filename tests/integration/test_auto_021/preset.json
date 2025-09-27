@@ -45,6 +45,11 @@
             "level": 0
         }
     },
+    "god": {
+        "spawn_cooldown": 0,
+        "location": 50,
+        "duration": 5
+    },
     "placed_prop": {
         "bomb": [],
         "barrier": [8]

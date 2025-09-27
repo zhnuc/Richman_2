@@ -41,7 +41,7 @@
         {
             "index": 2,
             "name": "S",
-            "fund": 10200,
+            "fund": 10000,
             "credit": 0,
             "location": 0,
             "alive": true,

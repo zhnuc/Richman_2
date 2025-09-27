@@ -22,7 +22,7 @@
         {
             "index": 1,
             "name": "A",
-            "fund": 10050,
+            "fund": 10000,
             "credit": 0,
             "location": 0,
             "alive": true,
@@ -48,6 +48,11 @@
     "placed_prop": {
         "bomb": [],
         "barrier": []
+    },
+    "god": {
+        "spawn_cooldown": 0,
+        "location": 50,
+        "duration": 5
     },
     "game": {
         "now_player": 1,
