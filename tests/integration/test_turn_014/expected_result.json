@@ -22,7 +22,7 @@
         {
             "index": 1,
             "name": "A",
-            "fund": 10199,
+            "fund": 10000,
             "credit": 0,
             "location": 0,
             "alive": true,
