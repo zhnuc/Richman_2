@@ -22,6 +22,11 @@
     ],
     "houses": {
     },
+    "god": {
+        "spawn_cooldown": 10,
+        "location": -1,
+        "duration": 0
+    },
     "placed_prop": {
         "bomb": [],
         "barrier": []
