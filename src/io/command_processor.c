@@ -30,8 +30,7 @@ void switch_to_next_player();
 
 
 void process_command(const char* command) {
-    // 在处理新命令前清空旧消息
-    g_last_action_message[0] = '\0';
+    // 不再在这里清空消息，而是在消息显示后清空
     char message_buffer[1024] = {0};
 
     char lower_command[100];
@@ -500,9 +499,8 @@ void run_game(void) {
             // 先将移动消息打印出来
             if (strlen(g_last_action_message) > 0) {
                 printf("%s", g_last_action_message);
+                g_last_action_message[0] = '\0'; // 打印后清空
             }
-            // 清空，为事件消息做准备
-            g_last_action_message[0] = '\0';
 
             // 执行落地事件，这可能会产生新的交互或消息
             on_player_land(player_for_interaction);
@@ -515,6 +513,12 @@ void run_game(void) {
             // 完成后，清除所有状态
             g_game_state.game.interaction_pending = false;
             g_last_action_message[0] = '\0';
+        } else {
+            // 如果没有交互，但有其他消息（如财神出现），在这里打印
+            if (strlen(g_last_action_message) > 0) {
+                printf("%s", g_last_action_message);
+                g_last_action_message[0] = '\0'; // 打印后清空
+            }
         }
 
         printf("%s%c%s> ", current_player->color, current_player->name[0], COLOR_RESET);
@@ -532,7 +536,7 @@ void run_game(void) {
         printf(CLEAR_SCREEN);
         display_map();
 
-        // 在显示提示符前，打印上一条动作消息
+        // 在显示提示符前，打印命令处理后产生的消息
         if (strlen(g_last_action_message) > 0) {
             // 如果没有待处理的交互，就在这里打印消息
             if (!g_game_state.game.interaction_pending) {
