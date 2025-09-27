@@ -32,7 +32,7 @@ void update_god_status() {
         if (g_game_state.god.duration <= 0) {
             printf("财神在位置 %d 停留时间结束，消失了。\n", g_game_state.god.location);
             g_game_state.god.location = -1;
-            g_game_state.god.spawn_cooldown = 10; // 重置冷却
+            g_game_state.god.spawn_cooldown = rand() % 11; // 重置冷却
         }
     } else { // 财神未出现
         g_game_state.god.spawn_cooldown--;
@@ -62,5 +62,5 @@ void trigger_god_encounter(Player* player, int location) {
     printf("玩家 %s 在位置 %d 遇到了财神！获得财神附身效果。\n", player->name, location);
     player->buff.god = 5; // 获得5回合财神附身
     g_game_state.god.location = -1; // 财神被领取后消失
-    g_game_state.god.spawn_cooldown = 10; // 重置冷却
+    g_game_state.god.spawn_cooldown = rand() % 11; // 重置冷却
 }
