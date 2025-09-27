@@ -69,9 +69,11 @@ typedef struct {
 typedef struct {
     int now_player_id; // 当前操作玩家
     int next_player_id; // 下一操作玩家
+    int last_player_id; // 上一个行动的玩家ID
     bool started;      // 游戏是否开始
     bool ended;        // 游戏是否结束
     int winner_id;     // 胜者 ID，未结束为 -1
+    bool interaction_pending; // 是否有待处理的交互
 } Game;
 
 // 顶层游戏状态结构

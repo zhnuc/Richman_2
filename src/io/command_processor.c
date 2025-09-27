@@ -162,8 +162,8 @@ void handle_roll_command() {
     snprintf(message_buffer, sizeof(message_buffer), "%s 前进 %d 步，到达位置 %d\n", current_player->name, final_steps, current_player->location);
     strncat(g_last_action_message, message_buffer, sizeof(g_last_action_message) - strlen(g_last_action_message) - 1);
 
-    // 触发到达事件
-    on_player_land(current_player);
+    // 不在这里触发事件，只标记需要交互
+    g_game_state.game.interaction_pending = true;
 
     // 切换到下一个玩家（游戏未结束时）
     if (!g_game_state.game.ended) {
@@ -214,8 +214,8 @@ void handle_step_command(const char* command) {
         snprintf(message_buffer, sizeof(message_buffer), "%s 前进 %d 步，到达位置 %d\n", current_player->name, final_steps, current_player->location);
         strncat(g_last_action_message, message_buffer, sizeof(g_last_action_message) - strlen(g_last_action_message) - 1);
         
-        // 触发到达事件
-        on_player_land(current_player);
+        // 不在这里触发事件，只标记需要交互
+        g_game_state.game.interaction_pending = true;
         
         // 切换到下一个玩家（游戏未结束时）
         if (!g_game_state.game.ended) {
@@ -493,9 +493,28 @@ void run_game(void) {
         // }
         
         
-        // 在显示提示符前，打印上一条动作消息
-        if (strlen(g_last_action_message) > 0) {
-            printf("%s", g_last_action_message);
+        // 如果有待处理的交互，现在执行它
+        if (g_game_state.game.interaction_pending) {
+            Player* player_for_interaction = &g_game_state.players[g_game_state.game.last_player_id];
+            
+            // 先将移动消息打印出来
+            if (strlen(g_last_action_message) > 0) {
+                printf("%s", g_last_action_message);
+            }
+            // 清空，为事件消息做准备
+            g_last_action_message[0] = '\0';
+
+            // 执行落地事件，这可能会产生新的交互或消息
+            on_player_land(player_for_interaction);
+
+            // 打印落地事件产生的消息（例如买地成功、获得点数等）
+            if (strlen(g_last_action_message) > 0) {
+                printf("%s", g_last_action_message);
+            }
+
+            // 完成后，清除所有状态
+            g_game_state.game.interaction_pending = false;
+            g_last_action_message[0] = '\0';
         }
 
         printf("%s%c%s> ", current_player->color, current_player->name[0], COLOR_RESET);
@@ -513,18 +532,18 @@ void run_game(void) {
         printf(CLEAR_SCREEN);
         display_map();
 
-        if (!g_game_state.game.ended) {
-            //wait_for_enter();
-        }
-        
-        // 如果读取到EOF，则退出
-        if (feof(stdin)) {
-            break;
+        // 在显示提示符前，打印上一条动作消息
+        if (strlen(g_last_action_message) > 0) {
+            // 如果没有待处理的交互，就在这里打印消息
+            if (!g_game_state.game.interaction_pending) {
+                 printf("%s", g_last_action_message);
+            }
         }
     }
 }
 
 void switch_to_next_player() {
+    g_game_state.game.last_player_id = g_game_state.game.now_player_id;
     g_game_state.game.now_player_id = (g_game_state.game.now_player_id + 1) % g_game_state.player_count;
     g_game_state.game.next_player_id = (g_game_state.game.now_player_id + 1) % g_game_state.player_count;
 }
