@@ -40,14 +40,14 @@
         }
     ],
     "houses": {},
-    "placed_prop": {
-        "bomb": [],
-        "barrier": []
-    },
     "god": {
         "spawn_cooldown": 0,
         "location": 50,
         "duration": 5
+    },
+    "placed_prop": {
+        "bomb": [],
+        "barrier": []
     },
     "game": {
         "now_player": 0,
