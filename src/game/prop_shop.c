@@ -16,8 +16,7 @@ typedef struct {
 // 道具信息数据表
 static PropInfo prop_info[] = {
     {1, "路障", PROP_BARRIER_PRICE, "#"},
-    {2, "机器娃娃", PROP_ROBOT_PRICE, "无"},
-    {3, "炸弹", PROP_BOMB_PRICE, "@"}
+    {2, "机器娃娃", PROP_ROBOT_PRICE, "无"}
 };
 
 static int prop_count = sizeof(prop_info) / sizeof(PropInfo);
@@ -98,9 +97,6 @@ bool buy_prop(Player* player, int prop_id) {
             break;
         case 2: // 机器娃娃
             player->prop.robot++;
-            break;
-        case 3: // 炸弹
-            player->prop.bomb++;
             break;
     }
     
