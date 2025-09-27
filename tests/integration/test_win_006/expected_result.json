@@ -48,7 +48,7 @@
     "god": {
         "spawn_cooldown": 0,
         "location": 50,
-        "duration": 5
+        "duration": 4
     },
     "placed_prop": {
         "bomb": [],

@@ -42,7 +42,7 @@
     "houses": {},
     "god": {
         "spawn_cooldown": 0,
-        "location": 50,
+        "location": 67,
         "duration": 5
     },
     "placed_prop": {

@@ -35,7 +35,7 @@
         "now_player": 0,
         "next_player": 1,
         "started": true,
-        "ended": false,
-        "winner": -1
+        "ended": true,
+        "winner": 0
     }
 }

@@ -5,7 +5,7 @@
             "name": "Q",
             "fund": 10000,
             "credit": 0,
-            "location": 0,
+            "location": 49,
             "alive": true,
             "prop": {
                 "bomb": 0,
@@ -42,7 +42,7 @@
     "houses": {},
     "god": {
         "spawn_cooldown": 0,
-        "location": 50,
+        "location": 30,
         "duration": 5
     },
     "placed_prop": {
