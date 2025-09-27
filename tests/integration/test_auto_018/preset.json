@@ -49,6 +49,11 @@
         "bomb": [],
         "barrier": []
     },
+    "god": {
+        "spawn_cooldown": 0,
+        "location": 50,
+        "duration": 5
+    },
     "game": {
         "now_player": 0,
         "next_player": 1,
