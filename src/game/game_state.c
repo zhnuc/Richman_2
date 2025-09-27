@@ -33,6 +33,11 @@ void init_game_state(void) {
     memset(g_game_state.placed_prop.bomb, 0, sizeof(g_game_state.placed_prop.bomb));
     memset(g_game_state.placed_prop.barrier, 0, sizeof(g_game_state.placed_prop.barrier));
     
+    // 初始化财神状态
+    g_game_state.god.spawn_cooldown = 10;
+    g_game_state.god.location = -1;
+    g_game_state.god.duration = 0;
+
     // 初始化游戏信息
     g_game_state.game.now_player_id = 0;
     g_game_state.game.next_player_id = 1;

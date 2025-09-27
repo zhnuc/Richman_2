@@ -63,6 +63,12 @@ void save_game_dump(const char* filename) {
     }
     fprintf(file, "\n    },\n");
 
+    fprintf(file, "    \"god\": {\n");
+    fprintf(file, "        \"spawn_cooldown\": %d,\n", g_game_state.god.spawn_cooldown);
+    fprintf(file, "        \"location\": %d,\n", g_game_state.god.location);
+    fprintf(file, "        \"duration\": %d\n", g_game_state.god.duration);
+    fprintf(file, "    },\n");
+
     fprintf(file, "    \"placed_prop\": {\n");
     fprintf(file, "        \"bomb\": [");
     bool first_bomb = true;
@@ -202,6 +208,47 @@ void parse_player_buff(const char* player_obj, const char* player_end, Buff* buf
     buff->god = extract_int_value(buff_obj_start, "god", buff_obj_end);
     buff->prison = extract_int_value(buff_obj_start, "prison", buff_obj_end);
     buff->hospital = extract_int_value(buff_obj_start, "hospital", buff_obj_end);
+}
+
+// 解析god对象
+void parse_and_load_god(const char* content) {
+    // 查找顶级的 god 对象，而不是 buff 中的 god 字段
+    // 我们需要查找 "god": { 的模式，而不仅仅是 "god":
+    const char* search_pos = content;
+    const char* god_start = NULL;
+    
+    // 循环查找所有的 "god": 直到找到后面跟着 { 的那个
+    while ((search_pos = strstr(search_pos, "\"god\":")) != NULL) {
+        const char* check_pos = search_pos + strlen("\"god\":");
+        // 跳过空白字符
+        while (*check_pos == ' ' || *check_pos == '\t' || *check_pos == '\n' || *check_pos == '\r') {
+            check_pos++;
+        }
+        // 检查是否是对象开始
+        if (*check_pos == '{') {
+            god_start = search_pos;
+            break;
+        }
+        search_pos++; // 继续查找下一个
+    }
+    
+    if (!god_start) {
+        return;
+    }
+
+    char* obj_start = strchr(god_start, '{');
+    if (!obj_start) {
+        return;
+    }
+
+    char* obj_end = find_matching_brace(obj_start);
+    if (!obj_end) {
+        return;
+    }
+
+    g_game_state.god.spawn_cooldown = extract_int_value(obj_start, "spawn_cooldown", obj_end);
+    g_game_state.god.location = extract_int_value(obj_start, "location", obj_end);
+    g_game_state.god.duration = extract_int_value(obj_start, "duration", obj_end);
 }
 
 // 解析players数组
@@ -387,6 +434,7 @@ int load_game_preset(const char* filename) {
 
     parse_and_load_players(content);
     parse_and_load_houses(content);
+    parse_and_load_god(content);
     parse_and_load_placed_prop(content);
     parse_and_load_game_info(content);
 

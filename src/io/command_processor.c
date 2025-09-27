@@ -5,6 +5,7 @@
 #include "../game/map.h"
 #include "../game/land.h"
 #include "../game/block_system.h"
+#include "../game/god_system.h"
 #include "../io/colors.h"
 #include "json_serializer.h"
 #include "utils.h"
@@ -14,6 +15,9 @@
 #include <stdbool.h>
 #include <time.h>
 #include <ctype.h>
+
+// 全局消息缓冲区
+char g_last_action_message[1024] = {0};
 
 // 函数声明
 void handle_roll_command();
@@ -26,6 +30,9 @@ void switch_to_next_player();
 
 
 void process_command(const char* command) {
+    // 不再在这里清空消息，而是在消息显示后清空
+    char message_buffer[1024] = {0};
+
     char lower_command[100];
     for (int i = 0; command[i]; i++) {
         lower_command[i] = tolower(command[i]);
@@ -45,7 +52,7 @@ void process_command(const char* command) {
         if (sscanf(command, "sell %d", &location) == 1) {
             handle_sell_command(location);
         } else {
-            printf("格式错误，请使用: sell <位置>\n");
+            snprintf(message_buffer, sizeof(message_buffer), "格式错误，请使用: sell <位置>\n");
         }
     } else if (strncmp(lower_command, "block ", 6) == 0) {
         int relative_distance;
@@ -53,15 +60,7 @@ void process_command(const char* command) {
             Player* current_player = &g_game_state.players[g_game_state.game.now_player_id];
             handle_block_command(current_player, relative_distance);
         } else {
-            printf("格式错误，请使用: block <相对距离>\n");
-        }
-    } else if (strncmp(lower_command, "bomb ", 5) == 0) {
-        int relative_distance;
-        if (sscanf(command, "bomb %d", &relative_distance) == 1) {
-            Player* current_player = &g_game_state.players[g_game_state.game.now_player_id];
-            handle_bomb_command(current_player, relative_distance);
-        } else {
-            printf("格式错误，请使用: bomb <相对距离>\n");
+            snprintf(message_buffer, sizeof(message_buffer), "格式错误，请使用: block <相对距离>\n");
         }
     } else if (strcmp(lower_command, "robot") == 0) {
         Player* current_player = &g_game_state.players[g_game_state.game.now_player_id];
@@ -75,58 +74,65 @@ void process_command(const char* command) {
         if (sscanf(command, "create_player %s %d", name, &fund) == 2) {
             Player* p = create_player(g_game_state.player_count, name, fund);
             if (p) {
-                printf("创建玩家成功: %s\n", p->name);
+                snprintf(message_buffer, sizeof(message_buffer), "创建玩家成功: %s\n", p->name);
             } else {
-                printf("创建玩家失败\n");
+                snprintf(message_buffer, sizeof(message_buffer), "创建玩家失败\n");
             }
         } else {
-            printf("格式错误，请使用: create_player <姓名> <资金>\n");
+            snprintf(message_buffer, sizeof(message_buffer), "格式错误，请使用: create_player <姓名> <资金>\n");
         }
     } else if (strcmp(lower_command, "status") == 0) {
         print_game_state();
     } else if (strcmp(lower_command, "dump") == 0) {
         // dump命令: 默认保存为dump.json
         save_game_dump("dump.json");
-        printf("游戏状态已保存到: dump.json\n");
+        snprintf(message_buffer, sizeof(message_buffer), "游戏状态已保存到: dump.json\n");
     } else if (strncmp(lower_command, "dump ", 5) == 0) {
         // dump命令: dump filename.json (带文件名)
         char filename[256];
         if (sscanf(command, "dump %s", filename) == 1) {
             save_game_dump(filename);
-            printf("游戏状态已保存到: %s\n", filename);
+            snprintf(message_buffer, sizeof(message_buffer), "游戏状态已保存到: %s\n", filename);
         } else {
-            printf("格式错误，请使用: dump 或 dump <文件名>\n");
+            snprintf(message_buffer, sizeof(message_buffer), "格式错误，请使用: dump 或 dump <文件名>\n");
         }
     } else if (strncmp(lower_command, "load", 4) == 0) {
         // load命令: load filename.json
         char filename[256];
         if (sscanf(command, "load %s", filename) == 1) {
             if (load_game_preset(filename) == 0) {
-                printf("游戏状态已从 %s 加载\n", filename);
+                snprintf(message_buffer, sizeof(message_buffer), "游戏状态已从 %s 加载\n", filename);
             } else {
-                printf("加载失败: %s\n", filename);
+                snprintf(message_buffer, sizeof(message_buffer), "加载失败: %s\n", filename);
             }
         } else {
-            printf("格式错误，请使用: load <文件名>\n");
+            snprintf(message_buffer, sizeof(message_buffer), "格式错误，请使用: load <文件名>\n");
         }
     } else {
-        printf("未知命令: %s\n", command);
+        snprintf(message_buffer, sizeof(message_buffer), "未知命令: %s\n", command);
         handle_help_command();
+    }
+
+    // 如果有消息，则拼接到全局消息缓冲区
+    if (strlen(message_buffer) > 0) {
+        strncat(g_last_action_message, message_buffer, sizeof(g_last_action_message) - strlen(g_last_action_message) - 1);
     }
 }
 
 void handle_roll_command() {
     Player* current_player = &g_game_state.players[g_game_state.game.now_player_id];
+    char message_buffer[256];
     
     int steps = rand() % 6 + 1;
-    printf("玩家 %s 掷骰子，点数为 %d\n", current_player->name, steps);
+    snprintf(message_buffer, sizeof(message_buffer), "玩家 %s 掷骰子，点数为 %d\n", current_player->name, steps);
+    strncat(g_last_action_message, message_buffer, sizeof(g_last_action_message) - strlen(g_last_action_message) - 1);
     
     int original_location = current_player->location;
     int final_location = (original_location + steps) % MAP_SIZE;
     int final_steps = steps;
     bool stopped_by_block = false;
     
-    // 检查移动路径上是否有路障或炸弹
+    // 检查移动路径上是否有路障或财神
     for (int i = 1; i <= steps; i++) {
         int next_location = (original_location + i) % MAP_SIZE;
         
@@ -137,32 +143,26 @@ void handle_roll_command() {
             stopped_by_block = true;
             break; // 找到第一个路障就停下
         }
-        
-        // 检查炸弹爆炸
-        if (check_bomb_explosion(next_location)) {
-            // 踩中炸弹，触发爆炸效果
-            printf("%s 前进 %d 步，踩中位置 %d 的炸弹\n", current_player->name, i, next_location);
-            trigger_bomb_explosion(current_player, next_location);
-            
-            // 即使被炸也要切换到下一个玩家（游戏未结束时）
-            if (!g_game_state.game.ended) {
-                switch_to_next_player();
-            }
-            return;
+
+        // 检查是否遇到财神
+        if (check_god_encounter(next_location)) {
+            // 遇到财神不停下，直接触发效果
+            trigger_god_encounter(current_player, next_location);
         }
     }
     
-    // 移动到最终位置
-    current_player->location = final_location;
-    printf("%s 前进 %d 步，到达位置 %d\n", current_player->name, final_steps, current_player->location);
-
-    // 触发到达事件
-    on_player_land(current_player);
-
-    // 如果是被路障拦截，在触发完地点事件后再触发路障效果
+    // 如果是被路障拦截，在移动和触发地点事件前，先触发路障效果
     if (stopped_by_block) {
         trigger_block_interception(current_player, final_location);
     }
+
+    // 移动到最终位置
+    current_player->location = final_location;
+    snprintf(message_buffer, sizeof(message_buffer), "%s 前进 %d 步，到达位置 %d\n", current_player->name, final_steps, current_player->location);
+    strncat(g_last_action_message, message_buffer, sizeof(g_last_action_message) - strlen(g_last_action_message) - 1);
+
+    // 不在这里触发事件，只标记需要交互
+    g_game_state.game.interaction_pending = true;
 
     // 切换到下一个玩家（游戏未结束时）
     if (!g_game_state.game.ended) {
@@ -174,14 +174,17 @@ void handle_step_command(const char* command) {
     int steps;
     if (sscanf(command, "step %d", &steps) == 1) {
         Player* current_player = &g_game_state.players[g_game_state.game.now_player_id];
+        char message_buffer[256];
         
-        printf("遥控骰子，指定步数为 %d\n", steps);
+        snprintf(message_buffer, sizeof(message_buffer), "遥控骰子，指定步数为 %d\n", steps);
+        strncat(g_last_action_message, message_buffer, sizeof(g_last_action_message) - strlen(g_last_action_message) - 1);
+
         int original_location = current_player->location;
         int final_location = (original_location + steps) % MAP_SIZE;
         int final_steps = steps;
         bool stopped_by_block = false;
         
-        // 检查移动路径上是否有路障或炸弹
+        // 检查移动路径上是否有路障或财神
         for (int i = 1; i <= steps; i++) {
             int next_location = (original_location + i) % MAP_SIZE;
             
@@ -192,91 +195,116 @@ void handle_step_command(const char* command) {
                 stopped_by_block = true;
                 break; // 找到第一个路障就停下
             }
-            
-            // 检查炸弹爆炸
-            if (check_bomb_explosion(next_location)) {
-                // 踩中炸弹，触发爆炸效果
-                printf("%s 前进 %d 步，踩中位置 %d 的炸弹\n", current_player->name, i, next_location);
-                trigger_bomb_explosion(current_player, next_location);
-                
-                // 即使被炸也要切换到下一个玩家（游戏未结束时）
-                if (!g_game_state.game.ended) {
-                    switch_to_next_player();
-                }
-                return;
+
+            // 检查是否遇到财神
+            if (check_god_encounter(next_location)) {
+                // 遇到财神不停下，直接触发效果
+                trigger_god_encounter(current_player, next_location);
             }
+        }
+        
+        // 如果是被路障拦截，在移动和触发地点事件前，先触发路障效果
+        if (stopped_by_block) {
+            trigger_block_interception(current_player, final_location);
         }
         
         // 移动到最终位置
         current_player->location = final_location;
-        printf("%s 前进 %d 步，到达位置 %d\n", current_player->name, final_steps, current_player->location);
-
-        // 触发到达事件
-        on_player_land(current_player);
-
-        // 如果是被路障拦截，在触发完地点事件后再触发路障效果
-        if (stopped_by_block) {
-            trigger_block_interception(current_player, final_location);
-        }
-
+        snprintf(message_buffer, sizeof(message_buffer), "%s 前进 %d 步，到达位置 %d\n", current_player->name, final_steps, current_player->location);
+        strncat(g_last_action_message, message_buffer, sizeof(g_last_action_message) - strlen(g_last_action_message) - 1);
+        
+        // 不在这里触发事件，只标记需要交互
+        g_game_state.game.interaction_pending = true;
+        
         // 切换到下一个玩家（游戏未结束时）
         if (!g_game_state.game.ended) {
             switch_to_next_player();
         }
     } else {
-        printf("无效的 step 命令格式, e.g., step 5\n");
+        snprintf(g_last_action_message, sizeof(g_last_action_message), "无效的 step 命令格式, e.g., step 5\n");
     }
 }
 
 void handle_query_command() {
     Player* p = &g_game_state.players[g_game_state.game.now_player_id];
-    printf("资产查询:\n");
-    printf("  玩家: %s\n", p->name);
-    printf("  资金: %d 元\n", p->fund);
-    printf("  点数: %d 点\n", p->credit);
-    printf("  位置: %d\n", p->location);
-    printf("  道具:\n");
-    printf("    - 炸弹: %d\n", p->prop.bomb);
-    printf("    - 路障: %d\n", p->prop.barrier);
-    printf("    - 机器娃娃: %d\n", p->prop.robot);
-    printf("  房产:\n");
+    char buffer[1024] = {0};
+    char line[256];
+
+    strncat(buffer, "资产查询:\n", sizeof(buffer) - strlen(buffer) - 1);
+    snprintf(line, sizeof(line), "  玩家: %s\n", p->name);
+    strncat(buffer, line, sizeof(buffer) - strlen(buffer) - 1);
+    snprintf(line, sizeof(line), "  资金: %d 元\n", p->fund);
+    strncat(buffer, line, sizeof(buffer) - strlen(buffer) - 1);
+    snprintf(line, sizeof(line), "  点数: %d 点\n", p->credit);
+    strncat(buffer, line, sizeof(buffer) - strlen(buffer) - 1);
+    snprintf(line, sizeof(line), "  位置: %d\n", p->location);
+    strncat(buffer, line, sizeof(buffer) - strlen(buffer) - 1);
+    strncat(buffer, "  道具:\n", sizeof(buffer) - strlen(buffer) - 1);
+    snprintf(line, sizeof(line), "    - 路障: %d\n", p->prop.barrier);
+    strncat(buffer, line, sizeof(buffer) - strlen(buffer) - 1);
+    snprintf(line, sizeof(line), "    - 机器娃娃: %d\n", p->prop.robot);
+    strncat(buffer, line, sizeof(buffer) - strlen(buffer) - 1);
+    strncat(buffer, "  状态:\n", sizeof(buffer) - strlen(buffer) - 1);
+    if (p->buff.god > 0) {
+        snprintf(line, sizeof(line), "    - 财神附身: 剩余 %d 回合\n", p->buff.god);
+        strncat(buffer, line, sizeof(buffer) - strlen(buffer) - 1);
+    } else {
+        strncat(buffer, "    - (无特殊状态)\n", sizeof(buffer) - strlen(buffer) - 1);
+    }
+    strncat(buffer, "  房产:\n", sizeof(buffer) - strlen(buffer) - 1);
     bool has_house = false;
     for (int i = 0; i < MAP_SIZE; i++) {
         if (g_game_state.houses[i].owner_id == p->index) {
-            printf("    - 位置 %d (等级 %d)\n", i, g_game_state.houses[i].level);
+            snprintf(line, sizeof(line), "    - 位置 %d (等级 %d)\n", i, g_game_state.houses[i].level);
+            strncat(buffer, line, sizeof(buffer) - strlen(buffer) - 1);
             has_house = true;
         }
     }
     if (!has_house) {
-        printf("    (无)\n");
+        strncat(buffer, "    (无)\n", sizeof(buffer) - strlen(buffer) - 1);
     }
+
+    // 显示地图财神状态
+    strncat(buffer, "  地图财神状态:\n", sizeof(buffer) - strlen(buffer) - 1);
+    if (g_game_state.god.location != -1) {
+        snprintf(line, sizeof(line), "    - 位置: %d (剩余 %d 回合消失)\n", g_game_state.god.location, g_game_state.god.duration);
+        strncat(buffer, line, sizeof(buffer) - strlen(buffer) - 1);
+    } else {
+        snprintf(line, sizeof(line), "    - (未出现，预计 %d 回合后出现)\n", g_game_state.god.spawn_cooldown);
+        strncat(buffer, line, sizeof(buffer) - strlen(buffer) - 1);
+    }
+    
+    // 将所有内容复制到全局消息缓冲区
+    strncpy(g_last_action_message, buffer, sizeof(g_last_action_message) - 1);
 }
 
 void handle_help_command() {
-    printf("命令帮助:\n");
-    printf("roll\n");
-    printf("  掷骰子命令，行走1～6步，步数由随机算法产生。\n");
-    printf("sell n\n");
-    printf("  出售房产，n为房产在地图上的绝对位置，出售价格为投资总成本的2倍。\n");
-    printf("block n\n");
-    printf("  放置路障，n为前后相对距离（±10步），玩家经过将被拦截。\n");
-    printf("bomb n\n");
-    printf("  放置炸弹，n为前后相对距离（±10步），玩家经过将被炸伤，住院3天。\n");
-    printf("robot\n");
-    printf("  清扫前方10步内的障碍（路障、炸弹）。\n");
-    printf("query\n");
-    printf("  显示自家资产信息。\n");
-    printf("help\n");
-    printf("  查看命令帮助。\n");
-    printf("quit\n");
-    printf("  强制退出游戏。\n");
-    printf("step n\n");
-    printf("  遥控骰子，指定行走步数。\n");
+    char help_text[] =
+        "命令帮助:\n"
+        "roll\n"
+        "  掷骰子命令，行走1～6步，步数由随机算法产生。\n"
+        "sell n\n"
+        "  出售房产，n为房产在地图上的绝对位置，出售价格为投资总成本的2倍。\n"
+        "block n\n"
+        "  放置路障，n为前后相对距离（±10步），玩家经过将被拦截。\n"
+        "robot\n"
+        "  清扫前方10步内的障碍（路障）。\n"
+        "query\n"
+        "  显示自家资产信息。\n"
+        "help\n"
+        "  查看命令帮助。\n"
+        "quit\n"
+        "  强制退出游戏。\n"
+        "step n\n"
+        "  遥控骰子，指定行走步数。\n";
+    strncpy(g_last_action_message, help_text, sizeof(g_last_action_message) - 1);
 }
 
 void handle_quit_command() {
-        g_game_state.game.ended = true;
-        printf("游戏结束。\n");
+    g_game_state.game.ended = true;
+    strncpy(g_last_action_message, "游戏已退出。\n", sizeof(g_last_action_message) - 1);
+    printf("%s", g_last_action_message); // 确保退出前能看到消息
+    exit(0); // 强制退出程序
 }
 
 
@@ -354,15 +382,17 @@ void show_welcome_and_select_character(int initial_fund) {
     }
 }
 
-void run_game(void) {
+void run_game_with_preset(const char* preset_file) {
     printf("大富翁游戏启动\n");
     srand(time(NULL)); // 初始化随机数种子
     
     init_game_state();
     bool game_started = false;
     
-    if (load_game_preset("preset.json") == 0) {
-        printf("使用预设配置\n");
+    const char* file_to_load = preset_file ? preset_file : "preset.json";
+    if (load_game_preset(file_to_load) == 0) {
+        printf("使用预设配置: %s\n", file_to_load);
+        game_started = true; // 使用预设配置时，游戏已经开始
     } else {
         int initial_fund = get_initial_fund();
         show_welcome_and_select_character(initial_fund);
@@ -375,13 +405,14 @@ void run_game(void) {
     }
     
     char command[100];
-    char last_command_output[1024] = {0}; // 用于存储上一条命令的输出
 
     // 初始显示
     printf(CLEAR_SCREEN);
     display_map();
 
     while (true) {
+        // 财神状态更新应该移到合适的地方，而不是在每个游戏循环中都调用
+
         // 检查胜利条件
         if (game_started) {
             int alive_count = 0;
@@ -395,16 +426,20 @@ void run_game(void) {
 
             if (alive_count <= 1) {
                 if (!g_game_state.game.ended) {
+                    char message_buffer[256];
+                    if (winner_id != -1) {
+                        snprintf(message_buffer, sizeof(message_buffer), "游戏结束！胜利者是 %s！\n", g_game_state.players[winner_id].name);
+                    } else {
+                        snprintf(message_buffer, sizeof(message_buffer), "所有玩家都已破产，游戏结束！\n");
+                    }
+                    strncpy(g_last_action_message, message_buffer, sizeof(g_last_action_message) - 1);
+                    
                     printf(CLEAR_SCREEN);
                     display_map();
-                    if (winner_id != -1) {
-                        printf("游戏结束！胜利者是 %s！\n", g_game_state.players[winner_id].name);
-                    } else {
-                        printf("所有玩家都已破产，游戏结束！\n");
-                    }
+                    printf("%s", g_last_action_message);
+
                     g_game_state.game.ended = true;
                     g_game_state.game.winner_id = winner_id;
-                    //wait_for_enter();
                 }
                 // 游戏结束后仍然允许处理命令（如dump）
             }
@@ -414,42 +449,76 @@ void run_game(void) {
 
         // 检查财神附身状态
         if (current_player->buff.god > 0) {
-            printf("玩家 %s 有财神附身，免过路费，剩余 %d 回合。\n",
+            char message_buffer[256];
+            snprintf(message_buffer, sizeof(message_buffer), "玩家 %s 有财神附身，免过路费，剩余 %d 回合。\n",
                    current_player->name, current_player->buff.god);
+            strncat(g_last_action_message, message_buffer, sizeof(g_last_action_message) - strlen(g_last_action_message) - 1);
             current_player->buff.god--;
         }
 
         // 检查当前玩家是否已破产，如果是则自动跳过（游戏未结束时）
         if (!current_player->alive && !g_game_state.game.ended) {
+            char message_buffer[256];
+            snprintf(message_buffer, sizeof(message_buffer), "玩家 %s 已破产，自动跳过。\n", current_player->name);
+            strncat(g_last_action_message, message_buffer, sizeof(g_last_action_message) - strlen(g_last_action_message) - 1);
             switch_to_next_player();
             continue; // 直接进入下一位玩家
         }
         
         // 检查当前玩家是否在住院，如果是则自动跳过
-        if (current_player->buff.hospital > 0) {
-            printf("玩家 %s 正在住院治疗，剩余 %d 天，本轮自动跳过。\n", 
-                   current_player->name, current_player->buff.hospital);
-            current_player->buff.hospital--;
-            if (!g_game_state.game.ended) {
-                switch_to_next_player();
-            }
-            //wait_for_enter();
-            continue; // 直接进入下一轮
-        }
+        // if (current_player->buff.hospital > 0) {
+        //     printf("玩家 %s 正在住院治疗，剩余 %d 天，本轮自动跳过。\n", 
+        //            current_player->name, current_player->buff.hospital);
+        //     current_player->buff.hospital--;
+        //     if (!g_game_state.game.ended) {
+        //         switch_to_next_player();
+        //     }
+        //     //wait_for_enter();
+        //     continue; // 直接进入下一轮
+        // }
         
         // 检查当前玩家是否在监狱，如果是则自动跳过
-        if (current_player->buff.prison > 0) {
-            printf("玩家 %s 正在监狱中，剩余 %d 天，本轮自动跳过。\n", 
-                   current_player->name, current_player->buff.prison);
-            current_player->buff.prison--;
-            if (!g_game_state.game.ended) {
-                switch_to_next_player();
+        // if (current_player->buff.prison > 0) {
+        //     printf("玩家 %s 正在监狱中，剩余 %d 天，本轮自动跳过。\n", 
+        //            current_player->name, current_player->buff.prison);
+        //     current_player->buff.prison--;
+        //     if (!g_game_state.game.ended) {
+        //         switch_to_next_player();
+        //     }
+        //     //wait_for_enter();
+        //     continue; // 直接进入下一轮
+        // }
+        
+        
+        // 如果有待处理的交互，现在执行它
+        if (g_game_state.game.interaction_pending) {
+            Player* player_for_interaction = &g_game_state.players[g_game_state.game.last_player_id];
+            
+            // 先将移动消息打印出来
+            if (strlen(g_last_action_message) > 0) {
+                printf("%s", g_last_action_message);
+                g_last_action_message[0] = '\0'; // 打印后清空
             }
-            //wait_for_enter();
-            continue; // 直接进入下一轮
+
+            // 执行落地事件，这可能会产生新的交互或消息
+            on_player_land(player_for_interaction);
+
+            // 打印落地事件产生的消息（例如买地成功、获得点数等）
+            if (strlen(g_last_action_message) > 0) {
+                printf("%s", g_last_action_message);
+            }
+
+            // 完成后，清除所有状态
+            g_game_state.game.interaction_pending = false;
+            g_last_action_message[0] = '\0';
+        } else {
+            // 如果没有交互，但有其他消息（如财神出现），在这里打印
+            if (strlen(g_last_action_message) > 0) {
+                printf("%s", g_last_action_message);
+                g_last_action_message[0] = '\0'; // 打印后清空
+            }
         }
-        
-        
+
         printf("%s%c%s> ", current_player->color, current_player->name[0], COLOR_RESET);
         
         if (fgets(command, sizeof(command), stdin) == NULL) {
@@ -459,24 +528,28 @@ void run_game(void) {
         // Trim trailing newline
         command[strcspn(command, "\n")] = 0;
         
-        // 在处理命令前清屏并重绘
+        process_command(command);
+
+        // 在处理命令后清屏并重绘
         printf(CLEAR_SCREEN);
         display_map();
 
-        process_command(command);
-
-        if (!g_game_state.game.ended) {
-            //wait_for_enter();
-        }
-        
-        // 如果读取到EOF，则退出
-        if (feof(stdin)) {
-            break;
+        // 在显示提示符前，打印命令处理后产生的消息
+        if (strlen(g_last_action_message) > 0) {
+            // 如果没有待处理的交互，就在这里打印消息
+            if (!g_game_state.game.interaction_pending) {
+                 printf("%s", g_last_action_message);
+            }
         }
     }
 }
 
 void switch_to_next_player() {
+    g_game_state.game.last_player_id = g_game_state.game.now_player_id;
     g_game_state.game.now_player_id = (g_game_state.game.now_player_id + 1) % g_game_state.player_count;
     g_game_state.game.next_player_id = (g_game_state.game.now_player_id + 1) % g_game_state.player_count;
+}
+
+void run_game(void) {
+    run_game_with_preset(NULL);
 }
