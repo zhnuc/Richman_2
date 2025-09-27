@@ -5,7 +5,7 @@
             "name": "Q", 
             "fund": 10000,
             "credit": 0,
-            "location": 49,
+            "location": 52,
             "alive": true,
             "prop": {
                 "bomb": 0,

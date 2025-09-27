@@ -3,7 +3,7 @@
         {
             "index": 0,
             "name": "Q",
-            "fund": -1,
+            "fund": 0,
             "credit": 0,
             "location": 5,
             "alive": false,
