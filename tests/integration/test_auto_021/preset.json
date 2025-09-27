@@ -45,14 +45,14 @@
             "level": 0
         }
     },
-    "placed_prop": {
-        "bomb": [],
-        "barrier": [8]
-    },
     "god": {
         "spawn_cooldown": 0,
         "location": 50,
         "duration": 5
+    },
+    "placed_prop": {
+        "bomb": [],
+        "barrier": [8]
     },
     "game": {
         "now_player": 0,
