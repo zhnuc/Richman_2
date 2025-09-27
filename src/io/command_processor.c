@@ -55,14 +55,6 @@ void process_command(const char* command) {
         } else {
             printf("格式错误，请使用: block <相对距离>\n");
         }
-    } else if (strncmp(lower_command, "bomb ", 5) == 0) {
-        int relative_distance;
-        if (sscanf(command, "bomb %d", &relative_distance) == 1) {
-            Player* current_player = &g_game_state.players[g_game_state.game.now_player_id];
-            handle_bomb_command(current_player, relative_distance);
-        } else {
-            printf("格式错误，请使用: bomb <相对距离>\n");
-        }
     } else if (strcmp(lower_command, "robot") == 0) {
         Player* current_player = &g_game_state.players[g_game_state.game.now_player_id];
         handle_robot_command(current_player);
@@ -126,7 +118,7 @@ void handle_roll_command() {
     int final_steps = steps;
     bool stopped_by_block = false;
     
-    // 检查移动路径上是否有路障或炸弹
+    // 检查移动路径上是否有路障
     for (int i = 1; i <= steps; i++) {
         int next_location = (original_location + i) % MAP_SIZE;
         
@@ -136,19 +128,6 @@ void handle_roll_command() {
             final_steps = i;
             stopped_by_block = true;
             break; // 找到第一个路障就停下
-        }
-        
-        // 检查炸弹爆炸
-        if (check_bomb_explosion(next_location)) {
-            // 踩中炸弹，触发爆炸效果
-            printf("%s 前进 %d 步，踩中位置 %d 的炸弹\n", current_player->name, i, next_location);
-            trigger_bomb_explosion(current_player, next_location);
-            
-            // 即使被炸也要切换到下一个玩家（游戏未结束时）
-            if (!g_game_state.game.ended) {
-                switch_to_next_player();
-            }
-            return;
         }
     }
     
@@ -181,7 +160,7 @@ void handle_step_command(const char* command) {
         int final_steps = steps;
         bool stopped_by_block = false;
         
-        // 检查移动路径上是否有路障或炸弹
+        // 检查移动路径上是否有路障
         for (int i = 1; i <= steps; i++) {
             int next_location = (original_location + i) % MAP_SIZE;
             
@@ -191,19 +170,6 @@ void handle_step_command(const char* command) {
                 final_steps = i;
                 stopped_by_block = true;
                 break; // 找到第一个路障就停下
-            }
-            
-            // 检查炸弹爆炸
-            if (check_bomb_explosion(next_location)) {
-                // 踩中炸弹，触发爆炸效果
-                printf("%s 前进 %d 步，踩中位置 %d 的炸弹\n", current_player->name, i, next_location);
-                trigger_bomb_explosion(current_player, next_location);
-                
-                // 即使被炸也要切换到下一个玩家（游戏未结束时）
-                if (!g_game_state.game.ended) {
-                    switch_to_next_player();
-                }
-                return;
             }
         }
         
@@ -236,7 +202,6 @@ void handle_query_command() {
     printf("  点数: %d 点\n", p->credit);
     printf("  位置: %d\n", p->location);
     printf("  道具:\n");
-    printf("    - 炸弹: %d\n", p->prop.bomb);
     printf("    - 路障: %d\n", p->prop.barrier);
     printf("    - 机器娃娃: %d\n", p->prop.robot);
     printf("  房产:\n");
@@ -260,10 +225,8 @@ void handle_help_command() {
     printf("  出售房产，n为房产在地图上的绝对位置，出售价格为投资总成本的2倍。\n");
     printf("block n\n");
     printf("  放置路障，n为前后相对距离（±10步），玩家经过将被拦截。\n");
-    printf("bomb n\n");
-    printf("  放置炸弹，n为前后相对距离（±10步），玩家经过将被炸伤，住院3天。\n");
     printf("robot\n");
-    printf("  清扫前方10步内的障碍（路障、炸弹）。\n");
+    printf("  清扫前方10步内的障碍（路障）。\n");
     printf("query\n");
     printf("  显示自家资产信息。\n");
     printf("help\n");
@@ -375,7 +338,6 @@ void run_game(void) {
     }
     
     char command[100];
-    char last_command_output[1024] = {0}; // 用于存储上一条命令的输出
 
     // 初始显示
     printf(CLEAR_SCREEN);
@@ -426,28 +388,28 @@ void run_game(void) {
         }
         
         // 检查当前玩家是否在住院，如果是则自动跳过
-        if (current_player->buff.hospital > 0) {
-            printf("玩家 %s 正在住院治疗，剩余 %d 天，本轮自动跳过。\n", 
-                   current_player->name, current_player->buff.hospital);
-            current_player->buff.hospital--;
-            if (!g_game_state.game.ended) {
-                switch_to_next_player();
-            }
-            //wait_for_enter();
-            continue; // 直接进入下一轮
-        }
+        // if (current_player->buff.hospital > 0) {
+        //     printf("玩家 %s 正在住院治疗，剩余 %d 天，本轮自动跳过。\n", 
+        //            current_player->name, current_player->buff.hospital);
+        //     current_player->buff.hospital--;
+        //     if (!g_game_state.game.ended) {
+        //         switch_to_next_player();
+        //     }
+        //     //wait_for_enter();
+        //     continue; // 直接进入下一轮
+        // }
         
         // 检查当前玩家是否在监狱，如果是则自动跳过
-        if (current_player->buff.prison > 0) {
-            printf("玩家 %s 正在监狱中，剩余 %d 天，本轮自动跳过。\n", 
-                   current_player->name, current_player->buff.prison);
-            current_player->buff.prison--;
-            if (!g_game_state.game.ended) {
-                switch_to_next_player();
-            }
-            //wait_for_enter();
-            continue; // 直接进入下一轮
-        }
+        // if (current_player->buff.prison > 0) {
+        //     printf("玩家 %s 正在监狱中，剩余 %d 天，本轮自动跳过。\n", 
+        //            current_player->name, current_player->buff.prison);
+        //     current_player->buff.prison--;
+        //     if (!g_game_state.game.ended) {
+        //         switch_to_next_player();
+        //     }
+        //     //wait_for_enter();
+        //     continue; // 直接进入下一轮
+        // }
         
         
         printf("%s%c%s> ", current_player->color, current_player->name[0], COLOR_RESET);

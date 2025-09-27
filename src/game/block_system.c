@@ -52,14 +52,6 @@ bool has_player_at_location(int location) {
     return false;
 }
 
-// 检查位置是否有炸弹
-bool has_bomb_at_location(int location) {
-    if (location < 0 || location >= MAP_SIZE) {
-        return false;
-    }
-    return g_game_state.placed_prop.bomb[location] == 1;
-}
-
 // 放置路障
 bool place_block(int player_index, int target_location) {
     (void)player_index; // 避免未使用参数警告
@@ -84,12 +76,6 @@ bool place_block(int player_index, int target_location) {
     // 检查该位置是否已有路障
     if (has_block_at_location(target_location)) {
         printf("该位置已有路障，无法放置。\n");
-        return false;
-    }
-    
-    // 检查该位置是否已有炸弹
-    if (has_bomb_at_location(target_location)) {
-        printf("该位置已有炸弹，无法放置路障。\n");
         return false;
     }
     
@@ -166,151 +152,12 @@ void display_all_blocks(void) {
     printf("\n");
 }
 
-// ========== 炸弹系统实现 ==========
-
-// 验证炸弹放置位置是否有效
-bool is_valid_bomb_position(int current_pos, int relative_distance) {
-    (void)current_pos; // 避免未使用参数警告
-    // 检查距离范围 (-10 到 +10)
-    if (abs(relative_distance) > BOMB_RANGE) {
-        return false;
-    }
-    // 不能在当前位置放置炸弹
-    if (relative_distance == 0) {
-        return false;
-    }
-    return true;
-}
-
-// 计算炸弹放置位置
-int calculate_bomb_position(int current_pos, int relative_distance) {
-    int target_pos = current_pos + relative_distance;
-    // 处理地图循环
-    while (target_pos < 0) target_pos += MAP_SIZE;
-    while (target_pos >= MAP_SIZE) target_pos -= MAP_SIZE;
-    return target_pos;
-}
-
-// 放置炸弹
-bool place_bomb(int player_index, int target_location) {
-    (void)player_index; // 避免未使用参数警告
-    // 检查位置有效性
-    if (target_location < 0 || target_location >= MAP_SIZE) {
-        printf("无效的放置位置。\n");
-        return false;
-    }
-    
-    // 检查是否为特殊建筑
-    if (is_special_building(target_location)) {
-        printf("不能在特殊建筑位置放置道具。\n");
-        return false;
-    }
-    
-    // 检查该位置是否有玩家
-    if (has_player_at_location(target_location)) {
-        printf("不能在有玩家的位置放置道具。\n");
-        return false;
-    }
-    
-    // 检查该位置是否已有炸弹
-    if (has_bomb_at_location(target_location)) {
-        printf("该位置已有炸弹，无法放置。\n");
-        return false;
-    }
-    
-    // 检查该位置是否已有路障
-    if (has_block_at_location(target_location)) {
-        printf("该位置已有路障，无法放置炸弹。\n");
-        return false;
-    }
-    
-    // 放置炸弹
-    g_game_state.placed_prop.bomb[target_location] = 1;
-    printf("炸弹已放置在位置 %d。\n", target_location);
-    return true;
-}
-
-// 移除炸弹
-void remove_bomb(int location) {
-    if (location >= 0 && location < MAP_SIZE) {
-        g_game_state.placed_prop.bomb[location] = 0;
-        printf("位置 %d 的炸弹已爆炸。\n", location);
-    }
-}
-
-// 检查炸弹爆炸
-bool check_bomb_explosion(int location) {
-    return has_bomb_at_location(location);
-}
-
-// 触发炸弹爆炸效果
-void trigger_bomb_explosion(Player* player, int location) {
-    printf("玩家 %s 踩中了位置 %d 的炸弹！\n", player->name, location);
-    printf("炸弹爆炸！%s 被炸伤，需要住院治疗。\n", player->name);
-    
-    // 将玩家送到医院
-    player->location = HOSPITAL_LOCATION;
-    printf("%s 被送到医院（位置 %d）。\n", player->name, HOSPITAL_LOCATION);
-    
-    // 设置住院状态
-    player->buff.hospital = HOSPITAL_DAYS;
-    printf("%s 将住院 %d 天。\n", player->name, HOSPITAL_DAYS);
-    
-    // 炸弹一次性使用，爆炸后移除
-    remove_bomb(location);
-}
-
-// 处理bomb命令
-bool handle_bomb_command(Player* player, int relative_distance) {
-    // 检查玩家是否有炸弹道具
-    if (player->prop.bomb <= 0) {
-        printf("您没有炸弹道具。\n");
-        return false;
-    }
-    
-    // 验证放置距离
-    if (!is_valid_bomb_position(player->location, relative_distance)) {
-        printf("无效的放置距离。炸弹只能放置在前后 %d 步范围内，且不能放置在当前位置。\n", BOMB_RANGE);
-        return false;
-    }
-    
-    // 计算目标位置
-    int target_location = calculate_bomb_position(player->location, relative_distance);
-    
-    // 放置炸弹
-    if (place_bomb(player->index, target_location)) {
-        // 消耗炸弹道具
-        player->prop.bomb--;
-        player->prop.total--;
-        printf("使用了一个炸弹道具。剩余炸弹：%d\n", player->prop.bomb);
-        return true;
-    }
-    
-    return false;
-}
-
-// 显示所有炸弹位置（调试用）
-void display_all_bombs(void) {
-    printf("当前地图上的炸弹位置：");
-    bool found = false;
-    for (int i = 0; i < MAP_SIZE; i++) {
-        if (has_bomb_at_location(i)) {
-            printf(" %d", i);
-            found = true;
-        }
-    }
-    if (!found) {
-        printf(" 无");
-    }
-    printf("\n");
-}
-
 // ========== 机器娃娃系统实现 ==========
 
-// 检查位置是否有任何道具（路障或炸弹）
+// 检查位置是否有任何道具（路障）
 bool has_any_prop_at_location(int location) {
     if (location < 0 || location >= MAP_SIZE) return false;
-    return has_block_at_location(location) || has_bomb_at_location(location);
+    return has_block_at_location(location);
 }
 
 // 清除单个位置的道具，返回实际清除的道具数量
@@ -321,13 +168,6 @@ int clear_single_prop(int location) {
     if (has_block_at_location(location)) {
         g_game_state.placed_prop.barrier[location] = 0;
         printf("清除了位置 %d 的路障。\n", location);
-        return 1;
-    }
-    
-    // 检查并清除炸弹
-    if (has_bomb_at_location(location)) {
-        g_game_state.placed_prop.bomb[location] = 0;
-        printf("清除了位置 %d 的炸弹。\n", location);
         return 1;
     }
     

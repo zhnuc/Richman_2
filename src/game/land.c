@@ -120,10 +120,10 @@ void pay_toll(Player* player, int location) {
     int toll = (land->price * (land->level + 1)) / 2;
 
     // 检查房主是否在医院或监狱
-    if (owner->buff.hospital > 0 || owner->buff.prison > 0) {
-        printf("房主 %s 正在医院或监狱中，免除本次过路费！\n", owner->name);
-        return;
-    }
+    // if (owner->buff.hospital > 0 || owner->buff.prison > 0) {
+    //     printf("房主 %s 正在医院或监狱中，免除本次过路费！\n", owner->name);
+    //     return;
+    // }
 
     // 检查财神附身
     if (player->buff.god > 0) {
@@ -207,18 +207,13 @@ void on_player_land(Player* player) {
             case 0:   // S - 起点
                 printf("您到达了起点。\n");
                 break;
-            case 14:  // H - 医院
-                printf("您到达了医院。\n");
-                break;
-            case 49:  // P - 监狱 
-                printf("您到达了监狱，被关押2天。\n");
-                player->buff.prison = 2;
+            case 14:  // H - 医院 -> 公园
+            case 49:  // P - 监狱 -> 公园
+            case 63:  // M - 魔法屋 -> 公园
+                printf("您到达了公园。\n");
                 break;
             case 35:  // G - 礼品屋
                 enter_gift_house(player);
-                break;
-            case 63:  // M - 魔法屋
-                printf("您到达了魔法屋，暂时无效果\n");
                 break;
             default:
                 // 检查是否是矿地 ($) - 位置64-69
