@@ -4,14 +4,14 @@
             "index": 0,
             "name": "Q",
             "fund": 10000,
-            "credit": 100,
-            "location": 28,
+            "credit": 0,
+            "location": 5,
             "alive": true,
             "prop": {
                 "bomb": 0,
-                "barrier": 8,
-                "robot": 2,
-                "total": 10
+                "barrier": 0,
+                "robot": 0,
+                "total": 0
             },
             "buff": {
                 "god": 0,
@@ -42,12 +42,12 @@
     "houses": {},
     "god": {
         "spawn_cooldown": 0,
-        "location": 66,
+        "location": 30,
         "duration": 5
     },
     "placed_prop": {
         "bomb": [],
-        "barrier": []
+        "barrier": [66, 14, 69]
     },
     "game": {
         "now_player": 1,
