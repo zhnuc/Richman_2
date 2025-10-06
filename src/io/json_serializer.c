@@ -55,7 +55,7 @@ void save_game_dump(const char* filename) {
                 fprintf(file, ",\n");
             }
             fprintf(file, "        \"%d\": {\n", i);
-            fprintf(file, "            \"owner\": \"%s\",\n", g_game_state.players[g_game_state.houses[i].owner_id].name);
+            fprintf(file, "            \"owner\": %d,\n", g_game_state.houses[i].owner_id);
             fprintf(file, "            \"level\": %d\n", g_game_state.houses[i].level);
             fprintf(file, "        }");
             first_house = false;
@@ -337,15 +337,22 @@ void parse_and_load_houses(const char* content) {
         if (loc >= 0 && loc < MAP_SIZE) {
             g_game_state.houses[loc].level = extract_int_value(house_obj_start, "level", house_obj_end);
 
-            char* owner_name = extract_string_value(house_obj_start, "owner", house_obj_end);
-            if (owner_name) {
-                for (int i = 0; i < g_game_state.player_count; i++) {
-                    if (strcmp(g_game_state.players[i].name, owner_name) == 0) {
-                        g_game_state.houses[loc].owner_id = g_game_state.players[i].index;
-                        break;
+            // 尝试作为整数解析owner（玩家索引）
+            int owner_id = extract_int_value(house_obj_start, "owner", house_obj_end);
+            if (owner_id >= 0 && owner_id < g_game_state.player_count) {
+                g_game_state.houses[loc].owner_id = owner_id;
+            } else {
+                // 如果不是整数，尝试作为字符串解析（玩家名称）
+                char* owner_name = extract_string_value(house_obj_start, "owner", house_obj_end);
+                if (owner_name) {
+                    for (int i = 0; i < g_game_state.player_count; i++) {
+                        if (strcmp(g_game_state.players[i].name, owner_name) == 0) {
+                            g_game_state.houses[loc].owner_id = g_game_state.players[i].index;
+                            break;
+                        }
                     }
+                    free(owner_name);
                 }
-                free(owner_name);
             }
         }
         current = house_obj_end + 1;

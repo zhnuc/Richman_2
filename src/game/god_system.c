@@ -36,10 +36,12 @@ void update_god_status() {
             snprintf(message_buffer, sizeof(message_buffer), "财神在位置 %d 停留时间结束，消失了。\n", g_game_state.god.location);
             strncat(g_last_action_message, message_buffer, sizeof(g_last_action_message) - strlen(g_last_action_message) - 1);
             g_game_state.god.location = -1;
-            g_game_state.god.spawn_cooldown = rand() % 11; // 重置冷却
+            g_game_state.god.spawn_cooldown = rand() % 11 + 1; // 重置冷却，确保至少为1
         }
     } else { // 财神未出现
-        g_game_state.god.spawn_cooldown--;
+        if (g_game_state.god.spawn_cooldown > 0) {
+            g_game_state.god.spawn_cooldown--;
+        }
         if (g_game_state.god.spawn_cooldown <= 0) {
             // 尝试生成财神
             int attempts = 100; // 避免死循环
@@ -68,6 +70,12 @@ void trigger_god_encounter(Player* player, int location) {
     snprintf(message_buffer, sizeof(message_buffer), "玩家 %s 在位置 %d 遇到了财神！获得财神附身效果。\n", player->name, location);
     strncat(g_last_action_message, message_buffer, sizeof(g_last_action_message) - strlen(g_last_action_message) - 1);
     player->buff.god = 5; // 获得5回合财神附身
+    
+    // 财神被遇到时，先消耗这一回合的duration
+    if (g_game_state.god.duration > 0) {
+        g_game_state.god.duration--;
+    }
+    
     g_game_state.god.location = -1; // 财神被领取后消失
-    g_game_state.god.spawn_cooldown = rand() % 11; // 重置冷却
+    g_game_state.god.spawn_cooldown = rand() % 10 + 1; // 重置冷却，确保至少为1
 }

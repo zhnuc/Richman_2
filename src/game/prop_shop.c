@@ -54,12 +54,19 @@ void show_prop_shop_menu(void) {
     printf("\n");
     printf("欢迎光临道具屋，请选择您所需要的道具：\n");
     printf("\n");
-    printf("道具    编号    价值（点数）    显示方式\n");
+    printf("道具      编号    价值（点数）    显示方式    拥有数量\n");
+    printf("----------------------------------------------------\n");
     
     for (int i = 0; i < prop_count; i++) {
         PropInfo* prop = &prop_info[i];
-        printf("%-8s %-8d %-12d %s\n", 
-               prop->name, prop->id, prop->price, prop->display_symbol);
+        int owned_count = 0;
+        if (prop->id == 1) { // 路障
+            owned_count = g_game_state.players[g_game_state.game.now_player_id].prop.barrier;
+        } else if (prop->id == 2) { // 机器娃娃
+            owned_count = g_game_state.players[g_game_state.game.now_player_id].prop.robot;
+        }
+        printf("%-10s %-8d %-12d %-10s %d\n", 
+               prop->name, prop->id, prop->price, prop->display_symbol, owned_count);
     }
     printf("\n");
     printf("请输入道具编号选择道具，按F退出道具屋：");
@@ -171,6 +178,15 @@ void enter_prop_shop(Player* player) {
                     snprintf(message_buffer, sizeof(message_buffer), "您的点数不足以购买任何道具，自动退出道具屋。\n");
                 }
                 // 将最终退出消息写入全局缓冲区
+                strncat(g_last_action_message, message_buffer, sizeof(g_last_action_message) - strlen(g_last_action_message) - 1);
+                break;
+            }
+        } else {
+            // 购买失败，检查是否应该退出道具屋
+            if (!has_prop_space(player)) {
+                char message_buffer[256];
+                printf("您的道具已满，自动退出道具屋。\n");
+                snprintf(message_buffer, sizeof(message_buffer), "您的道具已满，自动退出道具屋。\n");
                 strncat(g_last_action_message, message_buffer, sizeof(g_last_action_message) - strlen(g_last_action_message) - 1);
                 break;
             }

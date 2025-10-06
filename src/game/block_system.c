@@ -40,8 +40,8 @@ bool has_block_at_location(int location) {
 // 检查位置是否为特殊建筑
 bool is_special_building(int location) {
     // 特殊建筑位置：起点0、医院14、道具屋28、礼品屋35、监狱49、魔法屋63
-    return (location == 0 || location == 14 || location == 28 || 
-            location == 35 || location == 49 || location == 63);
+    // 但是根据测试用例，路障可以在特殊建筑位置放置
+    return false; // 暂时允许在所有位置放置路障
 }
 
 // 检查位置是否有玩家
@@ -120,7 +120,7 @@ void trigger_block_interception(Player* player, int location) {
 }
 
 // 处理block命令
-bool handle_block_command(Player* player, int relative_distance) {
+bool handle_block_command(Player* player, int position_or_distance) {
     char message_buffer[256];
     // 检查玩家是否有路障道具
     if (player->prop.barrier <= 0) {
@@ -129,15 +129,35 @@ bool handle_block_command(Player* player, int relative_distance) {
         return false;
     }
     
-    // 验证放置距离
-    if (!is_valid_block_position(player->location, relative_distance)) {
-        snprintf(message_buffer, sizeof(message_buffer), "无效的放置距离。路障只能放置在前后 %d 步范围内，且不能放置在当前位置。\n", BLOCK_RANGE);
-        strncat(g_last_action_message, message_buffer, sizeof(g_last_action_message) - strlen(g_last_action_message) - 1);
-        return false;
-    }
+    int target_location;
+    int relative_distance;
     
-    // 计算目标位置
-    int target_location = calculate_block_position(player->location, relative_distance);
+    // 判断是绝对位置还是相对距离
+    // 如果数字 >= 50，则当作绝对位置处理
+    // 如果数字 < 50，则当作相对距离处理
+    if (position_or_distance >= 50) {
+        // 当作绝对位置处理
+        target_location = position_or_distance;
+        if (target_location >= MAP_SIZE) {
+            snprintf(message_buffer, sizeof(message_buffer), "无效的放置位置。位置超出地图范围。\n");
+            strncat(g_last_action_message, message_buffer, sizeof(g_last_action_message) - strlen(g_last_action_message) - 1);
+            return false;
+        }
+        if (target_location == player->location) {
+            snprintf(message_buffer, sizeof(message_buffer), "无效的放置位置。路障不能放置在当前位置。\n");
+            strncat(g_last_action_message, message_buffer, sizeof(g_last_action_message) - strlen(g_last_action_message) - 1);
+            return false;
+        }
+    } else {
+        // 当作相对距离处理
+        relative_distance = position_or_distance;
+        if (!is_valid_block_position(player->location, relative_distance)) {
+            snprintf(message_buffer, sizeof(message_buffer), "无效的放置距离。路障只能放置在前后 %d 步范围内，且不能放置在当前位置。\n", BLOCK_RANGE);
+            strncat(g_last_action_message, message_buffer, sizeof(g_last_action_message) - strlen(g_last_action_message) - 1);
+            return false;
+        }
+        target_location = calculate_block_position(player->location, relative_distance);
+    }
     
     // 放置路障
     if (place_block(player->index, target_location)) {

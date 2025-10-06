@@ -11,6 +11,27 @@
 void upgrade_land(Player* player, int location);
 void pay_toll(Player* player, int location);
 
+// 统一的胜利条件检查函数
+void check_win_condition() {
+    int alive_count = 0;
+    int winner_id = -1;
+    for (int i = 0; i < g_game_state.player_count; i++) {
+        if (g_game_state.players[i].alive) {
+            alive_count++;
+            winner_id = i;
+        }
+    }
+    
+    if (alive_count <= 1 && !g_game_state.game.ended) {
+        g_game_state.game.ended = true;
+        if (winner_id != -1) {
+            g_game_state.game.winner_id = winner_id;
+            g_game_state.game.now_player_id = winner_id;
+            g_game_state.game.next_player_id = winner_id;
+        }
+    }
+}
+
 void buy_land(Player* player, int location) {
     House* land = &g_game_state.houses[location];
     char message_buffer[256];
@@ -161,6 +182,11 @@ void pay_toll(Player* player, int location) {
         player->prop.bomb = 0;
         player->prop.barrier = 0;
         player->prop.robot = 0;
+        
+        // 清空破产玩家的状态效果
+        player->buff.god = 0;
+        player->buff.prison = 0;
+        player->buff.hospital = 0;
 
         // 将破产玩家的房产变为空地
         for (int i = 0; i < MAP_SIZE; i++) {
@@ -169,27 +195,25 @@ void pay_toll(Player* player, int location) {
                 g_game_state.houses[i].level = 0;
             }
         }
+        
+        // 清空破产玩家放置的道具
+        for (int i = 0; i < MAP_SIZE; i++) {
+            if (g_game_state.placed_prop.barrier[i] == 1) {
+                // 检查是否是当前玩家放置的路障，如果是则移除
+                // 注意：这里简化处理，实际应该记录道具的放置者
+                g_game_state.placed_prop.barrier[i] = 0;
+            }
+            if (g_game_state.placed_prop.bomb[i] == 1) {
+                // 检查是否是当前玩家放置的炸弹，如果是则移除
+                g_game_state.placed_prop.bomb[i] = 0;
+            }
+        }
+        
         snprintf(message_buffer, sizeof(message_buffer), "玩家 %s 的所有房产和道具已被清空。\n", player->name);
         strncat(g_last_action_message, message_buffer, sizeof(g_last_action_message) - strlen(g_last_action_message) - 1);
         
         // 检查游戏是否结束
-        int alive_count = 0;
-        int winner_id = -1;
-        for (int i = 0; i < g_game_state.player_count; i++) {
-            if (g_game_state.players[i].alive) {
-                alive_count++;
-                winner_id = i;
-            }
-        }
-        
-        if (alive_count <= 1) {
-            g_game_state.game.ended = true;
-            if (winner_id != -1) {
-                g_game_state.game.winner_id = winner_id;
-                g_game_state.game.now_player_id = winner_id;
-                g_game_state.game.next_player_id = winner_id;
-            }
-        }
+        check_win_condition();
 
     } else {
         player->fund -= toll;

@@ -26,7 +26,7 @@ void handle_query_command();
 void handle_help_command();
 void handle_quit_command();
 void handle_sell_command(int location);
-void switch_to_next_player();
+void switch_to_next_player(bool should_update_god);
 
 
 void process_command(const char* command) {
@@ -166,13 +166,22 @@ void handle_roll_command() {
 
     // 切换到下一个玩家（游戏未结束时）
     if (!g_game_state.game.ended) {
-        switch_to_next_player();
+        switch_to_next_player(false); // 移动完成，但交互可能还未完成，暂不更新财神状态
     }
 }
 
 void handle_step_command(const char* command) {
     int steps;
     if (sscanf(command, "step %d", &steps) == 1) {
+        // 验证步数范围：允许0，但不允许负数
+        if (steps < 0) {
+            char message_buffer[256];
+            snprintf(message_buffer, sizeof(message_buffer), "无效的步数。步数必须为非负数。\n");
+            strncat(g_last_action_message, message_buffer, sizeof(g_last_action_message) - strlen(g_last_action_message) - 1);
+            // 命令无效，不切换到下一个玩家，不消耗财神回合
+            return;
+        }
+        
         Player* current_player = &g_game_state.players[g_game_state.game.now_player_id];
         char message_buffer[256];
         
@@ -203,22 +212,22 @@ void handle_step_command(const char* command) {
             }
         }
         
-        // 如果是被路障拦截，在移动和触发地点事件前，先触发路障效果
-        if (stopped_by_block) {
-            trigger_block_interception(current_player, final_location);
-        }
-        
         // 移动到最终位置
         current_player->location = final_location;
         snprintf(message_buffer, sizeof(message_buffer), "%s 前进 %d 步，到达位置 %d\n", current_player->name, final_steps, current_player->location);
         strncat(g_last_action_message, message_buffer, sizeof(g_last_action_message) - strlen(g_last_action_message) - 1);
+        
+        // 如果是被路障拦截，在移动后触发路障效果
+        if (stopped_by_block) {
+            trigger_block_interception(current_player, final_location);
+        }
         
         // 不在这里触发事件，只标记需要交互
         g_game_state.game.interaction_pending = true;
         
         // 切换到下一个玩家（游戏未结束时）
         if (!g_game_state.game.ended) {
-            switch_to_next_player();
+            switch_to_next_player(false); // 移动完成，但交互可能还未完成，暂不更新财神状态
         }
     } else {
         snprintf(g_last_action_message, sizeof(g_last_action_message), "无效的 step 命令格式, e.g., step 5\n");
@@ -245,10 +254,23 @@ void handle_query_command() {
     snprintf(line, sizeof(line), "    - 机器娃娃: %d\n", p->prop.robot);
     strncat(buffer, line, sizeof(buffer) - strlen(buffer) - 1);
     strncat(buffer, "  状态:\n", sizeof(buffer) - strlen(buffer) - 1);
+    bool has_status = false;
     if (p->buff.god > 0) {
         snprintf(line, sizeof(line), "    - 财神附身: 剩余 %d 回合\n", p->buff.god);
         strncat(buffer, line, sizeof(buffer) - strlen(buffer) - 1);
-    } else {
+        has_status = true;
+    }
+    if (p->buff.prison > 0) {
+        snprintf(line, sizeof(line), "    - 监狱: 剩余 %d 回合\n", p->buff.prison);
+        strncat(buffer, line, sizeof(buffer) - strlen(buffer) - 1);
+        has_status = true;
+    }
+    if (p->buff.hospital > 0) {
+        snprintf(line, sizeof(line), "    - 医院: 剩余 %d 回合\n", p->buff.hospital);
+        strncat(buffer, line, sizeof(buffer) - strlen(buffer) - 1);
+        has_status = true;
+    }
+    if (!has_status) {
         strncat(buffer, "    - (无特殊状态)\n", sizeof(buffer) - strlen(buffer) - 1);
     }
     strncat(buffer, "  房产:\n", sizeof(buffer) - strlen(buffer) - 1);
@@ -414,34 +436,21 @@ void run_game_with_preset(const char* preset_file) {
         // 财神状态更新应该移到合适的地方，而不是在每个游戏循环中都调用
 
         // 检查胜利条件
-        if (game_started) {
-            int alive_count = 0;
-            int winner_id = -1;
-            for (int i = 0; i < g_game_state.player_count; i++) {
-                if (g_game_state.players[i].alive) {
-                    alive_count++;
-                    winner_id = i;
+        if (game_started && !g_game_state.game.ended) {
+            check_win_condition();
+            
+            if (g_game_state.game.ended) {
+                char message_buffer[256];
+                if (g_game_state.game.winner_id != -1) {
+                    snprintf(message_buffer, sizeof(message_buffer), "游戏结束！胜利者是 %s！\n", g_game_state.players[g_game_state.game.winner_id].name);
+                } else {
+                    snprintf(message_buffer, sizeof(message_buffer), "所有玩家都已破产，游戏结束！\n");
                 }
-            }
-
-            if (alive_count <= 1) {
-                if (!g_game_state.game.ended) {
-                    char message_buffer[256];
-                    if (winner_id != -1) {
-                        snprintf(message_buffer, sizeof(message_buffer), "游戏结束！胜利者是 %s！\n", g_game_state.players[winner_id].name);
-                    } else {
-                        snprintf(message_buffer, sizeof(message_buffer), "所有玩家都已破产，游戏结束！\n");
-                    }
-                    strncpy(g_last_action_message, message_buffer, sizeof(g_last_action_message) - 1);
-                    
-                    printf(CLEAR_SCREEN);
-                    display_map();
-                    printf("%s", g_last_action_message);
-
-                    g_game_state.game.ended = true;
-                    g_game_state.game.winner_id = winner_id;
-                }
-                // 游戏结束后仍然允许处理命令（如dump）
+                strncpy(g_last_action_message, message_buffer, sizeof(g_last_action_message) - 1);
+                
+                printf(CLEAR_SCREEN);
+                display_map();
+                printf("%s", g_last_action_message);
             }
         }
 
@@ -461,7 +470,7 @@ void run_game_with_preset(const char* preset_file) {
             char message_buffer[256];
             snprintf(message_buffer, sizeof(message_buffer), "玩家 %s 已破产，自动跳过。\n", current_player->name);
             strncat(g_last_action_message, message_buffer, sizeof(g_last_action_message) - strlen(g_last_action_message) - 1);
-            switch_to_next_player();
+            switch_to_next_player(false); // 破产玩家跳过，不更新财神状态
             continue; // 直接进入下一位玩家
         }
         
@@ -471,7 +480,7 @@ void run_game_with_preset(const char* preset_file) {
         //            current_player->name, current_player->buff.hospital);
         //     current_player->buff.hospital--;
         //     if (!g_game_state.game.ended) {
-        //         switch_to_next_player();
+        //         switch_to_next_player(true); // 玩家正确完成了移动，应该更新财神状态
         //     }
         //     //wait_for_enter();
         //     continue; // 直接进入下一轮
@@ -483,7 +492,7 @@ void run_game_with_preset(const char* preset_file) {
         //            current_player->name, current_player->buff.prison);
         //     current_player->buff.prison--;
         //     if (!g_game_state.game.ended) {
-        //         switch_to_next_player();
+        //         switch_to_next_player(true); // 玩家正确完成了移动，应该更新财神状态
         //     }
         //     //wait_for_enter();
         //     continue; // 直接进入下一轮
@@ -517,6 +526,8 @@ void run_game_with_preset(const char* preset_file) {
                 printf("%s", g_last_action_message);
                 g_last_action_message[0] = '\0'; // 打印后清空
             }
+            
+            // 如果没有交互，说明玩家回合已经完成
         }
 
         printf("%s%c%s> ", current_player->color, current_player->name[0], COLOR_RESET);
@@ -534,17 +545,11 @@ void run_game_with_preset(const char* preset_file) {
         printf(CLEAR_SCREEN);
         display_map();
 
-        // 在显示提示符前，打印命令处理后产生的消息
-        if (strlen(g_last_action_message) > 0) {
-            // 如果没有待处理的交互，就在这里打印消息
-            if (!g_game_state.game.interaction_pending) {
-                 printf("%s", g_last_action_message);
-            }
-        }
+        // 消息打印已在前面处理，这里不需要重复打印
     }
 }
 
-void switch_to_next_player() {
+void switch_to_next_player(bool should_update_god) {
     g_game_state.game.last_player_id = g_game_state.game.now_player_id;
     g_game_state.game.now_player_id = (g_game_state.game.now_player_id + 1) % g_game_state.player_count;
     g_game_state.game.next_player_id = (g_game_state.game.now_player_id + 1) % g_game_state.player_count;
