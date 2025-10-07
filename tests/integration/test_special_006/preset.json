@@ -5,7 +5,7 @@
             "name": "Q",
             "fund": 10000,
             "credit": 0,
-            "location": 69,
+            "location": 0,
             "alive": true,
             "prop": {
                 "bomb": 0,
@@ -24,7 +24,7 @@
             "name": "A",
             "fund": 10000,
             "credit": 0,
-            "location": 65,
+            "location": 20,
             "alive": true,
             "prop": {
                 "bomb": 0,
@@ -42,12 +42,17 @@
     "houses": {},
     "god": {
         "spawn_cooldown": 0,
-        "location": 63,
-        "duration": 5
+        "location": -1,
+        "duration": 0
     },
     "placed_prop": {
         "bomb": [],
-        "barrier": []
+        "barrier": [
+            3,
+            4,
+            5,
+            6
+        ]
     },
     "game": {
         "now_player": 0,

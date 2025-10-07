@@ -41,14 +41,14 @@
     ],
     "houses": {
         "5": {
-            "owner": 0,
+            "owner": "Q",
             "level": 3
         }
     },
     "god": {
         "spawn_cooldown": 0,
         "location": 30,
-        "duration": 4
+        "duration": 5
     },
     "placed_prop": {
         "bomb": [],

@@ -55,7 +55,15 @@ void save_game_dump(const char* filename) {
                 fprintf(file, ",\n");
             }
             fprintf(file, "        \"%d\": {\n", i);
-            fprintf(file, "            \"owner\": %d,\n", g_game_state.houses[i].owner_id);
+            
+            // 输出玩家名称而不是ID
+            int owner_id = g_game_state.houses[i].owner_id;
+            if (owner_id >= 0 && owner_id < g_game_state.player_count) {
+                fprintf(file, "            \"owner\": \"%s\",\n", g_game_state.players[owner_id].name);
+            } else {
+                fprintf(file, "            \"owner\": %d,\n", owner_id);
+            }
+            
             fprintf(file, "            \"level\": %d\n", g_game_state.houses[i].level);
             fprintf(file, "        }");
             first_house = false;
@@ -337,21 +345,32 @@ void parse_and_load_houses(const char* content) {
         if (loc >= 0 && loc < MAP_SIZE) {
             g_game_state.houses[loc].level = extract_int_value(house_obj_start, "level", house_obj_end);
 
-            // 尝试作为整数解析owner（玩家索引）
-            int owner_id = extract_int_value(house_obj_start, "owner", house_obj_end);
-            if (owner_id >= 0 && owner_id < g_game_state.player_count) {
-                g_game_state.houses[loc].owner_id = owner_id;
-            } else {
-                // 如果不是整数，尝试作为字符串解析（玩家名称）
-                char* owner_name = extract_string_value(house_obj_start, "owner", house_obj_end);
-                if (owner_name) {
-                    for (int i = 0; i < g_game_state.player_count; i++) {
-                        if (strcmp(g_game_state.players[i].name, owner_name) == 0) {
-                            g_game_state.houses[loc].owner_id = g_game_state.players[i].index;
-                            break;
-                        }
+            // 先尝试作为字符串解析owner（玩家名称）
+            char* owner_name = extract_string_value(house_obj_start, "owner", house_obj_end);
+            if (owner_name) {
+                // 找到匹配的玩家名称
+                bool found = false;
+                for (int i = 0; i < g_game_state.player_count; i++) {
+                    if (strcmp(g_game_state.players[i].name, owner_name) == 0) {
+                        g_game_state.houses[loc].owner_id = g_game_state.players[i].index;
+                        found = true;
+                        break;
                     }
-                    free(owner_name);
+                }
+                free(owner_name);
+                
+                // 如果没找到匹配的玩家名，尝试作为整数解析
+                if (!found) {
+                    int owner_id = extract_int_value(house_obj_start, "owner", house_obj_end);
+                    if (owner_id >= 0 && owner_id < g_game_state.player_count) {
+                        g_game_state.houses[loc].owner_id = owner_id;
+                    }
+                }
+            } else {
+                // 如果不是字符串，尝试作为整数解析（玩家索引）
+                int owner_id = extract_int_value(house_obj_start, "owner", house_obj_end);
+                if (owner_id >= 0 && owner_id < g_game_state.player_count) {
+                    g_game_state.houses[loc].owner_id = owner_id;
                 }
             }
         }

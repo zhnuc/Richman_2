@@ -41,7 +41,7 @@
     ],
     "houses": {
         "8": {
-            "owner": 1,
+            "owner": "A",
             "level": 2
         }
     },

@@ -5,7 +5,7 @@
             "name": "Q",
             "fund": 10000,
             "credit": 0,
-            "location": 69,
+            "location": 0,
             "alive": true,
             "prop": {
                 "bomb": 0,
@@ -24,7 +24,26 @@
             "name": "A",
             "fund": 10000,
             "credit": 0,
-            "location": 65,
+            "location": 18,
+            "alive": true,
+            "prop": {
+                "bomb": 0,
+                "barrier": 0,
+                "robot": 0,
+                "total": 0
+            },
+            "buff": {
+                "god": 0,
+                "prison": 0,
+                "hospital": 0
+            }
+        },
+        {
+            "index": 2,
+            "name": "S",
+            "fund": 10000,
+            "credit": 0,
+            "location": 30,
             "alive": true,
             "prop": {
                 "bomb": 0,
@@ -42,16 +61,16 @@
     "houses": {},
     "god": {
         "spawn_cooldown": 0,
-        "location": 63,
-        "duration": 5
+        "location": -1,
+        "duration": 0
     },
     "placed_prop": {
         "bomb": [],
         "barrier": []
     },
     "game": {
-        "now_player": 0,
-        "next_player": 1,
+        "now_player": 2,
+        "next_player": 0,
         "started": true,
         "ended": false,
         "winner": -1

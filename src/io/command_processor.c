@@ -552,7 +552,11 @@ void run_game_with_preset(const char* preset_file) {
 void switch_to_next_player(bool should_update_god) {
     g_game_state.game.last_player_id = g_game_state.game.now_player_id;
     g_game_state.game.now_player_id = (g_game_state.game.now_player_id + 1) % g_game_state.player_count;
-    g_game_state.game.next_player_id = (g_game_state.game.now_player_id + 1) % g_game_state.player_count;
+    
+    // 只在游戏未结束时更新next_player
+    if (!g_game_state.game.ended) {
+        g_game_state.game.next_player_id = (g_game_state.game.now_player_id + 1) % g_game_state.player_count;
+    }
     
     // 当轮到第一个玩家时，表示新一轮开始，更新财神状态
     if (g_game_state.game.now_player_id == 0) {

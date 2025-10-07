@@ -1,0 +1,82 @@
+================================================================================
+�� 测试用例完整性检查报告
+================================================================================
+
+应有测试用例总数：155 个
+实际测试用例总数：105 个
+缺失测试用例总数：50 个
+完成度：67.7%
+
+================================================================================
+❌ 缺失的测试用例（按类别）
+================================================================================
+
+【回合切换机制】缺失 13 个：
+  - test_turn_002
+  - test_turn_003
+  - test_turn_004
+  - test_turn_005
+  - test_turn_008
+  - test_turn_008a
+  - test_turn_008b
+  - test_turn_008c
+  - test_turn_008d
+  - test_turn_008e
+  - test_turn_008f
+  - test_turn_008g
+  - test_turn_013
+
+【购买询问机制】缺失 4 个：
+  - test_auto_013
+  - test_auto_014
+  - test_auto_016
+  - test_auto_019
+
+【特殊状态交互】缺失 5 个：
+  - test_status_002
+  - test_status_003
+  - test_status_005
+  - test_status_006
+  - test_status_008
+
+【复杂交互】缺失 6 个：
+  - test_interaction_002
+  - test_interaction_003
+  - test_interaction_004
+  - test_interaction_005
+  - test_interaction_006
+  - test_interaction_010
+
+【状态异常】缺失 5 个：
+  - test_state_001
+  - test_state_002
+  - test_state_003
+  - test_state_004
+  - test_state_005
+
+【大量道具场景】缺失 6 个：
+  - test_special_001
+  - test_special_002
+  - test_special_003
+  - test_special_004
+  - test_special_005
+  - test_special_006
+
+【极端游戏状态】缺失 6 个：
+  - test_extreme_001
+  - test_extreme_002
+  - test_extreme_003
+  - test_extreme_004
+  - test_extreme_005
+  - test_extreme_006
+
+【压力边界】缺失 5 个：
+  - test_stress_001
+  - test_stress_002
+  - test_stress_003
+  - test_stress_004
+  - test_stress_005
+
+================================================================================
+总计缺失：50 个测试用例
+================================================================================
