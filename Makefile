@@ -136,6 +136,11 @@ find_new_tests:
 	@echo "🔍 查找未配置的新测试用例..."
 	@python3 $(TEST_DIR)/scripts/run_agile_tests.py $(PWD) --find-new
 
+# 禁用所有测试用例
+disable_all_tests:
+	@echo "🚫 禁用所有测试用例..."
+	@$(MAKE) batch_update PATTERN=test_ STATUS=disabled
+
 # 显示帮助
 help:
 	@echo "大富翁游戏 Makefile 使用说明"
@@ -161,11 +166,12 @@ help:
 	@echo "make batch_update PATTERN=pattern STATUS=status - 批量更新测试状态"
 	@echo "make auto_add_tests [STATUS=status] - 自动添加新测试用例"
 	@echo "make find_new_tests - 查找新测试用例（不添加）"
+	@echo "make disable_all_tests - 禁用所有测试用例"
 	@echo ""
 	@echo "💡 示例:"
 	@echo "make batch_update PATTERN=test_startup* STATUS=active"
-	@echo "make auto_add_tests STATUS=wip"
-	@echo "make mark_test TEST=test_help_00{1,2,5,6} STATUS=pending"
+	@echo "make auto_add_tests STATUS=active"
+	@echo "make mark_test TEST=test_help_00{1,2,5,6} STATUS=active"
 
 .PHONY: all test integration_test test_all clean create_test run debug help \
-        list_tests batch_update auto_add_tests find_new_tests
+        list_tests batch_update auto_add_tests find_new_tests disable_all_tests

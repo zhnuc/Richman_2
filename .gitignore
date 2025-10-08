@@ -30,4 +30,4 @@ tests/integration/**/output.txt
 tests/integration/**/dump.json
 test_output/
 coverage.info
-./rich
+rich
