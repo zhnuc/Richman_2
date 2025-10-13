@@ -1,0 +1,10 @@
+12
+preset preset.json
+status
+buy 36
+status
+buy 49
+status
+buy 63
+status
+quit

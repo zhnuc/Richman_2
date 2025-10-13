@@ -173,14 +173,7 @@ void handle_roll_command() {
 void handle_step_command(const char* command) {
     int steps;
     if (sscanf(command, "step %d", &steps) == 1) {
-        // 验证步数范围：允许0，但不允许负数
-        if (steps < 0) {
-            char message_buffer[256];
-            snprintf(message_buffer, sizeof(message_buffer), "无效的步数。步数必须为非负数。\n");
-            strncat(g_last_action_message, message_buffer, sizeof(g_last_action_message) - strlen(g_last_action_message) - 1);
-            // 命令无效，不切换到下一个玩家，不消耗财神回合
-            return;
-        }
+        // 支持负数步数：正数向前移动，负数向后移动
         
         Player* current_player = &g_game_state.players[g_game_state.game.now_player_id];
         char message_buffer[256];
@@ -189,32 +182,66 @@ void handle_step_command(const char* command) {
         strncat(g_last_action_message, message_buffer, sizeof(g_last_action_message) - strlen(g_last_action_message) - 1);
 
         int original_location = current_player->location;
-        int final_location = (original_location + steps) % MAP_SIZE;
-        int final_steps = steps;
+        int final_location, final_steps;
         bool stopped_by_block = false;
         
-        // 检查移动路径上是否有路障或财神
-        for (int i = 1; i <= steps; i++) {
-            int next_location = (original_location + i) % MAP_SIZE;
+        // 处理负数步数：向后移动
+        if (steps < 0) {
+            // 负数步数：向后移动
+            int abs_steps = -steps;
+            final_location = (original_location - abs_steps + MAP_SIZE) % MAP_SIZE;
+            final_steps = steps;
             
-            // 检查路障拦截
-            if (check_block_interception(next_location)) {
-                final_location = next_location;
-                final_steps = i;
-                stopped_by_block = true;
-                break; // 找到第一个路障就停下
-            }
+            // 检查移动路径上是否有路障或财神（向后移动）
+            for (int i = 1; i <= abs_steps; i++) {
+                int next_location = (original_location - i + MAP_SIZE) % MAP_SIZE;
+                
+                // 检查路障拦截
+                if (check_block_interception(next_location)) {
+                    final_location = next_location;
+                    final_steps = -i;
+                    stopped_by_block = true;
+                    break; // 找到第一个路障就停下
+                }
 
-            // 检查是否遇到财神
-            if (check_god_encounter(next_location)) {
-                // 遇到财神不停下，直接触发效果
-                trigger_god_encounter(current_player, next_location);
+                // 检查是否遇到财神
+                if (check_god_encounter(next_location)) {
+                    // 遇到财神不停下，直接触发效果
+                    trigger_god_encounter(current_player, next_location);
+                }
+            }
+        } else {
+            // 正数步数：向前移动（原有逻辑）
+            final_location = (original_location + steps) % MAP_SIZE;
+            final_steps = steps;
+            
+            // 检查移动路径上是否有路障或财神（向前移动）
+            for (int i = 1; i <= steps; i++) {
+                int next_location = (original_location + i) % MAP_SIZE;
+                
+                // 检查路障拦截
+                if (check_block_interception(next_location)) {
+                    final_location = next_location;
+                    final_steps = i;
+                    stopped_by_block = true;
+                    break; // 找到第一个路障就停下
+                }
+
+                // 检查是否遇到财神
+                if (check_god_encounter(next_location)) {
+                    // 遇到财神不停下，直接触发效果
+                    trigger_god_encounter(current_player, next_location);
+                }
             }
         }
         
         // 移动到最终位置
         current_player->location = final_location;
-        snprintf(message_buffer, sizeof(message_buffer), "%s 前进 %d 步，到达位置 %d\n", current_player->name, final_steps, current_player->location);
+        if (final_steps < 0) {
+            snprintf(message_buffer, sizeof(message_buffer), "%s 后退 %d 步，到达位置 %d\n", current_player->name, -final_steps, current_player->location);
+        } else {
+            snprintf(message_buffer, sizeof(message_buffer), "%s 前进 %d 步，到达位置 %d\n", current_player->name, final_steps, current_player->location);
+        }
         strncat(g_last_action_message, message_buffer, sizeof(g_last_action_message) - strlen(g_last_action_message) - 1);
         
         // 如果是被路障拦截，在移动后触发路障效果

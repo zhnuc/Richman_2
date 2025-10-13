@@ -1,0 +1,10 @@
+12
+preset preset.json
+status
+step 1
+status
+step 1
+status
+step 1
+status
+quit
