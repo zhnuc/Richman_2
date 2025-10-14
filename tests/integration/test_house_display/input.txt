@@ -1,9 +1,0 @@
-12
-preset preset.json
-status
-buy 36
-y
-status
-step 1
-status
-quit
