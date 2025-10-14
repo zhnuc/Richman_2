@@ -137,7 +137,7 @@ void save_game_dump(const char *filename)
 char *extract_string_value(const char *json, const char *key, const char *end_pos)
 {
     char search_key[100];
-    sprintf(search_key, "\"%s\": \"", key);
+    sprintf(search_key, "\"%s\":", key);
 
     char *key_pos = strstr(json, search_key);
     if (!key_pos || (end_pos && key_pos > end_pos))
@@ -146,6 +146,18 @@ char *extract_string_value(const char *json, const char *key, const char *end_po
     }
 
     char *value_start = key_pos + strlen(search_key);
+    // 跳过可能的空白字符（空格、制表符等）
+    while (*value_start == ' ' || *value_start == '\t') {
+        value_start++;
+    }
+    
+    // 跳过开头的引号
+    if (*value_start == '"') {
+        value_start++;
+    } else {
+        return NULL;
+    }
+    
     char *value_end = strchr(value_start, '"');
     if (!value_end)
     {
@@ -165,7 +177,7 @@ char *extract_string_value(const char *json, const char *key, const char *end_po
 int extract_int_value(const char *json, const char *key, const char *end_pos)
 {
     char search_key[100];
-    sprintf(search_key, "\"%s\": ", key);
+    sprintf(search_key, "\"%s\":", key);
 
     char *key_pos = strstr(json, search_key);
     if (!key_pos || (end_pos && key_pos > end_pos))
@@ -174,6 +186,11 @@ int extract_int_value(const char *json, const char *key, const char *end_pos)
     }
 
     char *value_start = key_pos + strlen(search_key);
+    // 跳过可能的空白字符（空格、制表符等）
+    while (*value_start == ' ' || *value_start == '\t') {
+        value_start++;
+    }
+    
     return atoi(value_start);
 }
 
@@ -181,7 +198,7 @@ int extract_int_value(const char *json, const char *key, const char *end_pos)
 bool extract_bool_value(const char *json, const char *key, const char *end_pos)
 {
     char search_key[100];
-    sprintf(search_key, "\"%s\": ", key);
+    sprintf(search_key, "\"%s\":", key);
 
     char *key_pos = strstr(json, search_key);
     if (!key_pos || (end_pos && key_pos > end_pos))
@@ -190,6 +207,11 @@ bool extract_bool_value(const char *json, const char *key, const char *end_pos)
     }
 
     char *value_start = key_pos + strlen(search_key);
+    // 跳过可能的空白字符（空格、制表符等）
+    while (*value_start == ' ' || *value_start == '\t') {
+        value_start++;
+    }
+    
     return strncmp(value_start, "true", 4) == 0;
 }
 

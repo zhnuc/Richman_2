@@ -92,10 +92,9 @@ class IntegrationTestRunner:
         # 比较dump文件
         dump_match = True
         if dump_file.exists():
-            dump_match = self.compare_files(
+            dump_match = self.compare_json_files(
                 test_dir / "expected_result.json",
-                dump_file,
-                "JSON状态"
+                dump_file
             )
         else:
             print("⚠️  未生成dump.json文件")
