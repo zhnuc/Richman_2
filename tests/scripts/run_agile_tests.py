@@ -19,6 +19,7 @@ class AgileTestManager:
         self.status_config = self.project_root / "tests" / "test_status.config"
         self.results = []
         self.test_statuses = self.load_test_statuses()
+        self.report_file = self.project_root / "test_report.html"
         
     def load_test_statuses(self):
         """加载测试状态配置"""
@@ -51,6 +52,7 @@ class AgileTestManager:
     
     def run_tests(self):
         """运行所有集成测试"""
+        self.results = [] # 清空历史结果
         print("🚀 开始运行大富翁游戏集成测试（敏捷模式）")
         print("=" * 60)
         
@@ -132,15 +134,26 @@ class AgileTestManager:
         
         if failed == 0:
             print("✅ 所有活跃测试通过！")
-            return True
+            success = True
         else:
             print("❌ 部分测试失败")
-            return False
+            success = False
+        
+        self.generate_html_report()
+        return success
     
     def run_single_test(self, test_dir):
         """运行单个集成测试"""
         test_name = test_dir.name
         status = self.get_test_status(test_name)
+        
+        test_result = {
+            'name': test_name,
+            'status': status,
+            'passed': False,
+            'diff': '',
+            'reason': ''
+        }
         
         status_emoji = {
             'active': '🟢',
@@ -161,6 +174,8 @@ class AgileTestManager:
         
         if missing_files:
             print(f"❌ 缺少文件: {', '.join(missing_files)}")
+            test_result['reason'] = f"缺少文件: {', '.join(missing_files)}"
+            self.results.append(test_result)
             return False
         
         # 检查可选文件
@@ -202,24 +217,32 @@ class AgileTestManager:
             
         except subprocess.TimeoutExpired:
             print("❌ 测试超时")
+            test_result['reason'] = "测试超时"
+            self.results.append(test_result)
             return False
         except Exception as e:
             print(f"❌ 运行测试时出错: {e}")
+            test_result['reason'] = f"运行测试时出错: {e}"
+            self.results.append(test_result)
             return False
         
         # 检查dump文件是否生成
         if dump_file.exists():
             print(f"📄 生成dump文件: {dump_file.name}")
-            dump_match = self.compare_json_files(
+            dump_match, diff_output = self.compare_json_files(
                 test_dir / "expected_result.json",
                 dump_file
             )
+            test_result['diff'] = diff_output
         else:
             print("⚠️  未生成dump.json文件")
             dump_match = False
+            test_result['reason'] = "未生成dump.json文件"
         
         # 返回测试结果
         test_passed = dump_match
+        test_result['passed'] = test_passed
+        
         if test_passed:
             print(f"✅ {test_name} 通过")
         else:
@@ -227,10 +250,11 @@ class AgileTestManager:
             if status == 'wip':
                 print("   💡 提示: 这是开发中的功能，失败是正常的")
         
+        self.results.append(test_result)
         return test_passed
     
     def compare_json_files(self, expected_file, actual_file):
-        """比较JSON文件"""
+        """比较JSON文件，返回 (is_match, diff_string)"""
         try:
             with open(expected_file, 'r', encoding='utf-8') as f:
                 expected_data = json.load(f)
@@ -240,7 +264,7 @@ class AgileTestManager:
             
             if expected_data == actual_data:
                 print("✅ JSON状态 匹配")
-                return True
+                return True, ""
             else:
                 print("❌ JSON状态 不匹配")
                 print(f"📄 期望文件: {expected_file}")
@@ -261,14 +285,233 @@ class AgileTestManager:
                     lineterm=""
                 )
                 
-                for line in diff:
-                    print(line)
+                diff_str = "\n".join(diff)
+                print(diff_str)
                 
-                return False
+                return False, diff_str
                 
         except Exception as e:
-            print(f"❌ 比较JSON时出错: {e}")
-            return False
+            error_msg = f"❌ 比较JSON时出错: {e}"
+            print(error_msg)
+            return False, error_msg
+
+    def categorize_test(self, test_name):
+        """根据测试名称自动分类"""
+        if not test_name.startswith('test_'):
+            return '其他'
+        
+        # 提取test_后的第一个单词作为类别
+        rest_name = test_name[5:]  # 去掉'test_'前缀
+        
+        # 找到第一个下划线或数字的位置，作为类别的结束
+        category_end = len(rest_name)
+        for i, char in enumerate(rest_name):
+            if char.isdigit() or (char == '_' and i > 0 and not rest_name[i-1].isalpha()):
+                category_end = i
+                break
+        
+        category = rest_name[:category_end]
+        
+        # 如果类别为空或太短，返回完整的前缀
+        if len(category) < 2:
+            # 尝试找到更长的有意义前缀
+            parts = rest_name.split('_')
+            if len(parts) >= 2:
+                category = '_'.join(parts[:2])
+            else:
+                category = parts[0] if parts else 'unknown'
+        
+        return category
+
+    def generate_html_report(self):
+        """生成HTML格式的测试报告"""
+        print(f"\n📄 生成HTML测试报告: {self.report_file}")
+        
+        passed_count = sum(1 for r in self.results if r['passed'])
+        failed_count = len(self.results) - passed_count
+        pass_rate = (passed_count / len(self.results) * 100) if self.results else 0
+        
+        # 按类别统计
+        category_stats = {}
+        for result in self.results:
+            category = self.categorize_test(result['name'])
+            if category not in category_stats:
+                category_stats[category] = {'total': 0, 'passed': 0, 'failed': 0, 'tests': []}
+            category_stats[category]['total'] += 1
+            category_stats[category]['tests'].append(result)
+            if result['passed']:
+                category_stats[category]['passed'] += 1
+            else:
+                category_stats[category]['failed'] += 1
+        
+        from datetime import datetime
+        now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+        html = f"""
+        <!DOCTYPE html>
+        <html lang="zh-CN">
+        <head>
+            <meta charset="UTF-8">
+            <title>大富翁游戏 - 测试报告</title>
+            <style>
+                body {{ font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; margin: 40px; background-color: #f8f9fa; color: #212529; }}
+                h1, h2, h3 {{ color: #343a40; }}
+                .container {{ max-width: 1200px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }}
+                .summary {{ border-bottom: 1px solid #dee2e6; padding-bottom: 15px; margin-bottom: 20px; }}
+                .summary p {{ margin: 5px 0; }}
+                .category-stats {{ border-bottom: 1px solid #dee2e6; padding-bottom: 20px; margin-bottom: 20px; }}
+                .category-table {{ width: 100%; border-collapse: collapse; margin-top: 15px; }}
+                .category-table th, .category-table td {{ padding: 8px 12px; text-align: left; border: 1px solid #dee2e6; }}
+                .category-table th {{ background-color: #f8f9fa; font-weight: bold; }}
+                .category-table .category-name {{ font-weight: bold; }}
+                .category-table .pass-rate {{ font-weight: bold; }}
+                .test-case {{ border: 1px solid #dee2e6; padding: 15px; margin-bottom: 15px; border-radius: 5px; }}
+                .passed {{ border-left: 5px solid #28a745; }}
+                .failed {{ border-left: 5px solid #dc3545; }}
+                .test-case h4 {{ margin-top: 0; color: #495057; }}
+                .status-passed {{ color: #28a745; font-weight: bold; }}
+                .status-failed {{ color: #dc3545; font-weight: bold; }}
+                .category-section {{ margin-bottom: 30px; }}
+                .category-header {{ background-color: #f8f9fa; padding: 10px 15px; border-radius: 5px; margin-bottom: 15px; }}
+                .category-header h3 {{ margin: 0; color: #343a40; }}
+                .category-summary {{ font-size: 14px; color: #6c757d; margin-top: 5px; }}
+                pre {{ background-color: #e9ecef; padding: 15px; border-radius: 5px; white-space: pre-wrap; word-wrap: break-word; }}
+                .diff-del {{ color: #dc3545; text-decoration: line-through; }}
+                .diff-add {{ color: #28a745; }}
+                .toc {{ background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin-bottom: 20px; }}
+                .toc h3 {{ margin-top: 0; }}
+                .toc ul {{ list-style-type: none; padding-left: 0; }}
+                .toc li {{ margin: 5px 0; }}
+                .toc a {{ text-decoration: none; color: #007bff; }}
+                .toc a:hover {{ text-decoration: underline; }}
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <h1>大富翁游戏 - 测试报告</h1>
+                
+                <div class="summary">
+                    <h2>测试摘要</h2>
+                    <p><strong>报告生成时间:</strong> {now}</p>
+                    <p><strong>总测试数:</strong> {len(self.results)}</p>
+                    <p><strong>通过:</strong> <span class="status-passed">{passed_count}</span></p>
+                    <p><strong>失败:</strong> <span class="status-failed">{failed_count}</span></p>
+                    <p><strong>通过率:</strong> {pass_rate:.2f}%</p>
+                </div>
+
+                <div class="category-stats">
+                    <h2>各类别测试统计</h2>
+                    <table class="category-table">
+                        <thead>
+                            <tr>
+                                <th>测试类别</th>
+                                <th>总数</th>
+                                <th>通过</th>
+                                <th>失败</th>
+                                <th>通过率</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+        """
+        
+        # 添加类别统计表
+        for category, stats in sorted(category_stats.items()):
+            pass_rate_cat = (stats['passed'] / stats['total'] * 100) if stats['total'] > 0 else 0
+            html += f"""
+                            <tr>
+                                <td class="category-name"><a href="#category-{category}">{category}</a></td>
+                                <td>{stats['total']}</td>
+                                <td><span class="status-passed">{stats['passed']}</span></td>
+                                <td><span class="status-failed">{stats['failed']}</span></td>
+                                <td class="pass-rate">{pass_rate_cat:.1f}%</td>
+                            </tr>
+            """
+        
+        html += """
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="toc">
+                    <h3>快速导航</h3>
+                    <ul>
+        """
+        
+        # 添加目录
+        for category in sorted(category_stats.keys()):
+            stats = category_stats[category]
+            html += f'<li><a href="#category-{category}">{category} ({stats["total"]}个测试)</a></li>'
+        
+        html += """
+                    </ul>
+                </div>
+
+                <h2>测试详情</h2>
+        """
+
+        # 按类别显示测试详情
+        for category in sorted(category_stats.keys()):
+            stats = category_stats[category]
+            pass_rate_cat = (stats['passed'] / stats['total'] * 100) if stats['total'] > 0 else 0
+            
+            html += f"""
+                <div class="category-section" id="category-{category}">
+                    <div class="category-header">
+                        <h3>{category}</h3>
+                        <div class="category-summary">
+                            总计: {stats['total']} | 
+                            通过: <span class="status-passed">{stats['passed']}</span> | 
+                            失败: <span class="status-failed">{stats['failed']}</span> | 
+                            通过率: {pass_rate_cat:.1f}%
+                        </div>
+                    </div>
+            """
+            
+            # 排序：失败的测试在前，通过的测试在后
+            sorted_tests = sorted(stats['tests'], key=lambda x: (x['passed'], x['name']))
+            
+            for result in sorted_tests:
+                result_class = "passed" if result['passed'] else "failed"
+                result_text = "通过" if result['passed'] else "失败"
+                result_status_class = "status-passed" if result['passed'] else "status-failed"
+                
+                html += f"""
+                    <div class="test-case {result_class}">
+                        <h4>{result['name']}</h4>
+                        <p><strong>状态:</strong> <span class="{result_status_class}">{result_text}</span></p>
+                """
+                
+                if not result['passed']:
+                    if result['reason']:
+                        html += f"<p><strong>原因:</strong> {result['reason']}</p>"
+                    if result['diff']:
+                        # 简单的diff高亮，正确处理换行符
+                        diff_html = ""
+                        for line in result['diff'].splitlines():
+                            if line.startswith('-'):
+                                diff_html += f'<span class="diff-del">{line}</span>\n'
+                            elif line.startswith('+'):
+                                diff_html += f'<span class="diff-add">{line}</span>\n'
+                            else:
+                                diff_html += f'{line}\n'
+                        html += f"<h5>差异对比:</h5><pre>{diff_html}</pre>"
+
+                html += "</div>"
+            
+            html += "</div>"
+
+        html += """
+            </div>
+        </body>
+        </html>
+        """
+        
+        try:
+            with open(self.report_file, 'w', encoding='utf-8') as f:
+                f.write(html)
+            print(f"✅ 报告已保存到 {self.report_file}")
+        except Exception as e:
+            print(f"❌ 保存HTML报告时出错: {e}")
 
     def batch_update_status(self, pattern, new_status):
         """批量更新测试状态"""
