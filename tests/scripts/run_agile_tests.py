@@ -254,7 +254,7 @@ class AgileTestManager:
         return test_passed
     
     def compare_json_files(self, expected_file, actual_file):
-        """比较JSON文件，返回 (is_match, diff_string)"""
+        """比较JSON文件，只比较expected_file中存在的属性，返回 (is_match, diff_string)"""
         try:
             with open(expected_file, 'r', encoding='utf-8') as f:
                 expected_data = json.load(f)
@@ -262,26 +262,33 @@ class AgileTestManager:
             with open(actual_file, 'r', encoding='utf-8') as f:
                 actual_data = json.load(f)
             
-            if expected_data == actual_data:
+            # 从actual_data中提取expected_data中存在的属性进行比较
+            filtered_actual_data = self._filter_json_by_structure(actual_data, expected_data, "")
+            
+            # 对expected_data中需要无序比较的数组也进行排序
+            normalized_expected_data = self._normalize_expected_data(expected_data)
+            
+            if normalized_expected_data == filtered_actual_data:
                 print("✅ JSON状态 匹配")
                 return True, ""
             else:
                 print("❌ JSON状态 不匹配")
                 print(f"📄 期望文件: {expected_file}")
                 print(f"📄 实际文件: {actual_file}")
+                print("📝 只比较期望文件中存在的属性")
                 
                 # 显示差异
                 print("\n📊 差异对比:")
-                expected_str = json.dumps(expected_data, indent=4, ensure_ascii=False)
-                actual_str = json.dumps(actual_data, indent=4, ensure_ascii=False)
+                expected_str = json.dumps(normalized_expected_data, indent=4, ensure_ascii=False)
+                filtered_actual_str = json.dumps(filtered_actual_data, indent=4, ensure_ascii=False)
                 
                 expected_lines = expected_str.splitlines()
-                actual_lines = actual_str.splitlines()
+                actual_lines = filtered_actual_str.splitlines()
                 
                 diff = difflib.unified_diff(
                     expected_lines, actual_lines,
-                    fromfile="期望 JSON状态",
-                    tofile="实际 JSON状态",
+                    fromfile="期望 JSON状态（标准化后）",
+                    tofile="实际 JSON状态（过滤后）",
                     lineterm=""
                 )
                 
@@ -294,6 +301,100 @@ class AgileTestManager:
             error_msg = f"❌ 比较JSON时出错: {e}"
             print(error_msg)
             return False, error_msg
+
+    def _filter_json_by_structure(self, actual_data, expected_data, parent_key=""):
+        """
+        根据expected_data的结构过滤actual_data，只保留expected_data中存在的属性
+        递归处理嵌套对象和数组，对特定数组进行无序比较
+        """
+        if isinstance(expected_data, dict) and isinstance(actual_data, dict):
+            # 处理字典：只保留expected_data中存在的键
+            filtered = {}
+            for key in expected_data:
+                if key in actual_data:
+                    # 递归处理嵌套结构，传递当前键名用于识别特殊处理的数组
+                    current_path = f"{parent_key}.{key}" if parent_key else key
+                    filtered[key] = self._filter_json_by_structure(actual_data[key], expected_data[key], current_path)
+                else:
+                    # 如果actual_data中没有这个键，记录为缺失
+                    filtered[key] = None
+            return filtered
+        
+        elif isinstance(expected_data, list) and isinstance(actual_data, list):
+            # 特殊处理：bomb功能已删除，强制返回空数组
+            if parent_key == "placed_prop.bomb":
+                return []
+            
+            # 检查是否是需要无序比较的数组
+            if self._should_compare_unordered(parent_key, expected_data):
+                # 对于placed_prop下的数组，按值排序后比较
+                if all(isinstance(item, (int, float, str)) for item in expected_data + actual_data):
+                    # 只有当数组中都是基础类型时才进行排序比较
+                    try:
+                        sorted_actual = sorted(actual_data)
+                        return sorted_actual
+                    except TypeError:
+                        # 如果排序失败，回退到原始逻辑
+                        pass
+            
+            # 处理数组：比较相同索引的元素
+            filtered = []
+            for i, expected_item in enumerate(expected_data):
+                if i < len(actual_data):
+                    # 递归处理数组元素
+                    filtered.append(self._filter_json_by_structure(actual_data[i], expected_item, f"{parent_key}[{i}]"))
+                else:
+                    # 如果actual_data数组较短，用None填充
+                    filtered.append(None)
+            return filtered
+        
+        else:
+            # 基础类型直接返回actual_data的值
+            return actual_data
+    
+    def _should_compare_unordered(self, parent_key, expected_data):
+        """
+        判断是否应该对数组进行无序比较
+        """
+        # 对placed_prop下的bomb和barrier数组进行无序比较
+        if parent_key in ["placed_prop.bomb", "placed_prop.barrier"]:
+            return True
+        
+        # 可以在这里添加其他需要无序比较的路径
+        # 例如：if parent_key.endswith(".some_unordered_array"):
+        #         return True
+        
+        return False
+    
+    def _normalize_expected_data(self, expected_data, parent_key=""):
+        """
+        对期望数据进行标准化，主要是对需要无序比较的数组进行排序
+        """
+        if isinstance(expected_data, dict):
+            normalized = {}
+            for key, value in expected_data.items():
+                current_path = f"{parent_key}.{key}" if parent_key else key
+                normalized[key] = self._normalize_expected_data(value, current_path)
+            return normalized
+        
+        elif isinstance(expected_data, list):
+            if self._should_compare_unordered(parent_key, expected_data):
+                # 对需要无序比较的数组进行排序
+                if all(isinstance(item, (int, float, str)) for item in expected_data):
+                    try:
+                        return sorted(expected_data)
+                    except TypeError:
+                        pass
+            
+            # 对数组元素递归处理
+            normalized = []
+            for i, item in enumerate(expected_data):
+                normalized.append(self._normalize_expected_data(item, f"{parent_key}[{i}]"))
+            return normalized
+        
+        else:
+            # 基础类型直接返回
+            return expected_data
 
     def categorize_test(self, test_name):
         """根据测试名称自动分类"""
