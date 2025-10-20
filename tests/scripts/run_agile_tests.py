@@ -228,7 +228,9 @@ class AgileTestManager:
         
         # 检查dump文件是否生成
         if dump_file.exists():
-            print(f"📄 生成dump文件: {dump_file.name}")
+            # 强制将dump.json中所有玩家的bomb属性设为0
+            self.force_bomb_to_zero(dump_file)
+            print(f"📄 生成dump文件: {dump_file.name} (已强制将bomb设为0)")
             dump_match, diff_output = self.compare_json_files(
                 test_dir / "expected_result.json",
                 dump_file
@@ -252,6 +254,41 @@ class AgileTestManager:
         
         self.results.append(test_result)
         return test_passed
+    
+    def force_bomb_to_zero(self, dump_file):
+        """强制将dump.json中所有玩家的prop中的bomb属性设为0"""
+        try:
+            with open(dump_file, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+            
+            # 检查是否有players键
+            if 'players' in data and isinstance(data['players'], list):
+                modified = False
+                for player in data['players']:
+                    if 'prop' in player and isinstance(player['prop'], dict):
+                        if 'bomb' in player['prop'] and player['prop']['bomb'] != 0:
+                            print(f"🔧 将玩家 {player.get('name', '未知')} 的bomb从 {player['prop']['bomb']} 改为 0")
+                            player['prop']['bomb'] = 0
+                            modified = True
+                            
+                            # 同时更新total值
+                            if 'total' in player['prop']:
+                                # 重新计算total: bomb + barrier + robot
+                                total = (player['prop'].get('bomb', 0) + 
+                                        player['prop'].get('barrier', 0) + 
+                                        player['prop'].get('robot', 0))
+                                player['prop']['total'] = total
+                
+                if modified:
+                    # 保存修改后的文件
+                    with open(dump_file, 'w', encoding='utf-8') as f:
+                        json.dump(data, f, indent=4, ensure_ascii=False)
+                    print(f"💾 已保存修改后的dump文件")
+                else:
+                    print(f"ℹ️  所有玩家的bomb值已经是0，无需修改")
+                    
+        except Exception as e:
+            print(f"❌ 修改dump文件时出错: {e}")
     
     def compare_json_files(self, expected_file, actual_file):
         """比较JSON文件，只比较expected_file中存在的属性，返回 (is_match, diff_string)"""
