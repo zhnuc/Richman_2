@@ -90,7 +90,6 @@
     "game": {
         "now_player": 2,
         "next_player": 0,
-        "started": true,
         "ended": false,
         "winner": -1
     }

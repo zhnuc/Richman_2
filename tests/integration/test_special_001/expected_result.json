@@ -39,9 +39,7 @@
             }
         }
     ],
-    "houses": {
-
-    },
+    "houses": {},
     "god": {
         "spawn_cooldown": 0,
         "location": -1,
@@ -49,12 +47,22 @@
     },
     "placed_prop": {
         "bomb": [],
-        "barrier": [5, 10, 15, 25, 30, 35, 40, 45, 50, 55]
+        "barrier": [
+            5,
+            10,
+            15,
+            25,
+            30,
+            35,
+            40,
+            45,
+            50,
+            55
+        ]
     },
     "game": {
         "now_player": 1,
         "next_player": 0,
-        "started": true,
         "ended": false,
         "winner": -1
     }

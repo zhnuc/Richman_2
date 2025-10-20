@@ -47,12 +47,17 @@
     },
     "placed_prop": {
         "bomb": [],
-        "barrier": [1, 5, 10, 63, 69]
+        "barrier": [
+            1,
+            5,
+            10,
+            63,
+            69
+        ]
     },
     "game": {
         "now_player": 0,
         "next_player": 1,
-        "started": true,
         "ended": false,
         "winner": -1
     }

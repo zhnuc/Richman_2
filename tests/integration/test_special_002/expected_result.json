@@ -58,9 +58,7 @@
             }
         }
     ],
-    "houses": {
-
-    },
+    "houses": {},
     "god": {
         "spawn_cooldown": 0,
         "location": -1,
@@ -73,7 +71,6 @@
     "game": {
         "now_player": 1,
         "next_player": 2,
-        "started": true,
         "ended": false,
         "winner": -1
     }

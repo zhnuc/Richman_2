@@ -9,9 +9,9 @@
             "alive": true,
             "prop": {
                 "bomb": 0,
-                "barrier": 1,
+                "barrier": 0,
                 "robot": 0,
-                "total": 1
+                "total": 0
             },
             "buff": {
                 "god": 0,
@@ -47,12 +47,15 @@
     },
     "placed_prop": {
         "bomb": [],
-        "barrier": [66, 69]
+        "barrier": [
+            14,
+            61,
+            64
+        ]
     },
     "game": {
         "now_player": 0,
         "next_player": 1,
-        "started": true,
         "ended": false,
         "winner": -1
     }

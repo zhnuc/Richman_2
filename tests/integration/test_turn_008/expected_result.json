@@ -54,7 +54,6 @@
     "game": {
         "now_player": 1,
         "next_player": 0,
-        "started": true,
         "ended": false,
         "winner": -1
     }

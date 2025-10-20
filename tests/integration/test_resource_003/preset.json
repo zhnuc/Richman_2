@@ -41,7 +41,7 @@
     ],
     "houses": {
         "5": {
-            "owner": 0,
+            "owner": "Q",
             "level": 3
         }
     },
@@ -57,7 +57,6 @@
     "game": {
         "now_player": 0,
         "next_player": 1,
-        "started": true,
         "ended": false,
         "winner": -1
     }

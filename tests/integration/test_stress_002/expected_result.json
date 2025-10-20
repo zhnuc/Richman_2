@@ -245,13 +245,7 @@
         "duration": 3
     },
     "placed_prop": {
-        "bomb": [
-            42,
-            43,
-            44,
-            45,
-            46
-        ],
+        "bomb": [],
         "barrier": [
             52,
             53,
@@ -266,7 +260,6 @@
     "game": {
         "now_player": 1,
         "next_player": 2,
-        "started": true,
         "ended": false,
         "winner": -1
     }

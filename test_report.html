@@ -1,0 +1,1027 @@
+
+        <!DOCTYPE html>
+        <html lang="zh-CN">
+        <head>
+            <meta charset="UTF-8">
+            <title>大富翁游戏 - 测试报告</title>
+            <style>
+                body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; margin: 40px; background-color: #f8f9fa; color: #212529; }
+                h1, h2, h3 { color: #343a40; }
+                .container { max-width: 1200px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+                .summary { border-bottom: 1px solid #dee2e6; padding-bottom: 15px; margin-bottom: 20px; }
+                .summary p { margin: 5px 0; }
+                .category-stats { border-bottom: 1px solid #dee2e6; padding-bottom: 20px; margin-bottom: 20px; }
+                .category-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+                .category-table th, .category-table td { padding: 8px 12px; text-align: left; border: 1px solid #dee2e6; }
+                .category-table th { background-color: #f8f9fa; font-weight: bold; }
+                .category-table .category-name { font-weight: bold; }
+                .category-table .pass-rate { font-weight: bold; }
+                .test-case { border: 1px solid #dee2e6; padding: 15px; margin-bottom: 15px; border-radius: 5px; }
+                .passed { border-left: 5px solid #28a745; }
+                .failed { border-left: 5px solid #dc3545; }
+                .test-case h4 { margin-top: 0; color: #495057; }
+                .status-passed { color: #28a745; font-weight: bold; }
+                .status-failed { color: #dc3545; font-weight: bold; }
+                .category-section { margin-bottom: 30px; }
+                .category-header { background-color: #f8f9fa; padding: 10px 15px; border-radius: 5px; margin-bottom: 15px; }
+                .category-header h3 { margin: 0; color: #343a40; }
+                .category-summary { font-size: 14px; color: #6c757d; margin-top: 5px; }
+                pre { background-color: #e9ecef; padding: 15px; border-radius: 5px; white-space: pre-wrap; word-wrap: break-word; }
+                .diff-del { color: #dc3545; text-decoration: line-through; }
+                .diff-add { color: #28a745; }
+                .toc { background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin-bottom: 20px; }
+                .toc h3 { margin-top: 0; }
+                .toc ul { list-style-type: none; padding-left: 0; }
+                .toc li { margin: 5px 0; }
+                .toc a { text-decoration: none; color: #007bff; }
+                .toc a:hover { text-decoration: underline; }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <h1>大富翁游戏 - 测试报告</h1>
+                
+                <div class="summary">
+                    <h2>测试摘要</h2>
+                    <p><strong>报告生成时间:</strong> 2025-10-20 22:12:07</p>
+                    <p><strong>总测试数:</strong> 164</p>
+                    <p><strong>通过:</strong> <span class="status-passed">162</span></p>
+                    <p><strong>失败:</strong> <span class="status-failed">2</span></p>
+                    <p><strong>通过率:</strong> 98.78%</p>
+                </div>
+
+                <div class="category-stats">
+                    <h2>各类别测试统计</h2>
+                    <table class="category-table">
+                        <thead>
+                            <tr>
+                                <th>测试类别</th>
+                                <th>总数</th>
+                                <th>通过</th>
+                                <th>失败</th>
+                                <th>通过率</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+        
+                            <tr>
+                                <td class="category-name"><a href="#category-auto_">auto_</a></td>
+                                <td>21</td>
+                                <td><span class="status-passed">21</span></td>
+                                <td><span class="status-failed">0</span></td>
+                                <td class="pass-rate">100.0%</td>
+                            </tr>
+            
+                            <tr>
+                                <td class="category-name"><a href="#category-extreme_">extreme_</a></td>
+                                <td>3</td>
+                                <td><span class="status-passed">3</span></td>
+                                <td><span class="status-failed">0</span></td>
+                                <td class="pass-rate">100.0%</td>
+                            </tr>
+            
+                            <tr>
+                                <td class="category-name"><a href="#category-house_">house_</a></td>
+                                <td>29</td>
+                                <td><span class="status-passed">28</span></td>
+                                <td><span class="status-failed">1</span></td>
+                                <td class="pass-rate">96.6%</td>
+                            </tr>
+            
+                            <tr>
+                                <td class="category-name"><a href="#category-input_">input_</a></td>
+                                <td>34</td>
+                                <td><span class="status-passed">34</span></td>
+                                <td><span class="status-failed">0</span></td>
+                                <td class="pass-rate">100.0%</td>
+                            </tr>
+            
+                            <tr>
+                                <td class="category-name"><a href="#category-interaction_">interaction_</a></td>
+                                <td>12</td>
+                                <td><span class="status-passed">12</span></td>
+                                <td><span class="status-failed">0</span></td>
+                                <td class="pass-rate">100.0%</td>
+                            </tr>
+            
+                            <tr>
+                                <td class="category-name"><a href="#category-park_">park_</a></td>
+                                <td>3</td>
+                                <td><span class="status-passed">3</span></td>
+                                <td><span class="status-failed">0</span></td>
+                                <td class="pass-rate">100.0%</td>
+                            </tr>
+            
+                            <tr>
+                                <td class="category-name"><a href="#category-resource_">resource_</a></td>
+                                <td>7</td>
+                                <td><span class="status-passed">7</span></td>
+                                <td><span class="status-failed">0</span></td>
+                                <td class="pass-rate">100.0%</td>
+                            </tr>
+            
+                            <tr>
+                                <td class="category-name"><a href="#category-special_">special_</a></td>
+                                <td>6</td>
+                                <td><span class="status-passed">6</span></td>
+                                <td><span class="status-failed">0</span></td>
+                                <td class="pass-rate">100.0%</td>
+                            </tr>
+            
+                            <tr>
+                                <td class="category-name"><a href="#category-startup_">startup_</a></td>
+                                <td>10</td>
+                                <td><span class="status-passed">10</span></td>
+                                <td><span class="status-failed">0</span></td>
+                                <td class="pass-rate">100.0%</td>
+                            </tr>
+            
+                            <tr>
+                                <td class="category-name"><a href="#category-state_">state_</a></td>
+                                <td>5</td>
+                                <td><span class="status-passed">5</span></td>
+                                <td><span class="status-failed">0</span></td>
+                                <td class="pass-rate">100.0%</td>
+                            </tr>
+            
+                            <tr>
+                                <td class="category-name"><a href="#category-status_">status_</a></td>
+                                <td>2</td>
+                                <td><span class="status-passed">2</span></td>
+                                <td><span class="status-failed">0</span></td>
+                                <td class="pass-rate">100.0%</td>
+                            </tr>
+            
+                            <tr>
+                                <td class="category-name"><a href="#category-stress_">stress_</a></td>
+                                <td>3</td>
+                                <td><span class="status-passed">3</span></td>
+                                <td><span class="status-failed">0</span></td>
+                                <td class="pass-rate">100.0%</td>
+                            </tr>
+            
+                            <tr>
+                                <td class="category-name"><a href="#category-turn_">turn_</a></td>
+                                <td>20</td>
+                                <td><span class="status-passed">19</span></td>
+                                <td><span class="status-failed">1</span></td>
+                                <td class="pass-rate">95.0%</td>
+                            </tr>
+            
+                            <tr>
+                                <td class="category-name"><a href="#category-win_">win_</a></td>
+                                <td>9</td>
+                                <td><span class="status-passed">9</span></td>
+                                <td><span class="status-failed">0</span></td>
+                                <td class="pass-rate">100.0%</td>
+                            </tr>
+            
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="toc">
+                    <h3>快速导航</h3>
+                    <ul>
+        <li><a href="#category-auto_">auto_ (21个测试)</a></li><li><a href="#category-extreme_">extreme_ (3个测试)</a></li><li><a href="#category-house_">house_ (29个测试)</a></li><li><a href="#category-input_">input_ (34个测试)</a></li><li><a href="#category-interaction_">interaction_ (12个测试)</a></li><li><a href="#category-park_">park_ (3个测试)</a></li><li><a href="#category-resource_">resource_ (7个测试)</a></li><li><a href="#category-special_">special_ (6个测试)</a></li><li><a href="#category-startup_">startup_ (10个测试)</a></li><li><a href="#category-state_">state_ (5个测试)</a></li><li><a href="#category-status_">status_ (2个测试)</a></li><li><a href="#category-stress_">stress_ (3个测试)</a></li><li><a href="#category-turn_">turn_ (20个测试)</a></li><li><a href="#category-win_">win_ (9个测试)</a></li>
+                    </ul>
+                </div>
+
+                <h2>测试详情</h2>
+        
+                <div class="category-section" id="category-auto_">
+                    <div class="category-header">
+                        <h3>auto_</h3>
+                        <div class="category-summary">
+                            总计: 21 | 
+                            通过: <span class="status-passed">21</span> | 
+                            失败: <span class="status-failed">0</span> | 
+                            通过率: 100.0%
+                        </div>
+                    </div>
+            
+                    <div class="test-case passed">
+                        <h4>test_auto_001</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_auto_002</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_auto_003</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_auto_004</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_auto_005</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_auto_006</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_auto_007</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_auto_008</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_auto_009</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_auto_010</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_auto_011</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_auto_012</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_auto_015</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_auto_017</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_auto_018</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_auto_020</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_auto_021</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_auto_022</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_auto_023</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_auto_024</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_auto_025</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div></div>
+                <div class="category-section" id="category-extreme_">
+                    <div class="category-header">
+                        <h3>extreme_</h3>
+                        <div class="category-summary">
+                            总计: 3 | 
+                            通过: <span class="status-passed">3</span> | 
+                            失败: <span class="status-failed">0</span> | 
+                            通过率: 100.0%
+                        </div>
+                    </div>
+            
+                    <div class="test-case passed">
+                        <h4>test_extreme_001</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_extreme_003</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_extreme_004</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div></div>
+                <div class="category-section" id="category-house_">
+                    <div class="category-header">
+                        <h3>house_</h3>
+                        <div class="category-summary">
+                            总计: 29 | 
+                            通过: <span class="status-passed">28</span> | 
+                            失败: <span class="status-failed">1</span> | 
+                            通过率: 96.6%
+                        </div>
+                    </div>
+            
+                    <div class="test-case failed">
+                        <h4>test_house_030</h4>
+                        <p><strong>状态:</strong> <span class="status-failed">失败</span></p>
+                <h5>差异对比:</h5><pre><span class="diff-del">--- 期望 JSON状态（标准化后）</span>
+<span class="diff-add">+++ 实际 JSON状态（过滤后）</span>
+@@ -14,7 +14,7 @@
+                 "total": 0
+             },
+             "buff": {
+<span class="diff-del">-                "god": 5,</span>
+<span class="diff-add">+                "god": 2,</span>
+                 "prison": 0,
+                 "hospital": 0
+             }
+</pre></div>
+                    <div class="test-case passed">
+                        <h4>test_house_001</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_house_002</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_house_003</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_house_004</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_house_005</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_house_006</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_house_007</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_house_008</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_house_009</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_house_010</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_house_011</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_house_012</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_house_013</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_house_014</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_house_015</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_house_016</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_house_017</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_house_018</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_house_019</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_house_020</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_house_021</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_house_022</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_house_023</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_house_024</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_house_025</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_house_026</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_house_027</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_house_029</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div></div>
+                <div class="category-section" id="category-input_">
+                    <div class="category-header">
+                        <h3>input_</h3>
+                        <div class="category-summary">
+                            总计: 34 | 
+                            通过: <span class="status-passed">34</span> | 
+                            失败: <span class="status-failed">0</span> | 
+                            通过率: 100.0%
+                        </div>
+                    </div>
+            
+                    <div class="test-case passed">
+                        <h4>test_input_001</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_input_002</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_input_002a</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_input_002b</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_input_002c</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_input_002d</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_input_002e</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_input_002f</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_input_002g</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_input_002h</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_input_002i</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_input_002j</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_input_002k</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_input_002l</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_input_002m</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_input_002n</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_input_002o</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_input_006</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_input_006b</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_input_006c</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_input_006d</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_input_006e</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_input_006f</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_input_006g</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_input_007</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_input_007a</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_input_007b</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_input_007c</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_input_008</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_input_009</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_input_010</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_input_011</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_input_012</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_input_013</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div></div>
+                <div class="category-section" id="category-interaction_">
+                    <div class="category-header">
+                        <h3>interaction_</h3>
+                        <div class="category-summary">
+                            总计: 12 | 
+                            通过: <span class="status-passed">12</span> | 
+                            失败: <span class="status-failed">0</span> | 
+                            通过率: 100.0%
+                        </div>
+                    </div>
+            
+                    <div class="test-case passed">
+                        <h4>test_interaction_001</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_interaction_002</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_interaction_004</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_interaction_007</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_interaction_007a</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_interaction_007b</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_interaction_008</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_interaction_009</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_interaction_011</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_interaction_012</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_interaction_013</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_interaction_014</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div></div>
+                <div class="category-section" id="category-park_">
+                    <div class="category-header">
+                        <h3>park_</h3>
+                        <div class="category-summary">
+                            总计: 3 | 
+                            通过: <span class="status-passed">3</span> | 
+                            失败: <span class="status-failed">0</span> | 
+                            通过率: 100.0%
+                        </div>
+                    </div>
+            
+                    <div class="test-case passed">
+                        <h4>test_park_001</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_park_002</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_park_003</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div></div>
+                <div class="category-section" id="category-resource_">
+                    <div class="category-header">
+                        <h3>resource_</h3>
+                        <div class="category-summary">
+                            总计: 7 | 
+                            通过: <span class="status-passed">7</span> | 
+                            失败: <span class="status-failed">0</span> | 
+                            通过率: 100.0%
+                        </div>
+                    </div>
+            
+                    <div class="test-case passed">
+                        <h4>test_resource_001</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_resource_003</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_resource_005</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_resource_006</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_resource_007</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_resource_008</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_resource_009</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div></div>
+                <div class="category-section" id="category-special_">
+                    <div class="category-header">
+                        <h3>special_</h3>
+                        <div class="category-summary">
+                            总计: 6 | 
+                            通过: <span class="status-passed">6</span> | 
+                            失败: <span class="status-failed">0</span> | 
+                            通过率: 100.0%
+                        </div>
+                    </div>
+            
+                    <div class="test-case passed">
+                        <h4>test_special_001</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_special_002</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_special_003</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_special_004</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_special_005</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_special_006</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div></div>
+                <div class="category-section" id="category-startup_">
+                    <div class="category-header">
+                        <h3>startup_</h3>
+                        <div class="category-summary">
+                            总计: 10 | 
+                            通过: <span class="status-passed">10</span> | 
+                            失败: <span class="status-failed">0</span> | 
+                            通过率: 100.0%
+                        </div>
+                    </div>
+            
+                    <div class="test-case passed">
+                        <h4>test_startup_001</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_startup_002</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_startup_003</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_startup_004</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_startup_005</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_startup_006</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_startup_007</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_startup_008</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_startup_009</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_startup_010</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div></div>
+                <div class="category-section" id="category-state_">
+                    <div class="category-header">
+                        <h3>state_</h3>
+                        <div class="category-summary">
+                            总计: 5 | 
+                            通过: <span class="status-passed">5</span> | 
+                            失败: <span class="status-failed">0</span> | 
+                            通过率: 100.0%
+                        </div>
+                    </div>
+            
+                    <div class="test-case passed">
+                        <h4>test_state_001</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_state_002</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_state_003</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_state_004</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_state_005</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div></div>
+                <div class="category-section" id="category-status_">
+                    <div class="category-header">
+                        <h3>status_</h3>
+                        <div class="category-summary">
+                            总计: 2 | 
+                            通过: <span class="status-passed">2</span> | 
+                            失败: <span class="status-failed">0</span> | 
+                            通过率: 100.0%
+                        </div>
+                    </div>
+            
+                    <div class="test-case passed">
+                        <h4>test_status_001</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_status_007</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div></div>
+                <div class="category-section" id="category-stress_">
+                    <div class="category-header">
+                        <h3>stress_</h3>
+                        <div class="category-summary">
+                            总计: 3 | 
+                            通过: <span class="status-passed">3</span> | 
+                            失败: <span class="status-failed">0</span> | 
+                            通过率: 100.0%
+                        </div>
+                    </div>
+            
+                    <div class="test-case passed">
+                        <h4>test_stress_001</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_stress_002</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_stress_004</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div></div>
+                <div class="category-section" id="category-turn_">
+                    <div class="category-header">
+                        <h3>turn_</h3>
+                        <div class="category-summary">
+                            总计: 20 | 
+                            通过: <span class="status-passed">19</span> | 
+                            失败: <span class="status-failed">1</span> | 
+                            通过率: 95.0%
+                        </div>
+                    </div>
+            
+                    <div class="test-case failed">
+                        <h4>test_turn_005</h4>
+                        <p><strong>状态:</strong> <span class="status-failed">失败</span></p>
+                <h5>差异对比:</h5><pre><span class="diff-del">--- 期望 JSON状态（标准化后）</span>
+<span class="diff-add">+++ 实际 JSON状态（过滤后）</span>
+@@ -89,7 +89,7 @@
+     },
+     "game": {
+         "now_player": 2,
+<span class="diff-del">-        "next_player": 0,</span>
+<span class="diff-add">+        "next_player": 3,</span>
+         "ended": false,
+         "winner": -1
+     }
+</pre></div>
+                    <div class="test-case passed">
+                        <h4>test_turn_001</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_turn_002</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_turn_003</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_turn_004</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_turn_006</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_turn_007</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_turn_008</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_turn_009</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_turn_010</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_turn_011</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_turn_012</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_turn_013</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_turn_014</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_turn_015</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_turn_016</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_turn_017</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_turn_018</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_turn_019</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_turn_020</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div></div>
+                <div class="category-section" id="category-win_">
+                    <div class="category-header">
+                        <h3>win_</h3>
+                        <div class="category-summary">
+                            总计: 9 | 
+                            通过: <span class="status-passed">9</span> | 
+                            失败: <span class="status-failed">0</span> | 
+                            通过率: 100.0%
+                        </div>
+                    </div>
+            
+                    <div class="test-case passed">
+                        <h4>test_win_001</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_win_002</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_win_003</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_win_004</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_win_005</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_win_006</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_win_007</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_win_008</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_win_009</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div></div>
+            </div>
+        </body>
+        </html>
+        
