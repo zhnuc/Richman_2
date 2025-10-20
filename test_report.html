@@ -43,11 +43,11 @@
                 
                 <div class="summary">
                     <h2>测试摘要</h2>
-                    <p><strong>报告生成时间:</strong> 2025-10-20 21:05:22</p>
+                    <p><strong>报告生成时间:</strong> 2025-10-20 22:32:10</p>
                     <p><strong>总测试数:</strong> 407</p>
-                    <p><strong>通过:</strong> <span class="status-passed">376</span></p>
-                    <p><strong>失败:</strong> <span class="status-failed">31</span></p>
-                    <p><strong>通过率:</strong> 92.38%</p>
+                    <p><strong>通过:</strong> <span class="status-passed">378</span></p>
+                    <p><strong>失败:</strong> <span class="status-failed">29</span></p>
+                    <p><strong>通过率:</strong> 92.87%</p>
                 </div>
 
                 <div class="category-stats">
@@ -115,9 +115,9 @@
                             <tr>
                                 <td class="category-name"><a href="#category-bomb_alot">bomb_alot</a></td>
                                 <td>1</td>
-                                <td><span class="status-passed">0</span></td>
-                                <td><span class="status-failed">1</span></td>
-                                <td class="pass-rate">0.0%</td>
+                                <td><span class="status-passed">1</span></td>
+                                <td><span class="status-failed">0</span></td>
+                                <td class="pass-rate">100.0%</td>
                             </tr>
             
                             <tr>
@@ -235,9 +235,9 @@
                             <tr>
                                 <td class="category-name"><a href="#category-god_spawn_">god_spawn_</a></td>
                                 <td>64</td>
-                                <td><span class="status-passed">46</span></td>
-                                <td><span class="status-failed">18</span></td>
-                                <td class="pass-rate">71.9%</td>
+                                <td><span class="status-passed">47</span></td>
+                                <td><span class="status-failed">17</span></td>
+                                <td class="pass-rate">73.4%</td>
                             </tr>
             
                             <tr>
@@ -484,44 +484,16 @@
                         <h3>bomb_alot</h3>
                         <div class="category-summary">
                             总计: 1 | 
-                            通过: <span class="status-passed">0</span> | 
-                            失败: <span class="status-failed">1</span> | 
-                            通过率: 0.0%
+                            通过: <span class="status-passed">1</span> | 
+                            失败: <span class="status-failed">0</span> | 
+                            通过率: 100.0%
                         </div>
                     </div>
             
-                    <div class="test-case failed">
+                    <div class="test-case passed">
                         <h4>test_bomb_alot</h4>
-                        <p><strong>状态:</strong> <span class="status-failed">失败</span></p>
-                <h5>差异对比:</h5><pre><span class="diff-del">--- 期望 JSON状态（标准化后）</span>
-<span class="diff-add">+++ 实际 JSON状态（过滤后）</span>
-@@ -8,10 +8,10 @@
-             "location": 0,
-             "alive": true,
-             "prop": {
-<span class="diff-del">-                "bomb": 0,</span>
-<span class="diff-add">+                "bomb": 10,</span>
-                 "barrier": 0,
-                 "robot": 0,
-<span class="diff-del">-                "total": 0</span>
-<span class="diff-add">+                "total": 10</span>
-             },
-             "buff": {
-                 "god": 0,
-@@ -27,10 +27,10 @@
-             "location": 0,
-             "alive": true,
-             "prop": {
-<span class="diff-del">-                "bomb": 0,</span>
-<span class="diff-add">+                "bomb": 10,</span>
-                 "barrier": 0,
-                 "robot": 0,
-<span class="diff-del">-                "total": 0</span>
-<span class="diff-add">+                "total": 10</span>
-             },
-             "buff": {
-                 "god": 0,
-</pre></div></div>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div></div>
                 <div class="category-section" id="category-buff_update_god_">
                     <div class="category-header">
                         <h3>buff_update_god_</h3>
@@ -1071,7 +1043,7 @@
      "god": {
          "duration": 5,
 <span class="diff-del">-        "location": 1919810</span>
-<span class="diff-add">+        "location": 17</span>
+<span class="diff-add">+        "location": 34</span>
      },
      "houses": {},
      "placed_prop": {
@@ -1081,14 +1053,14 @@
                         <h3>god_spawn_</h3>
                         <div class="category-summary">
                             总计: 64 | 
-                            通过: <span class="status-passed">46</span> | 
-                            失败: <span class="status-failed">18</span> | 
-                            通过率: 71.9%
+                            通过: <span class="status-passed">47</span> | 
+                            失败: <span class="status-failed">17</span> | 
+                            通过率: 73.4%
                         </div>
                     </div>
             
                     <div class="test-case failed">
-                        <h4>test_god_spawn_0</h4>
+                        <h4>test_god_spawn_11</h4>
                         <p><strong>状态:</strong> <span class="status-failed">失败</span></p>
                 <h5>差异对比:</h5><pre><span class="diff-del">--- 期望 JSON状态（标准化后）</span>
 <span class="diff-add">+++ 实际 JSON状态（过滤后）</span>
@@ -1097,7 +1069,7 @@
      },
      "god": {
 <span class="diff-del">-        "duration": 5,</span>
-<span class="diff-del">-        "location": 0,</span>
+<span class="diff-del">-        "location": 11,</span>
 <span class="diff-add">+        "duration": 0,</span>
 <span class="diff-add">+        "location": -1,</span>
          "spawn_cooldown": 0
@@ -1105,7 +1077,7 @@
  }
 </pre></div>
                     <div class="test-case failed">
-                        <h4>test_god_spawn_12</h4>
+                        <h4>test_god_spawn_23</h4>
                         <p><strong>状态:</strong> <span class="status-failed">失败</span></p>
                 <h5>差异对比:</h5><pre><span class="diff-del">--- 期望 JSON状态（标准化后）</span>
 <span class="diff-add">+++ 实际 JSON状态（过滤后）</span>
@@ -1114,7 +1086,7 @@
      },
      "god": {
 <span class="diff-del">-        "duration": 5,</span>
-<span class="diff-del">-        "location": 12,</span>
+<span class="diff-del">-        "location": 23,</span>
 <span class="diff-add">+        "duration": 0,</span>
 <span class="diff-add">+        "location": -1,</span>
          "spawn_cooldown": 0
@@ -1122,7 +1094,7 @@
  }
 </pre></div>
                     <div class="test-case failed">
-                        <h4>test_god_spawn_13</h4>
+                        <h4>test_god_spawn_26</h4>
                         <p><strong>状态:</strong> <span class="status-failed">失败</span></p>
                 <h5>差异对比:</h5><pre><span class="diff-del">--- 期望 JSON状态（标准化后）</span>
 <span class="diff-add">+++ 实际 JSON状态（过滤后）</span>
@@ -1131,24 +1103,7 @@
      },
      "god": {
 <span class="diff-del">-        "duration": 5,</span>
-<span class="diff-del">-        "location": 13,</span>
-<span class="diff-add">+        "duration": 0,</span>
-<span class="diff-add">+        "location": -1,</span>
-         "spawn_cooldown": 0
-     }
- }
-</pre></div>
-                    <div class="test-case failed">
-                        <h4>test_god_spawn_25</h4>
-                        <p><strong>状态:</strong> <span class="status-failed">失败</span></p>
-                <h5>差异对比:</h5><pre><span class="diff-del">--- 期望 JSON状态（标准化后）</span>
-<span class="diff-add">+++ 实际 JSON状态（过滤后）</span>
-@@ -153,8 +153,8 @@
-         "winner": -1
-     },
-     "god": {
-<span class="diff-del">-        "duration": 5,</span>
-<span class="diff-del">-        "location": 25,</span>
+<span class="diff-del">-        "location": 26,</span>
 <span class="diff-add">+        "duration": 0,</span>
 <span class="diff-add">+        "location": -1,</span>
          "spawn_cooldown": 0
@@ -1190,23 +1145,6 @@
  }
 </pre></div>
                     <div class="test-case failed">
-                        <h4>test_god_spawn_38</h4>
-                        <p><strong>状态:</strong> <span class="status-failed">失败</span></p>
-                <h5>差异对比:</h5><pre><span class="diff-del">--- 期望 JSON状态（标准化后）</span>
-<span class="diff-add">+++ 实际 JSON状态（过滤后）</span>
-@@ -153,8 +153,8 @@
-         "winner": -1
-     },
-     "god": {
-<span class="diff-del">-        "duration": 5,</span>
-<span class="diff-del">-        "location": 38,</span>
-<span class="diff-add">+        "duration": 0,</span>
-<span class="diff-add">+        "location": -1,</span>
-         "spawn_cooldown": 0
-     }
- }
-</pre></div>
-                    <div class="test-case failed">
                         <h4>test_god_spawn_39</h4>
                         <p><strong>状态:</strong> <span class="status-failed">失败</span></p>
                 <h5>差异对比:</h5><pre><span class="diff-del">--- 期望 JSON状态（标准化后）</span>
@@ -1224,7 +1162,7 @@
  }
 </pre></div>
                     <div class="test-case failed">
-                        <h4>test_god_spawn_40</h4>
+                        <h4>test_god_spawn_41</h4>
                         <p><strong>状态:</strong> <span class="status-failed">失败</span></p>
                 <h5>差异对比:</h5><pre><span class="diff-del">--- 期望 JSON状态（标准化后）</span>
 <span class="diff-add">+++ 实际 JSON状态（过滤后）</span>
@@ -1233,7 +1171,7 @@
      },
      "god": {
 <span class="diff-del">-        "duration": 5,</span>
-<span class="diff-del">-        "location": 40,</span>
+<span class="diff-del">-        "location": 41,</span>
 <span class="diff-add">+        "duration": 0,</span>
 <span class="diff-add">+        "location": -1,</span>
          "spawn_cooldown": 0
@@ -1241,7 +1179,7 @@
  }
 </pre></div>
                     <div class="test-case failed">
-                        <h4>test_god_spawn_44</h4>
+                        <h4>test_god_spawn_43</h4>
                         <p><strong>状态:</strong> <span class="status-failed">失败</span></p>
                 <h5>差异对比:</h5><pre><span class="diff-del">--- 期望 JSON状态（标准化后）</span>
 <span class="diff-add">+++ 实际 JSON状态（过滤后）</span>
@@ -1250,7 +1188,7 @@
      },
      "god": {
 <span class="diff-del">-        "duration": 5,</span>
-<span class="diff-del">-        "location": 44,</span>
+<span class="diff-del">-        "location": 43,</span>
 <span class="diff-add">+        "duration": 0,</span>
 <span class="diff-add">+        "location": -1,</span>
          "spawn_cooldown": 0
@@ -1258,7 +1196,7 @@
  }
 </pre></div>
                     <div class="test-case failed">
-                        <h4>test_god_spawn_48</h4>
+                        <h4>test_god_spawn_5</h4>
                         <p><strong>状态:</strong> <span class="status-failed">失败</span></p>
                 <h5>差异对比:</h5><pre><span class="diff-del">--- 期望 JSON状态（标准化后）</span>
 <span class="diff-add">+++ 实际 JSON状态（过滤后）</span>
@@ -1267,41 +1205,7 @@
      },
      "god": {
 <span class="diff-del">-        "duration": 5,</span>
-<span class="diff-del">-        "location": 48,</span>
-<span class="diff-add">+        "duration": 0,</span>
-<span class="diff-add">+        "location": -1,</span>
-         "spawn_cooldown": 0
-     }
- }
-</pre></div>
-                    <div class="test-case failed">
-                        <h4>test_god_spawn_49</h4>
-                        <p><strong>状态:</strong> <span class="status-failed">失败</span></p>
-                <h5>差异对比:</h5><pre><span class="diff-del">--- 期望 JSON状态（标准化后）</span>
-<span class="diff-add">+++ 实际 JSON状态（过滤后）</span>
-@@ -153,8 +153,8 @@
-         "winner": -1
-     },
-     "god": {
-<span class="diff-del">-        "duration": 5,</span>
-<span class="diff-del">-        "location": 49,</span>
-<span class="diff-add">+        "duration": 0,</span>
-<span class="diff-add">+        "location": -1,</span>
-         "spawn_cooldown": 0
-     }
- }
-</pre></div>
-                    <div class="test-case failed">
-                        <h4>test_god_spawn_51</h4>
-                        <p><strong>状态:</strong> <span class="status-failed">失败</span></p>
-                <h5>差异对比:</h5><pre><span class="diff-del">--- 期望 JSON状态（标准化后）</span>
-<span class="diff-add">+++ 实际 JSON状态（过滤后）</span>
-@@ -153,8 +153,8 @@
-         "winner": -1
-     },
-     "god": {
-<span class="diff-del">-        "duration": 5,</span>
-<span class="diff-del">-        "location": 51,</span>
+<span class="diff-del">-        "location": 5,</span>
 <span class="diff-add">+        "duration": 0,</span>
 <span class="diff-add">+        "location": -1,</span>
          "spawn_cooldown": 0
@@ -1326,18 +1230,31 @@
  }
 </pre></div>
                     <div class="test-case failed">
+                        <h4>test_god_spawn_57</h4>
+                        <p><strong>状态:</strong> <span class="status-failed">失败</span></p>
+                <h5>差异对比:</h5><pre><span class="diff-del">--- 期望 JSON状态（标准化后）</span>
+<span class="diff-add">+++ 实际 JSON状态（过滤后）</span>
+@@ -154,7 +154,7 @@
+     },
+     "god": {
+         "duration": 5,
+<span class="diff-del">-        "location": 57,</span>
+<span class="diff-add">+        "location": 35,</span>
+         "spawn_cooldown": 0
+     }
+ }
+</pre></div>
+                    <div class="test-case failed">
                         <h4>test_god_spawn_59</h4>
                         <p><strong>状态:</strong> <span class="status-failed">失败</span></p>
                 <h5>差异对比:</h5><pre><span class="diff-del">--- 期望 JSON状态（标准化后）</span>
 <span class="diff-add">+++ 实际 JSON状态（过滤后）</span>
-@@ -153,8 +153,8 @@
-         "winner": -1
+@@ -154,7 +154,7 @@
      },
      "god": {
-<span class="diff-del">-        "duration": 5,</span>
+         "duration": 5,
 <span class="diff-del">-        "location": 59,</span>
-<span class="diff-add">+        "duration": 0,</span>
-<span class="diff-add">+        "location": -1,</span>
+<span class="diff-add">+        "location": 35,</span>
          "spawn_cooldown": 0
      }
  }
@@ -1347,31 +1264,42 @@
                         <p><strong>状态:</strong> <span class="status-failed">失败</span></p>
                 <h5>差异对比:</h5><pre><span class="diff-del">--- 期望 JSON状态（标准化后）</span>
 <span class="diff-add">+++ 实际 JSON状态（过滤后）</span>
-@@ -153,8 +153,8 @@
-         "winner": -1
+@@ -154,7 +154,7 @@
      },
      "god": {
-<span class="diff-del">-        "duration": 5,</span>
+         "duration": 5,
 <span class="diff-del">-        "location": 6,</span>
-<span class="diff-add">+        "duration": 0,</span>
-<span class="diff-add">+        "location": -1,</span>
+<span class="diff-add">+        "location": 35,</span>
          "spawn_cooldown": 0
      }
  }
 </pre></div>
                     <div class="test-case failed">
-                        <h4>test_god_spawn_65</h4>
+                        <h4>test_god_spawn_63</h4>
                         <p><strong>状态:</strong> <span class="status-failed">失败</span></p>
                 <h5>差异对比:</h5><pre><span class="diff-del">--- 期望 JSON状态（标准化后）</span>
 <span class="diff-add">+++ 实际 JSON状态（过滤后）</span>
-@@ -153,8 +153,8 @@
-         "winner": -1
+@@ -154,7 +154,7 @@
      },
      "god": {
-<span class="diff-del">-        "duration": 5,</span>
-<span class="diff-del">-        "location": 65,</span>
-<span class="diff-add">+        "duration": 0,</span>
-<span class="diff-add">+        "location": -1,</span>
+         "duration": 5,
+<span class="diff-del">-        "location": 63,</span>
+<span class="diff-add">+        "location": 35,</span>
+         "spawn_cooldown": 0
+     }
+ }
+</pre></div>
+                    <div class="test-case failed">
+                        <h4>test_god_spawn_64</h4>
+                        <p><strong>状态:</strong> <span class="status-failed">失败</span></p>
+                <h5>差异对比:</h5><pre><span class="diff-del">--- 期望 JSON状态（标准化后）</span>
+<span class="diff-add">+++ 实际 JSON状态（过滤后）</span>
+@@ -154,7 +154,7 @@
+     },
+     "god": {
+         "duration": 5,
+<span class="diff-del">-        "location": 64,</span>
+<span class="diff-add">+        "location": 35,</span>
          "spawn_cooldown": 0
      }
  }
@@ -1381,24 +1309,45 @@
                         <p><strong>状态:</strong> <span class="status-failed">失败</span></p>
                 <h5>差异对比:</h5><pre><span class="diff-del">--- 期望 JSON状态（标准化后）</span>
 <span class="diff-add">+++ 实际 JSON状态（过滤后）</span>
-@@ -153,8 +153,8 @@
-         "winner": -1
+@@ -154,7 +154,7 @@
      },
      "god": {
-<span class="diff-del">-        "duration": 5,</span>
+         "duration": 5,
 <span class="diff-del">-        "location": 66,</span>
-<span class="diff-add">+        "duration": 0,</span>
-<span class="diff-add">+        "location": -1,</span>
+<span class="diff-add">+        "location": 35,</span>
+         "spawn_cooldown": 0
+     }
+ }
+</pre></div>
+                    <div class="test-case failed">
+                        <h4>test_god_spawn_8</h4>
+                        <p><strong>状态:</strong> <span class="status-failed">失败</span></p>
+                <h5>差异对比:</h5><pre><span class="diff-del">--- 期望 JSON状态（标准化后）</span>
+<span class="diff-add">+++ 实际 JSON状态（过滤后）</span>
+@@ -154,7 +154,7 @@
+     },
+     "god": {
+         "duration": 5,
+<span class="diff-del">-        "location": 8,</span>
+<span class="diff-add">+        "location": 35,</span>
          "spawn_cooldown": 0
      }
  }
 </pre></div>
                     <div class="test-case passed">
+                        <h4>test_god_spawn_0</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
                         <h4>test_god_spawn_10</h4>
                         <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
                 </div>
                     <div class="test-case passed">
-                        <h4>test_god_spawn_11</h4>
+                        <h4>test_god_spawn_12</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_god_spawn_13</h4>
                         <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
                 </div>
                     <div class="test-case passed">
@@ -1438,15 +1387,11 @@
                         <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
                 </div>
                     <div class="test-case passed">
-                        <h4>test_god_spawn_23</h4>
-                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
-                </div>
-                    <div class="test-case passed">
                         <h4>test_god_spawn_24</h4>
                         <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
                 </div>
                     <div class="test-case passed">
-                        <h4>test_god_spawn_26</h4>
+                        <h4>test_god_spawn_25</h4>
                         <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
                 </div>
                     <div class="test-case passed">
@@ -1478,11 +1423,15 @@
                         <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
                 </div>
                     <div class="test-case passed">
+                        <h4>test_god_spawn_38</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
                         <h4>test_god_spawn_4</h4>
                         <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
                 </div>
                     <div class="test-case passed">
-                        <h4>test_god_spawn_41</h4>
+                        <h4>test_god_spawn_40</h4>
                         <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
                 </div>
                     <div class="test-case passed">
@@ -1490,7 +1439,7 @@
                         <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
                 </div>
                     <div class="test-case passed">
-                        <h4>test_god_spawn_43</h4>
+                        <h4>test_god_spawn_44</h4>
                         <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
                 </div>
                     <div class="test-case passed">
@@ -1506,11 +1455,19 @@
                         <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
                 </div>
                     <div class="test-case passed">
-                        <h4>test_god_spawn_5</h4>
+                        <h4>test_god_spawn_48</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_god_spawn_49</h4>
                         <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
                 </div>
                     <div class="test-case passed">
                         <h4>test_god_spawn_50</h4>
+                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
+                </div>
+                    <div class="test-case passed">
+                        <h4>test_god_spawn_51</h4>
                         <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
                 </div>
                     <div class="test-case passed">
@@ -1530,10 +1487,6 @@
                         <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
                 </div>
                     <div class="test-case passed">
-                        <h4>test_god_spawn_57</h4>
-                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
-                </div>
-                    <div class="test-case passed">
                         <h4>test_god_spawn_58</h4>
                         <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
                 </div>
@@ -1550,11 +1503,7 @@
                         <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
                 </div>
                     <div class="test-case passed">
-                        <h4>test_god_spawn_63</h4>
-                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
-                </div>
-                    <div class="test-case passed">
-                        <h4>test_god_spawn_64</h4>
+                        <h4>test_god_spawn_65</h4>
                         <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
                 </div>
                     <div class="test-case passed">
@@ -1567,10 +1516,6 @@
                 </div>
                     <div class="test-case passed">
                         <h4>test_god_spawn_7</h4>
-                        <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
-                </div>
-                    <div class="test-case passed">
-                        <h4>test_god_spawn_8</h4>
                         <p><strong>状态:</strong> <span class="status-passed">通过</span></p>
                 </div>
                     <div class="test-case passed">
@@ -1828,32 +1773,6 @@
                         <p><strong>状态:</strong> <span class="status-failed">失败</span></p>
                 <h5>差异对比:</h5><pre><span class="diff-del">--- 期望 JSON状态（标准化后）</span>
 <span class="diff-add">+++ 实际 JSON状态（过滤后）</span>
-@@ -8,10 +8,10 @@
-             "location": 0,
-             "alive": true,
-             "prop": {
-<span class="diff-del">-                "bomb": 0,</span>
-<span class="diff-add">+                "bomb": 10,</span>
-                 "barrier": 0,
-                 "robot": 0,
-<span class="diff-del">-                "total": 0</span>
-<span class="diff-add">+                "total": 10</span>
-             },
-             "buff": {
-                 "god": 0,
-@@ -27,10 +27,10 @@
-             "location": 0,
-             "alive": true,
-             "prop": {
-<span class="diff-del">-                "bomb": 0,</span>
-<span class="diff-add">+                "bomb": 10,</span>
-                 "barrier": 0,
-                 "robot": 0,
-<span class="diff-del">-                "total": 0</span>
-<span class="diff-add">+                "total": 10</span>
-             },
-             "buff": {
-                 "god": 0,
 @@ -47,9 +47,9 @@
              "alive": true,
              "prop": {

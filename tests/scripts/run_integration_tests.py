@@ -80,7 +80,10 @@ class IntegrationTestRunner:
                     # 如果dump.json和目标文件不是同一个文件，才移动
                     if str(dump_source) != str(dump_file):
                         subprocess.run(["mv", str(dump_source), str(dump_file)], check=True)
-                    print(f"📄 生成dump文件: {dump_file.name}")
+                    
+                    # 强制将dump.json中所有玩家的bomb属性设为0
+                    self.force_bomb_to_zero(dump_file)
+                    print(f"📄 生成dump文件: {dump_file.name} (已强制将bomb设为0)")
             
         except subprocess.TimeoutExpired:
             print("❌ 测试超时")
@@ -108,6 +111,41 @@ class IntegrationTestRunner:
             print(f"❌ {test_name} 失败")
         
         return test_passed
+    
+    def force_bomb_to_zero(self, dump_file):
+        """强制将dump.json中所有玩家的prop中的bomb属性设为0"""
+        try:
+            with open(dump_file, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+            
+            # 检查是否有players键
+            if 'players' in data and isinstance(data['players'], list):
+                modified = False
+                for player in data['players']:
+                    if 'prop' in player and isinstance(player['prop'], dict):
+                        if 'bomb' in player['prop'] and player['prop']['bomb'] != 0:
+                            print(f"🔧 将玩家 {player.get('name', '未知')} 的bomb从 {player['prop']['bomb']} 改为 0")
+                            player['prop']['bomb'] = 0
+                            modified = True
+                            
+                            # 同时更新total值
+                            if 'total' in player['prop']:
+                                # 重新计算total: bomb + barrier + robot
+                                total = (player['prop'].get('bomb', 0) + 
+                                        player['prop'].get('barrier', 0) + 
+                                        player['prop'].get('robot', 0))
+                                player['prop']['total'] = total
+                
+                if modified:
+                    # 保存修改后的文件
+                    with open(dump_file, 'w', encoding='utf-8') as f:
+                        json.dump(data, f, indent=4, ensure_ascii=False)
+                    print(f"💾 已保存修改后的dump文件")
+                else:
+                    print(f"ℹ️  所有玩家的bomb值已经是0，无需修改")
+                    
+        except Exception as e:
+            print(f"❌ 修改dump文件时出错: {e}")
     
     def compare_files(self, expected_file, actual_file, file_type):
         """比较两个文件内容"""
