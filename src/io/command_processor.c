@@ -249,8 +249,9 @@ void handle_step_command(const char* command) {
             trigger_block_interception(current_player, final_location);
         }
         
-        // 不在这里触发事件，只标记需要交互
+        // 不在这里触发事件，只标记需要交互，并记录执行交互的玩家ID
         g_game_state.game.interaction_pending = true;
+        g_game_state.game.pending_interaction_player_id = g_game_state.game.now_player_id;
         
         // 切换到下一个玩家（游戏未结束时）
         if (!g_game_state.game.ended) {
@@ -360,15 +361,29 @@ void handle_quit_command() {
 int get_initial_fund(void) {
     char input[20];
     int fund = 10000; // 默认资金
-    printf("请设置玩家初始资金（范围：1000～50000，默认10000），直接回车使用默认资金: ");
-    if (fgets(input, sizeof(input), stdin) != NULL && input[0] != '\n') {
+    
+    while (true) {
+        printf("请设置玩家初始资金（范围：1000～50000，默认10000），直接回车使用默认资金: ");
+        
+        if (fgets(input, sizeof(input), stdin) == NULL) {
+            break; // 输入结束，使用默认资金
+        }
+        
+        // 如果直接回车，使用默认资金
+        if (input[0] == '\n') {
+            break;
+        }
+        
+        // 尝试解析输入的资金
         int temp_fund = atoi(input);
         if (temp_fund >= 1000 && temp_fund <= 50000) {
             fund = temp_fund;
+            break; // 输入有效，退出循环
         } else {
-            printf("无效的资金数额，将使用默认资金 10000。\n");
+            printf("无效的资金数额，请输入1000～50000之间的数字，或直接回车使用默认资金。\n");
         }
     }
+    
     printf("初始资金设置为: %d\n", fund);
     return fund;
 }
@@ -483,13 +498,12 @@ void run_game_with_preset(const char* preset_file) {
 
         Player* current_player = &g_game_state.players[g_game_state.game.now_player_id];
 
-        // 检查财神附身状态
+        // 检查财神附身状态（显示但不减少）
         if (current_player->buff.god > 0) {
             char message_buffer[256];
             snprintf(message_buffer, sizeof(message_buffer), "玩家 %s 有财神附身，免过路费，剩余 %d 回合。\n",
                    current_player->name, current_player->buff.god);
             strncat(g_last_action_message, message_buffer, sizeof(g_last_action_message) - strlen(g_last_action_message) - 1);
-            current_player->buff.god--;
         }
 
         // 检查当前玩家是否已破产，如果是则自动跳过（游戏未结束时）
@@ -528,7 +542,7 @@ void run_game_with_preset(const char* preset_file) {
         
         // 如果有待处理的交互，现在执行它
         if (g_game_state.game.interaction_pending) {
-            Player* player_for_interaction = &g_game_state.players[g_game_state.game.last_player_id];
+            Player* player_for_interaction = &g_game_state.players[g_game_state.game.pending_interaction_player_id];
             
             // 先将移动消息打印出来
             if (strlen(g_last_action_message) > 0) {
@@ -577,12 +591,29 @@ void run_game_with_preset(const char* preset_file) {
 }
 
 void switch_to_next_player(bool should_update_god) {
+    // 在切换玩家前，减少当前玩家的财神回合数
+    Player* current_player = &g_game_state.players[g_game_state.game.now_player_id];
+    if (current_player->buff.god > 0) {
+        current_player->buff.god--;
+    }
+    
     g_game_state.game.last_player_id = g_game_state.game.now_player_id;
-    g_game_state.game.now_player_id = (g_game_state.game.now_player_id + 1) % g_game_state.player_count;
+    
+    // 找到下一个活跃的玩家
+    int next_player = (g_game_state.game.now_player_id + 1) % g_game_state.player_count;
+    while (!g_game_state.players[next_player].alive && next_player != g_game_state.game.now_player_id) {
+        next_player = (next_player + 1) % g_game_state.player_count;
+    }
+    g_game_state.game.now_player_id = next_player;
     
     // 只在游戏未结束时更新next_player
     if (!g_game_state.game.ended) {
-        g_game_state.game.next_player_id = (g_game_state.game.now_player_id + 1) % g_game_state.player_count;
+        // 找到下一个活跃的玩家作为next_player
+        int next_next_player = (g_game_state.game.now_player_id + 1) % g_game_state.player_count;
+        while (!g_game_state.players[next_next_player].alive && next_next_player != g_game_state.game.now_player_id) {
+            next_next_player = (next_next_player + 1) % g_game_state.player_count;
+        }
+        g_game_state.game.next_player_id = next_next_player;
     }
     
     // 当轮到第一个玩家时，表示新一轮开始，更新财神状态

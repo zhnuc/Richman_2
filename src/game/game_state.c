@@ -10,6 +10,8 @@ void init_game_state(void) {
     g_game_state.game.started = false;
     g_game_state.game.ended = false;
     g_game_state.game.now_player_id = 0;
+    g_game_state.game.last_player_id = 0;
+    g_game_state.game.pending_interaction_player_id = 0;
 
     // 初始化房产
     for (int i = 0; i < MAP_SIZE; i++) {

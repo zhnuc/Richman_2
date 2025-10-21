@@ -15,6 +15,7 @@ void pay_toll(Player* player, int location);
 void check_win_condition() {
     int alive_count = 0;
     int winner_id = -1;
+    
     for (int i = 0; i < g_game_state.player_count; i++) {
         if (g_game_state.players[i].alive) {
             alive_count++;
@@ -25,9 +26,15 @@ void check_win_condition() {
     if (alive_count <= 1 && !g_game_state.game.ended) {
         g_game_state.game.ended = true;
         if (winner_id != -1) {
+            // 有胜利者
             g_game_state.game.winner_id = winner_id;
             g_game_state.game.now_player_id = winner_id;
             g_game_state.game.next_player_id = winner_id;
+        } else {
+            // 所有玩家都破产，没有胜利者
+            g_game_state.game.winner_id = -1;
+            g_game_state.game.now_player_id = -1;
+            g_game_state.game.next_player_id = -1;
         }
     }
 }
@@ -157,6 +164,16 @@ void handle_sell_command(int location) {
 
 void pay_toll(Player* player, int location) {
     House* land = &g_game_state.houses[location];
+    
+    // 检查土地是否真的有主人
+    if (land->owner_id == -1 || land->owner_id >= g_game_state.player_count) {
+        // 土地无主或主人无效，不应该收取过路费
+        char message_buffer[256];
+        snprintf(message_buffer, sizeof(message_buffer), "您到达了一块空地，无需支付过路费。\n");
+        strncat(g_last_action_message, message_buffer, sizeof(g_last_action_message) - strlen(g_last_action_message) - 1);
+        return;
+    }
+    
     Player* owner = &g_game_state.players[land->owner_id];
     int toll = (land->price * (land->level + 1)) / 2;
     char message_buffer[512];

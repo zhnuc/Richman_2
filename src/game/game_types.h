@@ -74,6 +74,7 @@ typedef struct {
     bool ended;        // 游戏是否结束
     int winner_id;     // 胜者 ID，未结束为 -1
     bool interaction_pending; // 是否有待处理的交互
+    int pending_interaction_player_id; // 待处理交互的玩家ID
 } Game;
 
 // 顶层游戏状态结构
