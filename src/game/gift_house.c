@@ -35,7 +35,7 @@ void enter_gift_house(Player* player) {
             snprintf(message_buffer, sizeof(message_buffer), "您获得了 200 点数！\n");
             break;
         case 3:
-            player->buff.god = 5;
+            player->buff.god += 5;
             snprintf(message_buffer, sizeof(message_buffer), "财神已附身！5轮内免过路费。\n");
             break;
         default:
