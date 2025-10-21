@@ -46,36 +46,16 @@ void update_god_status() {
         if (g_game_state.god.spawn_cooldown <= 0) {
             // 尝试生成财神
             int attempts = 100; // 避免死循环
-            int preferred_location = -1;
             
-            // 首先尝试一些常见的位置
-            int common_locations[] = {5, 16, 23, 25, 27, 34, 36, 38, 39, 40, 41, 42, 44, 45, 48, 66, 68, 35};
-            int num_common = sizeof(common_locations) / sizeof(common_locations[0]);
-            
-            // 尝试常见位置
-            for (int i = 0; i < num_common; i++) {
-                if (is_valid_god_spawn_location(common_locations[i])) {
-                    preferred_location = common_locations[i];
+            // 随机选择财神位置
+            while (attempts-- > 0) {
+                int new_location = rand() % MAP_SIZE;
+                if (is_valid_god_spawn_location(new_location)) {
+                    g_game_state.god.location = new_location;
+                    g_game_state.god.duration = 5; // 财神出现时重置持续时间为5
+                    snprintf(message_buffer, sizeof(message_buffer), "财神出现在地图位置 %d！\n", new_location);
+                    strncat(g_last_action_message, message_buffer, sizeof(g_last_action_message) - strlen(g_last_action_message) - 1);
                     break;
-                }
-            }
-            
-            if (preferred_location != -1) {
-                g_game_state.god.location = preferred_location;
-                g_game_state.god.duration = 5; // 财神出现时重置持续时间为5
-                snprintf(message_buffer, sizeof(message_buffer), "财神出现在地图位置 %d！\n", preferred_location);
-                strncat(g_last_action_message, message_buffer, sizeof(g_last_action_message) - strlen(g_last_action_message) - 1);
-            } else {
-                // 如果常见位置都无效，则随机选择
-                while (attempts-- > 0) {
-                    int new_location = rand() % MAP_SIZE;
-                    if (is_valid_god_spawn_location(new_location)) {
-                        g_game_state.god.location = new_location;
-                        g_game_state.god.duration = 5; // 财神出现时重置持续时间为5
-                        snprintf(message_buffer, sizeof(message_buffer), "财神出现在地图位置 %d！\n", new_location);
-                        strncat(g_last_action_message, message_buffer, sizeof(g_last_action_message) - strlen(g_last_action_message) - 1);
-                        break;
-                    }
                 }
             }
         }
