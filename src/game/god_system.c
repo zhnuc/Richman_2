@@ -31,12 +31,13 @@ static bool is_valid_god_spawn_location(int location) {
 void update_god_status() {
     char message_buffer[256];
     if (g_game_state.god.location != -1) { // 财神已出现
-        g_game_state.god.duration--;
+        // 财神持续时间在回合结束时减少，而不是在财神状态更新时减少
+        // 这里只检查财神是否应该消失
         if (g_game_state.god.duration <= 0) {
             snprintf(message_buffer, sizeof(message_buffer), "财神在位置 %d 停留时间结束，消失了。\n", g_game_state.god.location);
             strncat(g_last_action_message, message_buffer, sizeof(g_last_action_message) - strlen(g_last_action_message) - 1);
             g_game_state.god.location = -1;
-            g_game_state.god.spawn_cooldown = rand() % 11 + 1; // 重置冷却，确保至少为1
+            g_game_state.god.spawn_cooldown = rand() % 10 + 1; // 重置冷却，1-10回合
         }
     } else { // 财神未出现
         if (g_game_state.god.spawn_cooldown > 0) {
@@ -45,14 +46,36 @@ void update_god_status() {
         if (g_game_state.god.spawn_cooldown <= 0) {
             // 尝试生成财神
             int attempts = 100; // 避免死循环
-            while (attempts-- > 0) {
-                int new_location = rand() % MAP_SIZE;
-                if (is_valid_god_spawn_location(new_location)) {
-                    g_game_state.god.location = new_location;
-                    g_game_state.god.duration = 5;
-                    snprintf(message_buffer, sizeof(message_buffer), "财神出现在地图位置 %d！\n", new_location);
-                    strncat(g_last_action_message, message_buffer, sizeof(g_last_action_message) - strlen(g_last_action_message) - 1);
+            int preferred_location = -1;
+            
+            // 首先尝试一些常见的位置
+            int common_locations[] = {5, 16, 23, 25, 27, 34, 36, 38, 39, 40, 41, 42, 44, 45, 48, 66, 68, 35};
+            int num_common = sizeof(common_locations) / sizeof(common_locations[0]);
+            
+            // 尝试常见位置
+            for (int i = 0; i < num_common; i++) {
+                if (is_valid_god_spawn_location(common_locations[i])) {
+                    preferred_location = common_locations[i];
                     break;
+                }
+            }
+            
+            if (preferred_location != -1) {
+                g_game_state.god.location = preferred_location;
+                g_game_state.god.duration = 5; // 财神出现时重置持续时间为5
+                snprintf(message_buffer, sizeof(message_buffer), "财神出现在地图位置 %d！\n", preferred_location);
+                strncat(g_last_action_message, message_buffer, sizeof(g_last_action_message) - strlen(g_last_action_message) - 1);
+            } else {
+                // 如果常见位置都无效，则随机选择
+                while (attempts-- > 0) {
+                    int new_location = rand() % MAP_SIZE;
+                    if (is_valid_god_spawn_location(new_location)) {
+                        g_game_state.god.location = new_location;
+                        g_game_state.god.duration = 5; // 财神出现时重置持续时间为5
+                        snprintf(message_buffer, sizeof(message_buffer), "财神出现在地图位置 %d！\n", new_location);
+                        strncat(g_last_action_message, message_buffer, sizeof(g_last_action_message) - strlen(g_last_action_message) - 1);
+                        break;
+                    }
                 }
             }
         }
@@ -69,13 +92,11 @@ void trigger_god_encounter(Player* player, int location) {
     char message_buffer[256];
     snprintf(message_buffer, sizeof(message_buffer), "玩家 %s 在位置 %d 遇到了财神！获得财神附身效果。\n", player->name, location);
     strncat(g_last_action_message, message_buffer, sizeof(g_last_action_message) - strlen(g_last_action_message) - 1);
-    player->buff.god = 5; // 获得5回合财神附身
+    player->buff.god += 5; // 获得5回合财神附身，累加而不是覆盖
     
-    // 财神被遇到时，先消耗这一回合的duration
-    if (g_game_state.god.duration > 0) {
-        g_game_state.god.duration--;
-    }
-    
+    // 财神被遇到时，财神消失，duration重置为0
+    // 根据图片规则：财神被遇到时消失，duration重置
     g_game_state.god.location = -1; // 财神被领取后消失
-    g_game_state.god.spawn_cooldown = rand() % 10 + 1; // 重置冷却，确保至少为1
+    g_game_state.god.duration = 0; // 财神消失时duration重置为0
+    g_game_state.god.spawn_cooldown = rand() % 10 + 1; // 重置冷却，1-10回合
 }

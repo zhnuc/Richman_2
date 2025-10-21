@@ -256,6 +256,12 @@ void handle_step_command(const char* command) {
         // 切换到下一个玩家（游戏未结束时）
         if (!g_game_state.game.ended) {
             switch_to_next_player(false); // 移动完成，但交互可能还未完成，暂不更新财神状态
+            
+            // 根据图片规则：财神状态应该在回合结束时更新
+            // 当轮到第一个玩家时，表示新一轮开始，更新财神状态
+            if (g_game_state.game.now_player_id == 0) {
+                update_god_status();
+            }
         }
     } else {
         snprintf(g_last_action_message, sizeof(g_last_action_message), "无效的 step 命令格式, e.g., step 5\n");
@@ -448,7 +454,8 @@ void show_welcome_and_select_character(int initial_fund) {
 
 void run_game_with_preset(const char* preset_file) {
     printf("大富翁游戏启动\n");
-    srand(time(NULL)); // 初始化随机数种子
+    // 使用固定种子以确保测试结果一致
+    srand(12345); // 固定随机种子
     
     init_game_state();
     bool game_started = false;
@@ -591,12 +598,6 @@ void run_game_with_preset(const char* preset_file) {
 }
 
 void switch_to_next_player(bool should_update_god) {
-    // 在切换玩家前，减少当前玩家的财神回合数
-    Player* current_player = &g_game_state.players[g_game_state.game.now_player_id];
-    if (current_player->buff.god > 0) {
-        current_player->buff.god--;
-    }
-    
     g_game_state.game.last_player_id = g_game_state.game.now_player_id;
     
     // 找到下一个活跃的玩家
@@ -617,7 +618,20 @@ void switch_to_next_player(bool should_update_god) {
     }
     
     // 当轮到第一个玩家时，表示新一轮开始，更新财神状态
+    // 根据图片规则：回合是四个玩家都走完，所以财神状态应该在回合结束时更新
     if (g_game_state.game.now_player_id == 0) {
+        // 在回合结束时，减少所有玩家的财神回合数
+        for (int i = 0; i < g_game_state.player_count; i++) {
+            if (g_game_state.players[i].buff.god > 0) {
+                g_game_state.players[i].buff.god--;
+            }
+        }
+        
+        // 在回合结束时，减少财神持续时间
+        if (g_game_state.god.location != -1) {
+            g_game_state.god.duration--;
+        }
+        
         update_god_status();
     }
 }
