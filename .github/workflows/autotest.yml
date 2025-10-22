@@ -52,8 +52,8 @@ jobs:
           tests/integration/*/dump.json
     
     - name: Upload test report artifact
-        if: always()
-        uses: actions/upload-artifact@v3
-        with:
-          name: test_report.html
-          path: test_report.html
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: test_report.html
+        path: test_report.html
