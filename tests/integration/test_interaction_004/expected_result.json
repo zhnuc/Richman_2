@@ -8,10 +8,10 @@
             "location": 28,
             "alive": true,
             "prop": {
-                "bomb": 5,
+                "bomb": 0,
                 "barrier": 4,
                 "robot": 1,
-                "total": 10
+                "total": 5
             },
             "buff": {
                 "god": 0,

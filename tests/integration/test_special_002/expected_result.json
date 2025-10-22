@@ -8,10 +8,10 @@
             "location": 5,
             "alive": true,
             "prop": {
-                "bomb": 4,
+                "bomb": 0,
                 "barrier": 4,
                 "robot": 2,
-                "total": 10
+                "total": 6
             },
             "buff": {
                 "god": 0,
@@ -27,10 +27,10 @@
             "location": 10,
             "alive": true,
             "prop": {
-                "bomb": 3,
+                "bomb": 0,
                 "barrier": 3,
                 "robot": 3,
-                "total": 9
+                "total": 6
             },
             "buff": {
                 "god": 0,
@@ -46,10 +46,10 @@
             "location": 20,
             "alive": true,
             "prop": {
-                "bomb": 5,
+                "bomb": 0,
                 "barrier": 2,
                 "robot": 1,
-                "total": 8
+                "total": 3
             },
             "buff": {
                 "god": 0,

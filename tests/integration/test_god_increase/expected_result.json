@@ -13,12 +13,13 @@
         "robot": 0,
         "total": 0
       },
-      "buff":{
-        "god": 114514,
+      "buff": {
+        "god": 114515,
         "prison": 0,
         "hospital": 0
       }
-    }, {
+    },
+    {
       "index": 1,
       "name": "A",
       "fund": 10000,
@@ -36,7 +37,8 @@
         "prison": 0,
         "hospital": 0
       }
-    }, {
+    },
+    {
       "index": 2,
       "name": "S",
       "fund": 10000,
@@ -54,7 +56,8 @@
         "prison": 0,
         "hospital": 0
       }
-    }, {
+    },
+    {
       "index": 3,
       "name": "J",
       "fund": 10000,
@@ -74,9 +77,8 @@
       }
     }
   ],
-  "houses": {
-  },
-  "placed_prop":{
+  "houses": {},
+  "placed_prop": {
     "bomb": [],
     "barrier": []
   },

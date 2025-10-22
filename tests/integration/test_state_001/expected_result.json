@@ -8,13 +8,13 @@
             "location": 3,
             "alive": true,
             "prop": {
-                "bomb": 1,
+                "bomb": 0,
                 "barrier": 2,
                 "robot": 0,
-                "total": 3
+                "total": 2
             },
             "buff": {
-                "god": 2,
+                "god": 3,
                 "prison": 0,
                 "hospital": 0
             }
@@ -46,10 +46,10 @@
             "location": 30,
             "alive": true,
             "prop": {
-                "bomb": 2,
+                "bomb": 0,
                 "barrier": 0,
                 "robot": 0,
-                "total": 2
+                "total": 0
             },
             "buff": {
                 "god": 0,
